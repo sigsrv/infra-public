@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "ecmaxp-infra"
+version = "1.0.0"
+description = ""
+authors = ["EcmaXp <ecmaxp@ecmaxp.kr>"]
+exclude = ["**/*"]
+classifiers = ["Private :: Do not Upload"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+boto3 = "^1.28.55"
+kubernetes = "^28.1.0"
+
+[tool.poetry.group.dev.dependencies]
+boto3-stubs-lite = {extras = ["all"], version = "^1.28.55"}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
