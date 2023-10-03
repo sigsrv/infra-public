@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "ecmaxp-infra"
+name = "sigsrv-infra"
 version = "1.0.0"
 description = ""
 authors = ["EcmaXp <ecmaxp@ecmaxp.kr>"]
@@ -8,11 +8,11 @@ classifiers = ["Private :: Do not Upload"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-boto3 = "^1.28.55"
+boto3 = "^1.28.58"
 kubernetes = "^28.1.0"
 
 [tool.poetry.group.dev.dependencies]
-boto3-stubs-lite = {extras = ["all"], version = "^1.28.55"}
+boto3-stubs-lite = {extras = ["all"], version = "^1.28.58"}
 
 [build-system]
 requires = ["poetry-core"]

@@ -1,0 +1,5 @@
+project: kms
+env: prod
+
+deletion_window_in_days: 30
+enable_key_rotation: true
