@@ -9,7 +9,7 @@ terraform {
 }
 
 module "kms" {
-  source = "../../../../projects/kms"
+  source = "../../../../packages/kms"
 }
 
 output "kms" {

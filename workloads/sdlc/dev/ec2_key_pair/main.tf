@@ -9,7 +9,7 @@ terraform {
 }
 
 module "ec2_key_pair" {
-  source = "../../../../projects/ec2_key_pair"
+  source = "../../../../packages/ec2_key_pair"
 }
 
 output "ec2_key_pair" {

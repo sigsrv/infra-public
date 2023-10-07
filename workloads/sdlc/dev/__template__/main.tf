@@ -9,7 +9,7 @@ terraform {
 }
 
 module "__template__" {
-  source = "../../../../projects/__template__"
+  source = "../../../../packages/__template__"
 }
 
 output "__template__" {

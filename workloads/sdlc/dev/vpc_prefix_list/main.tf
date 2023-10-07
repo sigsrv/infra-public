@@ -9,7 +9,7 @@ terraform {
 }
 
 module "vpc_prefix_list" {
-  source = "../../../../projects/vpc_prefix_list"
+  source = "../../../../packages/vpc_prefix_list"
 }
 
 output "vpc_prefix_list" {
