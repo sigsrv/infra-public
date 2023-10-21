@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seaweedfs-filer
+  namespace: seaweedfs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: seaweedfs-filer
+  template:
+    metadata:
+      labels:
+        app: seaweedfs-filer
+    spec:
+      containers:
+        - name: seaweedfs-filer
+          image: docker.io/chrislusf/seaweedfs:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9333
+              name: http
+            - containerPort: 19333
+              name: grpc
+          command:
+            - weed
+            - filer
+            - -mdir=/data/filer
+            - -defaultReplication=000
+          volumeMounts:
+            - mountPath: /data/filer
+              name: data-filer
+      volumes:
+        - name: data-filer
+          persistentVolumeClaim:
+            claimName: seaweedfs-filer-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: seaweedfs-filer
+  namespace: seaweedfs
+spec:
+  selector:
+    app: seaweedfs-filer
+  ports:
+    - name: http
+      port: 9333
+    - name: grpc
+      port: 19333
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: seaweedfs-filer-pv
+  namespace: seaweedfs
+spec:
+  storageClassName: local-path
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /Users/ecmaxp/seaweedfs/filer
+  persistentVolumeReclaimPolicy: Retain
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: seaweedfs-filer-pvc
+  namespace: seaweedfs
+spec:
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---

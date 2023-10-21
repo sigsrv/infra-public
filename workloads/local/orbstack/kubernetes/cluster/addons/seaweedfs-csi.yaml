@@ -1,0 +1,13 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: seaweedfs-csi
+  namespace: kube-system
+spec:
+  repo: https://seaweedfs.github.io/seaweedfs-csi-driver/helm
+  chart: seaweedfs-csi-driver
+  targetNamespace: seaweedfs
+  createNamespace: true
+  set:
+    seaweedfsFiler: "seaweedfs-server.seaweedfs.svc.cluster.local:8888"
+---
