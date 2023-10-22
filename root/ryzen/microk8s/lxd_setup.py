@@ -73,7 +73,7 @@ def iter_microk8s_master_nodes(ship_first=False):
 
 
 def iter_microk8s_worker_nodes():
-    for i in range(0, 8):
+    for i in range(0, 3):
         yield NODES[f"microk8s-worker-{i}"]
 
 
@@ -127,7 +127,7 @@ def _configure_node_ha(
         "microk8s",
         "join",
         url,
-        {"controlplane": "--controlplane", "worker": "--worker"}[role],
+        *{"controlplane": [], "worker": ["--worker"]}[role],
     )
 
 
@@ -174,7 +174,10 @@ def configure_cert_dns():
 
 def configure_tailscale():
     for node in iter_microk8s_nodes():
-        shell(node, "tailscale", "up")
+        try:
+            call(node, "tailscale", "status")
+        except RuntimeError:
+            call(node, "tailscale", "up")
 
 
 def configure_addons():
