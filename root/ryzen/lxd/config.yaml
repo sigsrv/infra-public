@@ -1,5 +1,15 @@
 config:
-  core.https_address: '[::]:8443'
+  core.https_address: 100.118.30.142:8443
+networks:
+- config:
+    ipv4.address: 10.18.36.1/24
+    ipv4.nat: "true"
+    ipv6.address: fd42:b2eb:a09b:16e5::1/64
+    ipv6.nat: "true"
+  description: ""
+  name: lxcbr0
+  type: bridge
+  project: default
 storage_pools:
 - config:
     source: default
@@ -10,12 +20,24 @@ storage_pools:
   driver: zfs
 profiles:
 - config: {}
-  description: ""
+  description: Default LXD profile
   devices:
+    lxcbr0:
+      nictype: bridged
+      parent: lxcbr0
+      type: nic
     root:
       path: /
       pool: default
       type: disk
   name: default
-projects: []
-cluster: null
+projects:
+- config:
+    features.images: "true"
+    features.networks: "true"
+    features.networks.zones: "true"
+    features.profiles: "true"
+    features.storage.buckets: "true"
+    features.storage.volumes: "true"
+  description: Default LXD project
+  name: default

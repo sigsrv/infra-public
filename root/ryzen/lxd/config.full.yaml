@@ -1,0 +1,81 @@
+# lxd init --dump
+config:
+  core.https_address: 100.118.30.142:8443
+networks:
+- config:
+    ipv4.address: 10.18.36.1/24
+    ipv4.nat: "true"
+    ipv6.address: fd42:b2eb:a09b:16e5::1/64
+    ipv6.nat: "true"
+  description: ""
+  name: lxcbr0
+  type: bridge
+  project: default
+- config:
+    ipv4.address: 10.100.0.1/24
+    ipv4.nat: "true"
+    ipv6.address: fd10:100:0:1::1/64
+    ipv6.nat: "true"
+  description: ""
+  name: microk8s
+  type: bridge
+  project: default
+- config:
+    ipv4.address: 10.23.59.1/24
+    ipv4.nat: "true"
+    ipv6.address: fd42:8df5:694:d808::1/64
+    ipv6.nat: "true"
+  description: Network bridge for Multipass
+  name: mpbr0
+  type: bridge
+  project: default
+storage_pools:
+- config:
+    source: default
+    volatile.initial_source: /dev/ubuntu-vg/ubuntu-data
+    zfs.pool_name: default
+  description: ""
+  name: default
+  driver: zfs
+- config:
+    source: /var/snap/lxd/common/lxd/storage-pools/multipass
+  description: Storage pool for Multipass
+  name: multipass
+  driver: dir
+profiles:
+- config: {}
+  description: Default LXD profile
+  devices:
+    lxcbr0:
+      nictype: bridged
+      parent: lxcbr0
+      type: nic
+    root:
+      path: /
+      pool: default
+      type: disk
+  name: default
+projects:
+- config:
+    features.images: "true"
+    features.networks: "true"
+    features.networks.zones: "true"
+    features.profiles: "true"
+    features.storage.buckets: "true"
+    features.storage.volumes: "true"
+  description: Default LXD project
+  name: default
+- config:
+    features.images: "true"
+    features.profiles: "true"
+    features.storage.buckets: "true"
+    features.storage.volumes: "true"
+  description: ""
+  name: microk8s
+- config:
+    features.images: "true"
+    features.profiles: "true"
+    features.storage.buckets: "true"
+    features.storage.volumes: "true"
+  description: Project for Multipass instances
+  name: multipass
