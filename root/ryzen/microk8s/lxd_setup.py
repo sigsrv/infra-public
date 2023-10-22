@@ -250,13 +250,29 @@ def configure_kube_config():
         yaml.safe_dump(local_kube_config, f)
 
 
+def configure_kube_taint():
+    microk8s_master_node = get_microk8s_master_node()
+    for node in iter_microk8s_master_nodes():
+        call(
+            microk8s_master_node,
+            "microk8s",
+            "kubectl",
+            "taint",
+            "nodes",
+            node.name,
+            "node-role.kubernetes.io/master=true:NoSchedule",
+            "--overwrite",
+        )
+
+
 def main():
     configure_ssh()
     configure_ha()
+    configure_kube_config()
+    configure_kube_taint()
     configure_cert_dns()
     configure_tailscale()
     configure_addons()
-    configure_kube_config()
 
 
 if __name__ == "__main__":
