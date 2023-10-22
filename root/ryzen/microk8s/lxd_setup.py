@@ -88,7 +88,7 @@ def configure_ha():
 
 
 def configure_cert_dns():
-    for node in iter_microk8s_worker_nodes():
+    for node in iter_microk8s_master_nodes():
         shell(
             node,
             "sed",
@@ -153,8 +153,8 @@ def main():
     # configure_ssh()
     # configure_ha()
     # configure_cert_dns()
-    # configure_tailscale()
-    configure_addons()
+    configure_tailscale()
+    # configure_addons()
     # configure_kube_config()
 
 

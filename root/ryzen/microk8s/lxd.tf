@@ -115,6 +115,49 @@ resource "lxd_profile" "base" {
   }
 }
 
+resource "lxd_instance" "tailscale" {
+  project = lxd_project.this.name
+  name    = "${lxd_project.this.name}-tailscale"
+  image   = lxd_cached_image.ubuntu_jammy_container.fingerprint
+  type    = "container"
+
+  profiles = [
+    lxd_profile.base.name,
+  ]
+
+  limits = {
+    cpu    = 2
+    memory = "2GiB"
+  }
+
+  config = {
+    "cloud-init.user-data" = format("#cloud-config\n%s", yamlencode(
+      {
+        "runcmd" = [
+          ["sh", "-c", "curl -fsSL https://tailscale.com/install.sh | sh"],
+          [
+            "sh", "-c",
+            "echo 'net.ipv4.ip_forward = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf && echo 'net.ipv6.conf.all.forwarding = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf && sudo sysctl -p /etc/sysctl.d/99-tailscale.conf"
+          ],
+          ["tailscale",
+            "up",
+            "--authkey=${var.ts_authkey}",
+            "--advertise-routes=${local.ipv4_address},${local.ipv6_address}",
+            "--advertise-tags=tag:local-sigsrv-microk8s-master"
+          ],
+        ],
+      }
+    ))
+  }
+
+  lifecycle {
+    ignore_changes = [
+      image,
+      config["cloud-init.user-data"],
+    ]
+  }
+}
+
 resource "lxd_instance" "master" {
   count   = 3
   project = lxd_project.this.name
@@ -145,7 +188,11 @@ resource "lxd_instance" "master" {
             "sh", "-c",
             "echo 'net.ipv4.ip_forward = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf && echo 'net.ipv6.conf.all.forwarding = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf && sudo sysctl -p /etc/sysctl.d/99-tailscale.conf"
           ],
-          ["tailscale", "up", "--authkey=${var.ts_authkey}"],
+          ["tailscale",
+            "up",
+            "--authkey=${var.ts_authkey}",
+            "--advertise-tags=tag:local-sigsrv-microk8s-master"
+          ],
           ["tailscale", "down"],
         ]
       }
@@ -162,9 +209,8 @@ resource "lxd_instance" "master" {
   }
 }
 
-
 resource "lxd_instance" "worker" {
-  count   = 3
+  count   = 8
   project = lxd_project.this.name
   name    = "${lxd_project.this.name}-worker-${count.index}"
   image   = lxd_cached_image.ubuntu_jammy_vm.fingerprint
@@ -176,7 +222,7 @@ resource "lxd_instance" "worker" {
 
   limits = {
     cpu    = 4
-    memory = "8GiB"
+    memory = "32GiB"
   }
 
   config = {
@@ -193,7 +239,11 @@ resource "lxd_instance" "worker" {
             "sh", "-c",
             "echo 'net.ipv4.ip_forward = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf && echo 'net.ipv6.conf.all.forwarding = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf && sudo sysctl -p /etc/sysctl.d/99-tailscale.conf"
           ],
-          ["tailscale", "up", "--authkey=${var.ts_authkey}"],
+          ["tailscale",
+            "up",
+            "--authkey=${var.ts_authkey}",
+            "--advertise-tags=tag:local-sigsrv-microk8s-master"
+          ],
           ["tailscale", "down"],
         ]
       }
