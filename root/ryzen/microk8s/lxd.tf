@@ -188,6 +188,7 @@ resource "lxd_instance" "master" {
           ["tailscale",
             "up",
             "--authkey=${var.ts_authkey}",
+            "--ssh",
             "--advertise-tags=tag:local-sigsrv-microk8s-master"
           ],
           ["tailscale", "down"],
@@ -239,6 +240,7 @@ resource "lxd_instance" "worker" {
           ["tailscale",
             "up",
             "--authkey=${var.ts_authkey}",
+            "--ssh",
             "--advertise-tags=tag:local-sigsrv-microk8s-master"
           ],
           ["tailscale", "down"],
