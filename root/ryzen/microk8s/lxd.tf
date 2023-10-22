@@ -197,7 +197,7 @@ resource "lxd_instance" "master" {
   }
 
   lifecycle {
-    prevent_destroy = false
+    prevent_destroy = true
 
     ignore_changes = [
       image,
@@ -207,7 +207,7 @@ resource "lxd_instance" "master" {
 }
 
 resource "lxd_instance" "worker" {
-  count   = 8
+  count   = 3
   project = lxd_project.this.name
   name    = "${lxd_project.this.name}-worker-${count.index}"
   image   = lxd_cached_image.ubuntu_jammy_vm.fingerprint
@@ -219,7 +219,7 @@ resource "lxd_instance" "worker" {
 
   limits = {
     cpu    = 4
-    memory = "32GiB"
+    memory = "8GiB"
   }
 
   config = {
