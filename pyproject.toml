@@ -7,10 +7,11 @@ exclude = ["**/*"]
 classifiers = ["Private :: Do not Upload"]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.12"
 boto3 = "^1.28.58"
 kubernetes = "^28.1.0"
 pylxd = "^2.3.1"
+setuptools = "^68.2.2"
 
 [tool.poetry.group.dev.dependencies]
 boto3-stubs-lite = {extras = ["all"], version = "^1.28.58"}
