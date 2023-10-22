@@ -1,46 +1,96 @@
 #!/usr/bin/env python3
 import json
+import os
+import shutil
+import ssl
 import subprocess
+import warnings
+from builtins import DeprecationWarning
 from pathlib import Path
+from typing import Literal
+from urllib.parse import urlparse, urlunparse
 
+import pylxd.models
 import yaml
+from pylxd.client import CERTS_PATH
+
+# TODO: remove this when ws4py is fixed
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", DeprecationWarning)
+    ssl.wrap_socket = ssl.SSLContext().wrap_socket
 
 
-def call_json(host, *args):
-    print(*["lxc", "exec", "--project", "microk8s", host, "--", *args])
-    return json.loads(
-        subprocess.check_output(
-            ["lxc", "exec", "--project", "microk8s", host, "--", *args]
-        )
+client = pylxd.Client(
+    endpoint="https://sigsrv:8443",
+    verify=os.path.join(CERTS_PATH, "servercerts/sigsrv.crt"),
+    project="microk8s",
+)
+
+
+def shell(instance, *args):
+    print(f"{instance.name}:", *args)
+    subprocess.check_call(
+        [
+            shutil.which("lxc") or "/opt/homebrew/bin/lxc",
+            "exec",
+            "--project",
+            client.project,
+            instance.name,
+            "--",
+            *args,
+        ]
     )
 
 
-def call_yaml(host, *args):
-    print(*["lxc", "exec", "--project", "microk8s", host, "--", *args])
-    return yaml.safe_load(
-        subprocess.check_output(
-            ["lxc", "exec", "--project", "microk8s", host, "--", *args]
-        )
-    )
+def call(instance, *args):
+    print(f"{instance.name}:", *args)
+    result = instance.execute([*args])
+    if result.exit_code != 0:
+        raise RuntimeError(f"Command failed: {args} -> {result.exit_code}")
+
+    if result.stderr:
+        print(result.stderr)
+
+    return result.stdout
 
 
-def shell(host, *args):
-    print(*["lxc", "exec", "--project", "microk8s", host, "--", *args])
-    subprocess.check_call(["lxc", "exec", "--project", "microk8s", host, "--", *args])
+NODES: dict[str, pylxd.models.Instance] = {}
+for node in client.instances.all():
+    node.name = node.name.partition("?")[0]  # XXX: fix pylxd bug
+    NODES[node.name] = node
+
+
+def get_microk8s_master_node():
+    return NODES["microk8s-master-0"]
+
+
+def iter_microk8s_master_nodes(ship_first=False):
+    for i in range(0, 3):
+        if i == 0 and ship_first:
+            continue
+
+        yield NODES[f"microk8s-master-{i}"]
+
+
+def iter_microk8s_worker_nodes():
+    for i in range(0, 8):
+        yield NODES[f"microk8s-worker-{i}"]
+
+
+def iter_microk8s_nodes(*, ship_first=False):
+    yield from iter_microk8s_master_nodes(ship_first=ship_first)
+    yield from iter_microk8s_worker_nodes()
 
 
 def configure_ssh():
-    data = json.loads(
-        subprocess.check_output(["lxc", "list", "--project", "microk8s", "-f", "json"])
-    )
-
-    resolved = {}
-    for container in data:
-        for network_id, network in container["state"]["network"].items():
-            for address in network["addresses"]:
-                if address["family"] == "inet" and address["scope"] == "global":
-                    if address["address"].startswith("100."):
-                        resolved[container["name"]] = address["address"]
+    resolved = {
+        node.name: address["address"]
+        for node in NODES.values()
+        for network_id, network in node.state().network.items()
+        for address in network["addresses"]
+        if address["family"] == "inet" and address["scope"] == "global"
+        if address["address"].startswith("100.")
+    }
 
     with Path("~/.ssh/config.d/lxc_ssh").expanduser().open("w") as f:
         for host, address in resolved.items():
@@ -51,7 +101,10 @@ def configure_ssh():
 
 
 def get_microk8s_join_node_url():
-    data = call_json("microk8s-master-0", "microk8s", "add-node", "--format=json")
+    microk8s_master_node = get_microk8s_master_node()
+    data = json.loads(
+        call(microk8s_master_node, "microk8s", "add-node", "--format=json")
+    )
     for url in data["urls"]:
         if url.startswith("10.100."):
             return url
@@ -59,45 +112,64 @@ def get_microk8s_join_node_url():
     raise RuntimeError("No 10.100.*.* address found")
 
 
-def iter_microk8s_master_nodes(ship_first=False):
-    for i in range(0, 3):
-        if i == 0 and ship_first:
-            continue
+def _configure_node_ha(
+    node: pylxd.models.Instance,
+    role: Literal["controlplane", "worker"],
+    node_joined_message: str,
+):
+    node_microk8s_status = call(node, "microk8s", "status")
+    if node_joined_message in node_microk8s_status:
+        return
 
-        yield f"microk8s-master-{i}"
+    url = get_microk8s_join_node_url()
+    shell(
+        node,
+        "microk8s",
+        "join",
+        url,
+        {"controlplane": "--controlplane", "worker": "--worker"}[role],
+    )
 
 
-def iter_microk8s_worker_nodes():
-    for i in range(0, 3):
-        yield f"microk8s-worker-{i}"
+def configure_master_ha(node: pylxd.models.Instance):
+    _configure_node_ha(
+        node,
+        "controlplane",
+        "high-availability: yes",
+    )
 
 
-def iter_microk8s_nodes(*, ship_first=False):
-    yield from iter_microk8s_master_nodes(ship_first=ship_first)
-    yield from iter_microk8s_worker_nodes()
+def configure_worker_ha(node: pylxd.models.Instance):
+    _configure_node_ha(
+        node,
+        "worker",
+        "This MicroK8s deployment is acting as a node in a cluster.",
+    )
 
 
 def configure_ha():
     for node in iter_microk8s_master_nodes(ship_first=True):
-        url = get_microk8s_join_node_url()
-        shell(node, "microk8s", "join", url)
+        configure_master_ha(node)
 
     for node in iter_microk8s_worker_nodes():
-        url = get_microk8s_join_node_url()
-        shell(node, "microk8s", "join", url, "--worker")
+        configure_worker_ha(node)
 
 
 def configure_cert_dns():
     for node in iter_microk8s_master_nodes():
-        shell(
-            node,
-            "sed",
-            "-i",
-            rf"s/#MOREIPS/&\nDNS.6 = {node}/",
-            "/var/snap/microk8s/current/certs/csr.conf.template",
-        )
+        csr_conf_template = "/var/snap/microk8s/current/certs/csr.conf.template"
+        dns_line = f"DNS.6 = {node.name}"
 
-        shell(node, "microk8s", "refresh-certs", "--cert", "server.crt")
+        if dns_line not in call(node, "cat", csr_conf_template):
+            shell(
+                node,
+                "sed",
+                "-i",
+                rf"s/#MOREIPS/&\n{dns_line}/",
+                csr_conf_template,
+            )
+
+            shell(node, "microk8s", "refresh-certs", "--cert", "server.crt")
 
 
 def configure_tailscale():
@@ -107,8 +179,16 @@ def configure_tailscale():
 
 def configure_addons():
     addons = [
-        # "cert-manager",
+        "argocd",
+        "istio",
+        "jaeger",
+        "cert-manager",
+        "community",
         "dashboard",
+        "dns",
+        "ha-cluster",
+        "helm",
+        "helm3",
         "hostpath-storage",
         "ingress",
         "metrics-server",
@@ -116,11 +196,17 @@ def configure_addons():
         "rbac",
         "registry",
     ]
-    shell("microk8s-master-0", "microk8s", "enable", *addons)
+
+    microk8s_master_node = get_microk8s_master_node()
+    for addon in addons:
+        shell(microk8s_master_node, "microk8s", "enable", addon)
 
 
 def configure_kube_config():
-    remote_kube_config = call_yaml("microk8s-master-0", "microk8s", "config")
+    microk8s_master_node = get_microk8s_master_node()
+    remote_kube_config = yaml.safe_load(
+        call(microk8s_master_node, "microk8s", "config")
+    )
 
     local_kube_config_path = Path("~/.kube/config").expanduser()
     with local_kube_config_path.open("r") as f:
@@ -137,7 +223,14 @@ def configure_kube_config():
 
     for pos, cluster in enumerate(local_kube_config["clusters"]):
         if cluster["name"] == context_cluster_name:
-            local_kube_config["clusters"][pos] = remote_kube_config["clusters"][0]
+            cluster = remote_kube_config["clusters"][0]
+            cluster_server = urlparse(cluster["cluster"]["server"])
+            cluster_server_netloc = f"{microk8s_master_node.name}:{cluster_server.port}"
+            cluster["cluster"]["server"] = urlunparse(
+                cluster_server._replace(netloc=cluster_server_netloc)  # noqa
+            )
+
+            local_kube_config["clusters"][pos] = cluster
             break
 
     for pos, user in enumerate(local_kube_config["users"]):
@@ -150,12 +243,12 @@ def configure_kube_config():
 
 
 def main():
-    # configure_ssh()
-    # configure_ha()
-    # configure_cert_dns()
+    configure_ssh()
+    configure_ha()
+    configure_cert_dns()
     configure_tailscale()
-    # configure_addons()
-    # configure_kube_config()
+    configure_addons()
+    configure_kube_config()
 
 
 if __name__ == "__main__":
