@@ -221,21 +221,23 @@ def configure_kube_config():
     context_cluster_name = context["context"]["cluster"]
     context_user_name = context["context"]["user"]
 
+    remote_cluster = remote_kube_config["clusters"][0]
+    remote_cluster_server = urlparse(remote_cluster["cluster"]["server"])
+    remote_cluster_server_netloc = (
+        f"{microk8s_master_node.name}:{remote_cluster_server.port}"
+    )
+    remote_cluster["cluster"]["server"] = urlunparse(
+        remote_cluster_server._replace(netloc=remote_cluster_server_netloc)  # noqa
+    )
     for pos, cluster in enumerate(local_kube_config["clusters"]):
         if cluster["name"] == context_cluster_name:
-            cluster = remote_kube_config["clusters"][0]
-            cluster_server = urlparse(cluster["cluster"]["server"])
-            cluster_server_netloc = f"{microk8s_master_node.name}:{cluster_server.port}"
-            cluster["cluster"]["server"] = urlunparse(
-                cluster_server._replace(netloc=cluster_server_netloc)  # noqa
-            )
-
-            local_kube_config["clusters"][pos] = cluster
+            local_kube_config["clusters"][pos] = remote_cluster
             break
 
+    remote_user = remote_kube_config["users"][0]
     for pos, user in enumerate(local_kube_config["users"]):
         if user["name"] == context_user_name:
-            local_kube_config["users"][pos] = remote_kube_config["users"][0]
+            local_kube_config["users"][pos] = remote_user
             break
 
     with local_kube_config_path.open("w") as f:
