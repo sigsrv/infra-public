@@ -179,22 +179,25 @@ def configure_tailscale():
 
 def configure_addons():
     addons = [
-        "argocd",
-        "istio",
-        "jaeger",
-        "cert-manager",
-        "community",
-        "dashboard",
+        # core default
         "dns",
         "ha-cluster",
         "helm",
         "helm3",
+        # core
+        "cert-manager",
+        "dashboard",
         "hostpath-storage",
         "ingress",
         "metrics-server",
         "observability",
         "rbac",
         "registry",
+        # community
+        "community",
+        "argocd",
+        "istio",
+        "jaeger",
     ]
 
     microk8s_master_node = get_microk8s_master_node()
