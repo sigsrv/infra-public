@@ -1,0 +1,12 @@
+# https://knative.dev/docs/install/operator/knative-with-operators/#install-knative-serving
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: knative-serving
+---
+apiVersion: operator.knative.dev/v1beta1
+kind: KnativeServing
+metadata:
+  name: knative-serving
+  namespace: knative-serving
+---

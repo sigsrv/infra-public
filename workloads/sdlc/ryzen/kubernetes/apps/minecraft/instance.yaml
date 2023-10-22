@@ -1,0 +1,39 @@
+apiVersion: minecraft.jameslaverack.com/v1alpha1
+kind: MinecraftServer
+metadata:
+  name: my-minecraft-server
+spec:
+  eula: Accepted
+  minecraftVersion: 1.20.2
+  type: Paper
+  opsList:
+    - name: EcmaXp
+      uuid: 4fd377bc-49dd-440e-ad9c-1980573354ac
+  allowList:
+    - name: EcmaXp
+      uuid: 4fd377bc-49dd-440e-ad9c-1980573354ac
+  world:
+    persistentVolumeClaim:
+      claimName: minecraft-world
+  motd: "My Minecraft Server"
+  maxPlayers: 8
+  viewDistance: 16
+  externalServiceIP: 192.168.1.51
+
+  vanillaTweaks:
+    survival:
+      - 'multiplayer sleep'
+      - 'afk display'
+    items:
+      - 'player head drops'
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minecraft-world
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

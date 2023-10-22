@@ -1,0 +1,16 @@
+# https://knative.dev/docs/install/operator/knative-with-operators/#install-knative-eventing
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: knative-eventing
+---
+apiVersion: operator.knative.dev/v1beta1
+kind: KnativeEventing
+metadata:
+  name: knative-eventing
+  namespace: knative-eventing
+spec:
+  source:
+    redis:
+      enabled: true
+---

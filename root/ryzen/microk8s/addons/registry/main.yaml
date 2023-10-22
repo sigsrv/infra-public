@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: registry
+  namespace: container-registry
+spec:
+  tls:
+    - hosts:
+        - microk8s-master-0.deer-neon.ts.net
+      secretName: microk8s-master-0.deer-neon.ts.net
+  rules:
+    - host: microk8s-master-0.deer-neon.ts.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: registry
+                port:
+                  number: 5000
+---
