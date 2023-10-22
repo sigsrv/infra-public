@@ -10,6 +10,7 @@ classifiers = ["Private :: Do not Upload"]
 python = "^3.11"
 boto3 = "^1.28.58"
 kubernetes = "^28.1.0"
+pylxd = "^2.3.1"
 
 [tool.poetry.group.dev.dependencies]
 boto3-stubs-lite = {extras = ["all"], version = "^1.28.58"}
