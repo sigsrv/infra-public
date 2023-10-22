@@ -7,12 +7,9 @@ terraform {
 }
 
 provider "lxd" {
-  accept_remote_certificate    = true
-  generate_client_certificates = true
-
   lxd_remote {
     default = true
-    name    = "default"
+    name    = "sigsrv"
     scheme  = "https"
     address = "sigsrv"
     port    = "8443"
