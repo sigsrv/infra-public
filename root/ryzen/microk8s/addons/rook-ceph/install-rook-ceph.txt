@@ -1,0 +1,5 @@
+1. import-external-resources.txt
+2. kubectl apply -f rook-ceph.yaml
+3. export envs from import-external-resources.txt
+4. ./import-external-cluster.sh
+5. kubectl apply -f rook-ceph-external-cluster.yaml

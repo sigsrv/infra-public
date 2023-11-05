@@ -47,6 +47,7 @@ metadata:
   name: test
   namespace: test
 spec:
+  ingressClassName: tailscale
   rules:
     - http:
         paths:

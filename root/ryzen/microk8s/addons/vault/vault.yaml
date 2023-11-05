@@ -1,17 +1,16 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: vault
----
 apiVersion: helm.cattle.io/v1
 kind: HelmChart
 metadata:
   name: vault
-  namespace: vault
+  namespace: helm-charts
 spec:
   repo: https://helm.releases.hashicorp.com
   chart: vault
   targetNamespace: vault
+  set:
+    server.dataStorage.storageClass: cephfs-protected
+    server.auditStorage.storageClass: cephfs-protected
+  # https://github.com/hashicorp/vault-helm/blob/main/values.yaml
   valuesContent: |-
     server:
       affinity: ""
@@ -19,42 +18,32 @@ spec:
         enabled: true
         raft:
           enabled: true
-        config: |-
-          ui = true
+          config: |-
+            ui = true
 
-          listener "tcp" {
-            tls_disable = 1
-            address = "[::]:8200"
-            cluster_address = "[::]:8201"
-          }
+            listener "tcp" {
+              tls_disable = 1
+              address = "[::]:8200"
+              cluster_address = "[::]:8201"
+            }
 
-          storage "consul" {
-            path = "vault"
-            address = "consul-server:8500"
-          }
----
-apiVersion: helm.cattle.io/v1
-kind: HelmChart
-metadata:
-  name: consul
-  namespace: vault
-spec:
-  repo: https://helm.releases.hashicorp.com
-  chart: consul
-  targetNamespace: vault
-  valuesContent: |-
-    global:
-      name: consul
-    server:
-      replicas: 3
-      bootstrapExpect: 3
+            storage "consul" {
+              address = "consul-server:8500"
+              path = "vault/"
+            }
+
+            service_registration "kubernetes" {}
+#      extraSecretEnvironmentVars:
+#      - envName: CONSUL_HTTP_TOKEN
+#        secretName: sigsrv-infra-microk8s-worker-consul-agent
+#        secretKey: CONSUL_HTTP_TOKEN
 ---
 # TODO: https://developer.hashicorp.com/vault/tutorials/kubernetes/vault-secrets-operator
 apiVersion: helm.cattle.io/v1
 kind: HelmChart
 metadata:
   name: vault-secrets-operator
-  namespace: vault
+  namespace: helm-charts
 spec:
   repo: https://helm.releases.hashicorp.com
   chart: vault-secrets-operator
@@ -66,9 +55,10 @@ spec:
       address: "http://vault.vault.svc.cluster.local:8200"
       skipTLSVerify: false
       spec:
-      template:
-        spec:
-          containers:
-          - name: manager
-            args:
-            - "--client-cache-persistence-model=direct-encrypted"
+        template:
+          spec:
+            containers:
+            - name: manager
+              args:
+              - "--client-cache-persistence-model=direct-encrypted"
+---

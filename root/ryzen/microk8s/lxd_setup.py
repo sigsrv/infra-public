@@ -172,12 +172,15 @@ def configure_cert_dns():
             shell(node, "microk8s", "refresh-certs", "--cert", "server.crt")
 
 
-def configure_tailscale():
+def configure_tailscale(mode: Literal["up", "down"]):
     for node in iter_microk8s_nodes():
-        try:
-            call(node, "tailscale", "status")
-        except RuntimeError:
-            call(node, "tailscale", "up")
+        if mode == "up":
+            try:
+                call(node, "tailscale", "status")
+            except RuntimeError:
+                shell(node, "tailscale", "up")
+        else:
+            shell(node, "tailscale", "down")
 
 
 def configure_addons():
@@ -271,7 +274,7 @@ def main():
     configure_kube_config()
     configure_kube_taint()
     configure_cert_dns()
-    configure_tailscale()
+    configure_tailscale("up")
     configure_addons()
 
 

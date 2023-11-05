@@ -16,9 +16,11 @@ def main():
     if "--project" not in argv[:pos]:
         if lxc_project := os.getenv("LXC_PROJECT"):
             argv[1:1] += ["--project", lxc_project]
+            pos += 2
 
-    if "list" in argv[:pos]:
+    if "list" in argv[:pos] and "device" not in argv[:pos]:
         argv[1:1] += ["--format", "compact"]
+        pos += 2
 
     os.execl(shutil.which("lxc"), *argv)
 

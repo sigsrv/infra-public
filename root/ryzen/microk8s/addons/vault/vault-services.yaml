@@ -1,0 +1,78 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: consul
+  namespace: vault
+spec:
+  ingressClassName: tailscale
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: consul
+                port:
+                  number: 8500
+  tls:
+    - hosts:
+        - consul
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: consul
+  namespace: vault
+spec:
+  selector:
+    app: consul
+    component: server
+    release: consul
+  ports:
+    - name: http
+      port: 8500
+      protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vault
+  namespace: vault
+spec:
+  ingressClassName: tailscale
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: vault
+                port:
+                  number: 8200
+  tls:
+    - hosts:
+        - vault
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vault-active
+  namespace: vault
+spec:
+  ingressClassName: tailscale
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: vault-active
+                port:
+                  number: 8200
+  tls:
+    - hosts:
+        - vault-active
+---

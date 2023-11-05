@@ -4,13 +4,9 @@ metadata:
   name: registry
   namespace: container-registry
 spec:
-  tls:
-    - hosts:
-        - microk8s-master-0.deer-neon.ts.net
-      secretName: microk8s-master-0.deer-neon.ts.net
+  ingressClassName: tailscale
   rules:
-    - host: microk8s-master-0.deer-neon.ts.net
-      http:
+    - http:
         paths:
           - path: /
             pathType: Prefix
@@ -19,4 +15,7 @@ spec:
                 name: registry
                 port:
                   number: 5000
+  tls:
+    - hosts:
+        - registry
 ---

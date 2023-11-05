@@ -1,0 +1,29 @@
+sudo python3 create-external-cluster-resources.py \
+    --k8s-cluster-name microk8s \
+    --namespace rook-ceph-external \
+    --ceph-conf /var/snap/microceph/current/conf/ceph.conf \
+    --keyring /var/snap/microceph/current/conf/ceph.keyring \
+    --rbd-data-pool-name sigsrv.microk8s.rbd.data \
+    --cephfs-filesystem-name sigsrv.microk8s.cephfs \
+    --cephfs-metadata-pool-name sigsrv.microk8s.cephfs.meta \
+    --cephfs-data-pool-name sigsrv.microk8s.cephfs.data \
+    --rgw-endpoint 100.111.208.135:8080 \
+    --format bash
+
+
+sudo ceph mgr module enable prometheus
+sudo ceph mgr module enable rgw --port=8080
+
+sudo ceph osd pool create sigsrv.microk8s.cephfs.meta
+sudo ceph osd pool set sigsrv.microk8s.cephfs.meta pg_autoscale_mode on
+
+sudo ceph osd pool create sigsrv.microk8s.cephfs.data
+sudo ceph osd pool set sigsrv.microk8s.cephfs.data pg_autoscale_mode on
+
+sudo ceph fs new sigsrv.microk8s.cephfs sigsrv.microk8s.cephfs.meta sigsrv.microk8s.cephfs.data
+
+sudo ceph osd pool create sigsrv.microk8s.rbd.meta
+sudo ceph osd pool set sigsrv.microk8s.rbd.meta pg_autoscale_mode on
+
+sudo ceph osd pool create sigsrv.microk8s.rbd.data
+sudo ceph osd pool set sigsrv.microk8s.rbd.data pg_autoscale_mode on

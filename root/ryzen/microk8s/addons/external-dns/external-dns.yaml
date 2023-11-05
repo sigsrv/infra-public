@@ -7,7 +7,7 @@ apiVersion: helm.cattle.io/v1
 kind: HelmChart
 metadata:
   name: external-dns
-  namespace: external-dns
+  namespace: helm-charts
 spec:
   repo: https://kubernetes-sigs.github.io/external-dns/
   chart: external-dns

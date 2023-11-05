@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chatgpt-discord-bot-gpt-4
+  namespace: chatgpt-discord-bot
+  labels:
+    app: chatgpt-discord-bot
+    model: gpt-4
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chatgpt-discord-bot
+      model: gpt-4
+  template:
+    metadata:
+      labels:
+        app: chatgpt-discord-bot
+        model: gpt-4
+    spec:
+      terminationGracePeriodSeconds: 5
+      containers:
+        - name: chatgpt-discord-bot
+          image: registry.deer-neon.ts.net/chatgpt-discord-bot:latest
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512M
+            limits:
+              cpu: 100m
+              memory: 512M
+          volumeMounts:
+            - mountPath: /code/config.json
+              name: config
+              readOnly: true
+              subPath: config.json
+          envFrom:
+            - secretRef:
+                name: chatgpt-discord-bot-secret-gpt-4
+      volumes:
+        - name: config
+          configMap:
+            name: chatgpt-discord-bot-config-gpt-4
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chatgpt-discord-bot-config-gpt-4
+  namespace: chatgpt-discord-bot
+data:
+  config.json: |
+    {
+        "prefix": "!",
+        "token": "env:DISCORD_TOKEN",
+        "permissions": "277025390592",
+        "application_id": "1080830283441512478",
+        "openai_api_key": "env:OPENAI_API_KEY",
+        "openai_chatgpt_model": "gpt-4",
+        "chatgpt_allow_mention": true,
+        "sync_commands_globally": true,
+        "owner_guild_id": 494354954098835478,
+        "owners": [264704516643880961],
+        "chatgpt_tokens_count": 2730911
+    }
+---

@@ -53,10 +53,10 @@ resource "lxd_cached_image" "ubuntu_jammy_vm" {
 
 locals {
   ipv4_address = "10.100.0.0/24"
-  ipv6_address = "fd10:100:0:1::0/64"
+  ipv6_address = "fdec:100:0:1::0/64"
 
   ipv4_1_address = "10.100.0.1/24"
-  ipv6_1_address = "fd10:100:0:1::1/64"
+  ipv6_1_address = "fdec:100:0:1::1/64"
 }
 
 resource "lxd_network" "this" {

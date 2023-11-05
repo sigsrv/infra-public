@@ -1,0 +1,31 @@
+# execute import-external-cluster.sh first to create
+#
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: rook-ceph-external-cluster
+  namespace: helm-charts
+spec:
+  repo: https://charts.rook.io/release
+  chart: rook-ceph-cluster
+  targetNamespace: rook-ceph-external
+  # https://github.com/rook/rook/blob/master/deploy/charts/rook-ceph-cluster/values-external.yaml
+  valuesContent: |-
+    operatorNamespace: rook-ceph
+    cephClusterSpec:
+      # cluster id
+      external:
+        enable: true
+      crashCollector:
+        disable: true
+      healthCheck:
+        daemonHealth:
+          mon:
+            disabled: false
+            interval: 45s
+
+    cephBlockPools: {}
+    cephFileSystems: {}
+    cephObjectStores: {}
+---
