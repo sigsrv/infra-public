@@ -204,6 +204,7 @@ def configure_addons():
         "argocd",
         "istio",
         "jaeger",
+        "knative",
     ]
 
     microk8s_master_node = get_microk8s_master_node()
