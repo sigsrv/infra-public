@@ -1,9 +1,9 @@
 specVersion: 0.35.0
 name: hello
 runtime: python
-registry: microk8s-master-0.deer-neon.ts.net
-image: microk8s-master-0.deer-neon.ts.net/hello:latest
-imageDigest: sha256:3ab68f45875a7c13d19df4ff63425a8eb1e62d99b89143732a9e51382d08089a
+registry: registry.deer-neon.ts.net
+image: registry.deer-neon.ts.net/hello:latest
+imageDigest: sha256:8c8ea4bc260f7b15d1d3c92872aa54bbc634e018087bed53a58f602fdf8380e9
 created: 2023-10-22T21:10:49.119274+09:00
 build:
   builder: pack
