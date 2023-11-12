@@ -56,7 +56,7 @@ data:
         "permissions": "277025390592",
         "application_id": "1080830283441512478",
         "openai_api_key": "env:OPENAI_API_KEY",
-        "openai_chatgpt_model": "gpt-3.5-turbo",
+        "openai_chatgpt_model": "gpt-3.5-turbo-1106",
         "chatgpt_allow_mention": true,
         "sync_commands_globally": true,
         "owner_guild_id": 494354954098835478,
