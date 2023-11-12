@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "gpt-bot"
+version = "1.0.0"
+description = ""
+authors = ["EcmaXp <ecmaxp@ecmaxp.kr>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+openai = "^1.2.3"
+"discord.py" = "^2.3.2"
+aiohttp = "3.9.0b1"
+setuptools = "^68.2.2"
+redis = "^5.0.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
