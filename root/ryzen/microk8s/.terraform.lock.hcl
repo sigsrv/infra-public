@@ -2,7 +2,8 @@
 # Manual edits may be lost in future updates.
 
 provider "registry.terraform.io/terraform-lxd/lxd" {
-  version = "1.10.2"
+  version     = "1.10.2"
+  constraints = "1.10.2"
   hashes = [
     "h1:v/z1den1WRAvKjNjdwbPCzeDnM1CooUosIfr6Kg/ovY=",
     "zh:0b0617c7bdd145bc34becfafbad211d88a39edaef488e7b6c453a6babf598c57",

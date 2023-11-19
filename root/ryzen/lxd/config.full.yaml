@@ -1,6 +1,8 @@
 # lxd init --dump
 config:
-  core.https_address: 100.111.208.135:8443
+  core.https_address: :8443
+  core.metrics_address: :8444
+  user.ui_title: sigsrv
 networks:
 - config:
     ipv4.address: 10.124.242.1/24
@@ -11,27 +13,38 @@ networks:
   name: lxdbr0
   type: bridge
   project: default
+- config:
+    dns.domain: microk8s.sigsrv.local
+    ipv4.address: 10.100.0.1/16
+    ipv4.nat: "true"
+    ipv6.address: fdec:100::1/64
+    ipv6.nat: "true"
+  description: sigsrv-microk8s
+  name: sigsrv-microk8s
+  type: bridge
+  project: default
 storage_pools:
 - config:
     ceph.cluster_name: ceph
-    ceph.osd.pg_num: "32"
-    ceph.osd.pool_name: lxd
+    ceph.osd.data_pool_name: sigsrv.lxd.osd.data
+    ceph.osd.pg_num: "1"
+    ceph.osd.pool_name: sigsrv.lxd.osd.meta
     ceph.user.name: admin
     volatile.pool.pristine: "true"
   description: ""
-  name: default
+  name: microceph-lxd
   driver: ceph
 profiles:
 - config: {}
   description: Default LXD profile
   devices:
     eth0:
-      name: eth0
       network: lxdbr0
       type: nic
     root:
       path: /
-      pool: default
+      pool: microceph-lxd
+      size: 10GiB
       type: disk
   name: default
 projects:
@@ -42,5 +55,54 @@ projects:
     features.profiles: "true"
     features.storage.buckets: "true"
     features.storage.volumes: "true"
+    restricted: "false"
   description: Default LXD project
   name: default
+- config:
+    features.images: "true"
+    features.networks: "false"
+    features.networks.zones: "false"
+    features.profiles: "true"
+    features.storage.buckets: "true"
+    features.storage.volumes: "true"
+    limits.containers: "0"
+    limits.disk: 200GiB
+    limits.instances: "4"
+    limits.memory: "34359738368"
+    limits.networks: "2"
+    limits.virtual-machines: "4"
+    restricted: "false"
+  description: user-jungooji
+  name: jungooji
+- config:
+    features.images: "true"
+    features.networks: "false"
+    features.networks.zones: "false"
+    features.profiles: "true"
+    features.storage.buckets: "true"
+    features.storage.volumes: "true"
+    limits.containers: "0"
+    limits.disk: 200GiB
+    limits.instances: "4"
+    limits.memory: "34359738368"
+    limits.networks: "2"
+    limits.virtual-machines: "4"
+    restricted: "false"
+  description: user-myang2
+  name: myang2
+- config:
+    features.images: "true"
+    features.networks: "false"
+    features.networks.zones: "true"
+    features.profiles: "true"
+    features.storage.buckets: "true"
+    features.storage.volumes: "true"
+    limits.containers: "16"
+    limits.cpu: "32"
+    limits.disk: 1TiB
+    limits.instances: "32"
+    limits.memory: 64GiB
+    limits.networks: "4"
+    limits.virtual-machines: "16"
+  description: sigsrv-microk8s
+  name: sigsrv-microk8s

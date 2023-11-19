@@ -1,0 +1,2 @@
+sudo ufw allow in on sigsrv-microk8s
+sudo ufw allow out on sigsrv-microk8s

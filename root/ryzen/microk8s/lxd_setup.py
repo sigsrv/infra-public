@@ -6,8 +6,9 @@ import ssl
 import subprocess
 import warnings
 from builtins import DeprecationWarning
+from itertools import chain
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Iterator
 from urllib.parse import urlparse, urlunparse
 
 import pylxd.models
@@ -23,7 +24,7 @@ with warnings.catch_warnings():
 client = pylxd.Client(
     endpoint="https://sigsrv:8443",
     verify=os.path.join(CERTS_PATH, "servercerts/sigsrv.crt"),
-    project="microk8s",
+    project="sigsrv-microk8s",
 )
 
 
@@ -54,27 +55,33 @@ def call(instance, *args):
     return result.stdout
 
 
+def fix_pylxd_bug(node: pylxd.models.Instance):
+    node.name, sep, project = node.name.partition("?project=")
+    url_params = sep + project
+    node.files._endpoint._api_endpoint = node.files._endpoint._api_endpoint.replace(url_params, "")
+
+
 NODES: dict[str, pylxd.models.Instance] = {}
 for node in client.instances.all():
-    node.name = node.name.partition("?")[0]  # XXX: fix pylxd bug
+    fix_pylxd_bug(node)
     NODES[node.name] = node
 
 
-def get_microk8s_master_node():
-    return NODES["microk8s-master-0"]
+def get_microk8s_master_node() -> pylxd.models.Instance:
+    return NODES["sigsrv-microk8s-master-0"]
 
 
-def iter_microk8s_master_nodes(ship_first=False):
+def iter_microk8s_master_nodes(ship_first=False) -> Iterator[pylxd.models.Instance]:
     for i in range(0, 3):
         if i == 0 and ship_first:
             continue
 
-        yield NODES[f"microk8s-master-{i}"]
+        yield NODES[f"sigsrv-microk8s-master-{i}"]
 
 
-def iter_microk8s_worker_nodes():
+def iter_microk8s_worker_nodes() -> Iterator[pylxd.models.Instance]:
     for i in range(0, 3):
-        yield NODES[f"microk8s-worker-{i}"]
+        yield NODES[f"sigsrv-microk8s-worker-{i}"]
 
 
 def iter_microk8s_nodes(*, ship_first=False):
@@ -155,21 +162,48 @@ def configure_ha():
         configure_worker_ha(node)
 
 
+def get_tailscale_ips():
+    microk8s_master_node = get_microk8s_master_node()
+
+    tailscale_ips = {}
+    tailscale_status = json.loads(call(microk8s_master_node, "tailscale", "status", "--json"))
+
+    user_ids = [6646434622863752, 8996697841740648]
+    for host in chain([tailscale_status["Self"]], tailscale_status["Peer"].values()):
+        print(host)
+        if host["UserID"] not in user_ids:
+            continue
+        if host["HostName"] not in NODES:
+            continue
+
+        tailscale_ip = next(
+            tailscale_ip
+            for tailscale_ip in host["TailscaleIPs"]
+            if tailscale_ip.startswith("100.")
+        )
+
+        tailscale_ips[host["HostName"]] = tailscale_ip
+
+    return tailscale_ips
+
+
+
+# TODO: https://github.com/canonical/microk8s/issues/2402#issuecomment-950884240
+
+
 def configure_cert_dns():
+    tailscale_ips = get_tailscale_ips()
     for node in iter_microk8s_master_nodes():
-        csr_conf_template = "/var/snap/microk8s/current/certs/csr.conf.template"
-        dns_line = f"DNS.6 = {node.name}"
+        csr_conf_template_path = "/var/snap/microk8s/current/certs/csr.conf.template"
+        csr_conf_template = node.files.get(csr_conf_template_path)
 
-        if dns_line not in call(node, "cat", csr_conf_template):
-            shell(
-                node,
-                "sed",
-                "-i",
-                rf"s/#MOREIPS/&\n{dns_line}/",
-                csr_conf_template,
-            )
-
-            shell(node, "microk8s", "refresh-certs", "--cert", "server.crt")
+        tailscale_ip = tailscale_ips[node.name]
+        for dns_line in [f"DNS.6 = {node.name}", f"IP.3 = {tailscale_ip}"]:
+            dns_line = dns_line.encode("utf-8")
+            if dns_line not in csr_conf_template:
+                csr_conf_template = csr_conf_template.replace(b"#MOREIPS\n", b"#MOREIPS\n" + dns_line + b"\n")
+                node.files.put(csr_conf_template_path, csr_conf_template)
+                shell(node, "microk8s", "refresh-certs", "--cert", "server.crt")
 
 
 def configure_tailscale(mode: Literal["up", "down"]):
@@ -225,7 +259,7 @@ def configure_kube_config():
     context = next(
         context
         for context in remote_kube_config["contexts"]
-        if context["name"] == "microk8s"
+        if context["name"] == "sigsrv-microk8s"
     )
 
     context_cluster_name = context["context"]["cluster"]
@@ -279,5 +313,5 @@ def main():
     configure_addons()
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
