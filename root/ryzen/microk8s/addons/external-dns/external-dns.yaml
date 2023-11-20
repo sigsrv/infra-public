@@ -18,20 +18,16 @@ spec:
       - --domain-filter=sigsrv.dev
       - --zone-id-filter=8bae321a816296c96dd3723a2b7e550e
       - --txt-owner-id=external-dns
+      - --cloudflare-proxied
       - --cloudflare-dns-records-per-page=5000
     env:
-    - name: CF_API_TOKEN
-      value: "file:///etc/kubernetes/external-dns/CF_API_TOKEN"
     - name: CF_API_EMAIL
-      value: "file:///etc/kubernetes/external-dns/CF_API_EMAIL"
-    extraVolumeMounts:
-    - name: secret-volume
-      mountPath: /etc/kubernetes/external-dns
-      readOnly: true
-    extraVolumes:
-    - name: secret-volume
-      secret:
-        secretName: cloudflare-external-dns
+      value: "ecmaxp@ecmaxp.kr"
+    - name: CF_API_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: cloudflare-external-dns
+          key: CF_API_TOKEN
 ---
 apiVersion: v1
 kind: Secret
@@ -40,6 +36,5 @@ metadata:
   namespace: external-dns
 type: Opaque
 data:
-  CF_API_TOKEN: "eHg3bGJFSmpXdUsxQnJVX0w4WXhwWlJpc0RQeHNGZTc0T0FXWlZoYw=="
-  CF_API_EMAIL: "ZWNtYXhwQGVjbWF4cC5rcg=="
+  CF_API_TOKEN: "ZVhYeVdXamdtMXRsRXZfc3c0MnpEZEZaWDZSd09RREpqZHZwM0lJXw=="
 ---
