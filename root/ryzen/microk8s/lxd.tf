@@ -17,11 +17,6 @@ provider "lxd" {
   }
 }
 
-variable "ts_authkey" {
-  type      = string
-  sensitive = true
-}
-
 locals {
   lxd_storage_pool = {
     default = {
@@ -159,9 +154,8 @@ resource "lxd_instance" "tailscale" {
           [
             "tailscale",
             "up",
-            "--authkey=${var.ts_authkey}",
             "--advertise-routes=${local.ipv4_address},${local.ipv6_address}",
-            "--advertise-tags=tag:local-sigsrv-microk8s-master"
+            "--advertise-tags=tag:sigsrv-microk8s"
           ],
         ],
       }
@@ -200,28 +194,13 @@ resource "lxd_instance" "master" {
           "commands" = [
             "snap install microk8s --classic",
           ]
-        },
-        "runcmd" = [
-          ["sh", "-c", "curl -fsSL https://tailscale.com/install.sh | sh"],
-          [
-            "sh", "-c",
-            "echo 'net.ipv4.ip_forward = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf && echo 'net.ipv6.conf.all.forwarding = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf && sudo sysctl -p /etc/sysctl.d/99-tailscale.conf"
-          ],
-          [
-            "tailscale",
-            "up",
-            "--authkey=${var.ts_authkey}",
-            "--ssh",
-            "--advertise-tags=tag:local-sigsrv-microk8s-master"
-          ],
-          ["tailscale", "down"],
-        ]
+        }
       }
     ))
   }
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
 
     ignore_changes = [
       image,
@@ -255,21 +234,6 @@ resource "lxd_instance" "worker" {
             "snap install microk8s --classic",
           ],
         }
-        "runcmd" = [
-          ["sh", "-c", "curl -fsSL https://tailscale.com/install.sh | sh"],
-          [
-            "sh", "-c",
-            "echo 'net.ipv4.ip_forward = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf && echo 'net.ipv6.conf.all.forwarding = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf && sudo sysctl -p /etc/sysctl.d/99-tailscale.conf"
-          ],
-          [
-            "tailscale",
-            "up",
-            "--authkey=${var.ts_authkey}",
-            "--ssh",
-            "--advertise-tags=tag:local-sigsrv-microk8s-master"
-          ],
-          ["tailscale", "down"],
-        ]
       }
     ))
   }

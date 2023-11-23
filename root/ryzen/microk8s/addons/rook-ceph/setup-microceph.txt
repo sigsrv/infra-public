@@ -30,7 +30,7 @@ What's the disk path? (empty to exit):
 
 sudo microceph.ceph osd crush rule rm replicated_rule
 sudo microceph.ceph osd crush rule create-replicated single default osd
-sudo microceph.ceph config set global osd_pool_default_size 2
+sudo microceph.ceph config set global osd_pool_default_size 3
 sudo microceph.ceph config set mgr mgr_standby_modules false
 sudo microceph.ceph config set osd osd_crush_chooseleaf_type 0
 sudo microceph.ceph config set global mon_max_pg_per_osd 512
@@ -43,7 +43,7 @@ sudo microceph enable rgw --port 8080
 sudo ceph mgr module enable prometheus
 
 for pool in (sudo ceph osd lspools | awk '{print $2}')
-    sudo ceph osd pool set $pool size 2
+    sudo ceph osd pool set $pool size 3
 end
 
 sudo ceph osd pool create sigsrv.lxd.osd.meta

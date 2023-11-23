@@ -129,6 +129,13 @@ def _configure_node_ha(
         return
 
     url = get_microk8s_join_node_url()
+    url_tokens = url.split("/")
+    for i, token in enumerate(url_tokens):
+        if token.startswith("10.100."):
+            url_tokens[i] = "sigsrv-microk8s-master-0.microk8s.sigsrv.local:" + token.split(":")[1]
+            break
+    url = "/".join(url_tokens)
+
     shell(
         node,
         "microk8s",
@@ -162,43 +169,12 @@ def configure_ha():
         configure_worker_ha(node)
 
 
-def get_tailscale_ips():
-    microk8s_master_node = get_microk8s_master_node()
-
-    tailscale_ips = {}
-    tailscale_status = json.loads(call(microk8s_master_node, "tailscale", "status", "--json"))
-
-    user_ids = [6646434622863752, 8996697841740648]
-    for host in chain([tailscale_status["Self"]], tailscale_status["Peer"].values()):
-        print(host)
-        if host["UserID"] not in user_ids:
-            continue
-        if host["HostName"] not in NODES:
-            continue
-
-        tailscale_ip = next(
-            tailscale_ip
-            for tailscale_ip in host["TailscaleIPs"]
-            if tailscale_ip.startswith("100.")
-        )
-
-        tailscale_ips[host["HostName"]] = tailscale_ip
-
-    return tailscale_ips
-
-
-
-# TODO: https://github.com/canonical/microk8s/issues/2402#issuecomment-950884240
-
-
 def configure_cert_dns():
-    tailscale_ips = get_tailscale_ips()
     for node in iter_microk8s_master_nodes():
         csr_conf_template_path = "/var/snap/microk8s/current/certs/csr.conf.template"
         csr_conf_template = node.files.get(csr_conf_template_path)
 
-        tailscale_ip = tailscale_ips[node.name]
-        for dns_line in [f"DNS.6 = {node.name}", f"IP.3 = {tailscale_ip}"]:
+        for dns_line in [f"DNS.6 = {node.name}.microk8s.sigsrv.local"]:
             dns_line = dns_line.encode("utf-8")
             if dns_line not in csr_conf_template:
                 csr_conf_template = csr_conf_template.replace(b"#MOREIPS\n", b"#MOREIPS\n" + dns_line + b"\n")
@@ -206,14 +182,41 @@ def configure_cert_dns():
                 shell(node, "microk8s", "refresh-certs", "--cert", "server.crt")
 
 
-def configure_tailscale(mode: Literal["up", "down"]):
+def configure_tailscale(mode: Literal["init", "up", "down"]):
     for node in iter_microk8s_nodes():
-        if mode == "up":
+        if mode == "init":
+            call(node, "sh", "-c", "curl -fsSL https://tailscale.com/install.sh | sh")
+            call(node, "sh", "-c", (
+                "echo 'net.ipv4.ip_forward = 1'"
+                " | sudo tee -a /etc/sysctl.d/99-tailscale.conf"
+                " && echo 'net.ipv6.conf.all.forwarding = 1'"
+                " | sudo tee -a /etc/sysctl.d/99-tailscale.conf"
+                " && sudo sysctl -p /etc/sysctl.d/99-tailscale.conf"
+            ))
+
+            # try:
+            #     sysctl_conf = node.files.get("/etc/sysctl.d/99-tailscale.conf")
+            # except pylxd.exceptions.NotFound:
+
+            for line in [
+                b"net.ipv4.ip_forward = 1",
+                b"net.ipv6.conf.all.forwarding = 1",
+            ]:
+                pass  # if line not in sysctl_conf:
+
+            call(node,
+                 "tailscale",
+                 "up",
+                 "--authkey=${var.ts_authkey}",
+                 "--ssh",
+                 "--advertise-tags=tag:local-sigsrv-microk8s-master"
+             )
+        elif mode == "up":
             try:
                 call(node, "tailscale", "status")
             except RuntimeError:
                 shell(node, "tailscale", "up")
-        else:
+        elif mode == "down":
             shell(node, "tailscale", "down")
 
 
@@ -227,12 +230,11 @@ def configure_addons():
         # core
         "cert-manager",
         "dashboard",
-        "hostpath-storage",
         "ingress",
         "metrics-server",
         "observability",
         "rbac",
-        "registry",
+        # "registry",
         # community
         "community",
         "argocd",
@@ -259,7 +261,7 @@ def configure_kube_config():
     context = next(
         context
         for context in remote_kube_config["contexts"]
-        if context["name"] == "sigsrv-microk8s"
+        if context["name"] == "microk8s"
     )
 
     context_cluster_name = context["context"]["cluster"]
@@ -306,12 +308,12 @@ def configure_kube_taint():
 def main():
     configure_ssh()
     configure_ha()
-    configure_kube_config()
     configure_kube_taint()
     configure_cert_dns()
-    configure_tailscale("up")
+    configure_kube_config()
+    # configure_tailscale("up")
     configure_addons()
 
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()
