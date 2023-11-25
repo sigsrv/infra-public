@@ -268,13 +268,13 @@ def configure_kube_config():
     context_user_name = context["context"]["user"]
 
     remote_cluster = remote_kube_config["clusters"][0]
-    remote_cluster_server = urlparse(remote_cluster["cluster"]["server"])
-    remote_cluster_server_netloc = (
-        f"{microk8s_master_node.name}:{remote_cluster_server.port}"
-    )
-    remote_cluster["cluster"]["server"] = urlunparse(
-        remote_cluster_server._replace(netloc=remote_cluster_server_netloc)  # noqa
-    )
+    # remote_cluster_server = urlparse(remote_cluster["cluster"]["server"])
+    # remote_cluster_server_netloc = (
+    #     f"{microk8s_master_node.name}:{remote_cluster_server.port}"
+    # )
+    # remote_cluster["cluster"]["server"] = urlunparse(
+    #     remote_cluster_server._replace(netloc=remote_cluster_server_netloc)  # noqa
+    # )
     for pos, cluster in enumerate(local_kube_config["clusters"]):
         if cluster["name"] == context_cluster_name:
             local_kube_config["clusters"][pos] = remote_cluster
