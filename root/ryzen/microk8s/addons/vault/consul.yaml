@@ -9,7 +9,7 @@ spec:
   targetNamespace: vault
   # https://github.com/hashicorp/consul-k8s/blob/main/charts/consul/values.yaml
   set:
-    server.storageClass: cephfs-protected
+    server.storageClass: shared-path-protected
   valuesContent: |-
     global:
       name: consul

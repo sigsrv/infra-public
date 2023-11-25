@@ -8,8 +8,8 @@ spec:
   chart: vault
   targetNamespace: vault
   set:
-    server.dataStorage.storageClass: cephfs-protected
-    server.auditStorage.storageClass: cephfs-protected
+    server.dataStorage.storageClass: shared-path-protected
+    server.auditStorage.storageClass: shared-path-protected
   # https://github.com/hashicorp/vault-helm/blob/main/values.yaml
   valuesContent: |-
     server:

@@ -83,9 +83,6 @@ def iter_microk8s_worker_nodes() -> Iterator[pylxd.models.Instance]:
     for i in range(0, 5):
         yield NODES[f"sigsrv-microk8s-worker-{i}"]
 
-    yield NODES[f"sigsrv-microk8s-nfs-0"]
-
-
 def iter_microk8s_nodes(*, ship_first=False):
     yield from iter_microk8s_master_nodes(ship_first=ship_first)
     yield from iter_microk8s_worker_nodes()
@@ -250,15 +247,6 @@ def configure_addons():
         shell(microk8s_master_node, "microk8s", "enable", addon)
 
 
-def configure_addon_nfs():
-    microk8s_master_node = get_microk8s_master_node()
-    shell(microk8s_master_node, "microk8s", "enable", "nfs", "-n", "sigsrv-microk8s-nfs-0")
-
-    for node in iter_microk8s_nodes():
-        shell(node, "sudo", "apt", "update")
-        shell(node, "sudo", "apt", "install", "-y", "nfs-common")
-
-
 def configure_kube_config():
     microk8s_master_node = get_microk8s_master_node()
     remote_kube_config = yaml.safe_load(
@@ -328,6 +316,13 @@ def configure_kube_taint():
     # )
 
 
+def configure_volumes():
+    microk8s_master_node = get_microk8s_master_node()
+    call(microk8s_master_node, "stat", "/mnt/volumes")
+    call(microk8s_master_node, "mountpoint", "/mnt/volumes")
+    call(microk8s_master_node, "touch", "/mnt/volumes/mounted")
+
+
 def main():
     configure_ssh()
     configure_ha()
@@ -336,7 +331,7 @@ def main():
     configure_kube_config()
     # configure_tailscale("up")
     configure_addons()
-    # configure_addon_nfs()
+    configure_volumes()
 
 
 if __name__ == "__main__":
