@@ -20,7 +20,7 @@ provider "lxd" {
 locals {
   lxd_storage_pool = {
     default = {
-      name = "microceph-lxd"
+      name = "sigsrv-lxd"
     }
   }
 }
@@ -38,7 +38,7 @@ resource "lxd_project" "this" {
     "features.networks.zones"  = "true"
     "limits.containers"        = "16"
     "limits.cpu"               = "32"
-    "limits.disk"              = "1TiB"
+    "limits.disk"              = "5TiB"
     "limits.instances"         = "32"
     "limits.memory"            = "64GiB"
     "limits.networks"          = "4"
