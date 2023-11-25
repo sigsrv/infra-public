@@ -1,0 +1,14 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-protected
+  labels:
+    app: nfs-server-provisioner
+provisioner: cluster.local/nfs-server-provisioner
+reclaimPolicy: Retain
+mountOptions:
+  - vers=3
+  - retrans=2
+  - timeo=30
+allowVolumeExpansion: true
+volumeBindingMode: Immediate

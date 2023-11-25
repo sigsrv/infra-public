@@ -80,8 +80,10 @@ def iter_microk8s_master_nodes(ship_first=False) -> Iterator[pylxd.models.Instan
 
 
 def iter_microk8s_worker_nodes() -> Iterator[pylxd.models.Instance]:
-    for i in range(0, 3):
+    for i in range(0, 5):
         yield NODES[f"sigsrv-microk8s-worker-{i}"]
+
+    yield NODES[f"sigsrv-microk8s-nfs-0"]
 
 
 def iter_microk8s_nodes(*, ship_first=False):
@@ -248,6 +250,15 @@ def configure_addons():
         shell(microk8s_master_node, "microk8s", "enable", addon)
 
 
+def configure_addon_nfs():
+    microk8s_master_node = get_microk8s_master_node()
+    shell(microk8s_master_node, "microk8s", "enable", "nfs", "-n", "sigsrv-microk8s-nfs-0")
+
+    for node in iter_microk8s_nodes():
+        shell(node, "sudo", "apt", "update")
+        shell(node, "sudo", "apt", "install", "-y", "nfs-common")
+
+
 def configure_kube_config():
     microk8s_master_node = get_microk8s_master_node()
     remote_kube_config = yaml.safe_load(
@@ -304,6 +315,18 @@ def configure_kube_taint():
             "--overwrite",
         )
 
+    # microk8s_nfs_node = NODES["sigsrv-microk8s-nfs-0"]
+    # call(
+    #     microk8s_master_node,
+    #     "microk8s",
+    #     "kubectl",
+    #     "taint",
+    #     "nodes",
+    #     microk8s_nfs_node.name,
+    #     "dedicated=nfs:NoSchedule",
+    #     "--overwrite",
+    # )
+
 
 def main():
     configure_ssh()
@@ -313,6 +336,7 @@ def main():
     configure_kube_config()
     # configure_tailscale("up")
     configure_addons()
+    # configure_addon_nfs()
 
 
 if __name__ == "__main__":

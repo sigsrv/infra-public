@@ -166,7 +166,7 @@ resource "lxd_instance" "tailscale" {
     ignore_changes = [
       image,
       config["cloud-init.user-data"],
-      device,
+      # device,
     ]
   }
 }
@@ -199,19 +199,29 @@ resource "lxd_instance" "master" {
     ))
   }
 
+  device {
+    name = "nfs"
+    type = "disk"
+    properties = {
+      pool   = local.lxd_storage_pool.default.name
+      path   = "/var/sigsrv-microk8s-storage"
+      source = lxd_volume.storage.name
+    }
+  }
+
   lifecycle {
     prevent_destroy = false
 
     ignore_changes = [
       image,
       config["cloud-init.user-data"],
-      device,
+      # device,
     ]
   }
 }
 
 resource "lxd_instance" "worker" {
-  count   = 3
+  count   = 5
   project = lxd_project.this.name
   name    = "${lxd_project.this.name}-worker-${count.index}"
   image   = lxd_cached_image.ubuntu_jammy_vm.fingerprint
@@ -238,11 +248,70 @@ resource "lxd_instance" "worker" {
     ))
   }
 
+  device {
+    name = "nfs"
+    type = "disk"
+    properties = {
+      pool   = local.lxd_storage_pool.default.name
+      path   = "/var/sigsrv-microk8s-storage"
+      source = lxd_volume.storage.name
+    }
+  }
+
   lifecycle {
     ignore_changes = [
       image,
       config["cloud-init.user-data"],
-      device,
+      # device,
     ]
   }
 }
+
+resource "lxd_volume" "storage" {
+  project = lxd_project.this.name
+  name    = "${lxd_project.this.name}-storage"
+  pool    = local.lxd_storage_pool.default.name
+  config = {
+    size = "100GiB"
+  }
+}
+
+#resource "lxd_instance" "nfs" {
+#  count   = 1
+#  project = lxd_project.this.name
+#  name    = "${lxd_project.this.name}-nfs-${count.index}"
+#  image   = lxd_cached_image.ubuntu_jammy_vm.fingerprint
+#  type    = "virtual-machine"
+#
+#  profiles = [
+#    lxd_profile.default.name,
+#  ]
+#
+#  limits = {
+#    cpu    = 2
+#    memory = "4GiB"
+#  }
+#
+#  config = {
+#    "cloud-init.user-data" = format("#cloud-config\n%s", yamlencode(
+#      {
+#        "snap" = {
+#          "commands" = [
+#            "snap install microk8s --classic",
+#          ],
+#        }
+#      }
+#    ))
+#  }
+#
+#
+#
+#  lifecycle {
+#    ignore_changes = [
+#      image,
+#      config["cloud-init.user-data"],
+#      # device,
+#    ]
+#  }
+#}
+
