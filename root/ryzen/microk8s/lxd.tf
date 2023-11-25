@@ -120,6 +120,8 @@ resource "lxd_profile" "default" {
         }
       }
     ))
+    "snapshots.expiry"   = "4w"
+    "snapshots.schedule" = "@daily"
   }
 
   device {
@@ -147,7 +149,9 @@ resource "lxd_volume" "volumes" {
   name    = "${lxd_project.this.name}-volumes"
   pool    = local.lxd_storage_pool.default.name
   config = {
-    size = "1TiB"
+    size                 = "1TiB"
+    "snapshots.expiry"   = "4w"
+    "snapshots.schedule" = "@daily"
   }
 }
 
