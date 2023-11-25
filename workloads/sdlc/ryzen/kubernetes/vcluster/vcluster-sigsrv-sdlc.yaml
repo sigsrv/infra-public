@@ -1,0 +1,19 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: sigsrv-sdlc
+  namespace: helm-charts
+spec:
+  repo: https://charts.loft.sh
+  chart: vcluster
+  targetNamespace: vcluster-sigsrv-sdlc
+  valuesContent: |-
+    fallbackHostDns: true
+    serviceCIDR: 10.152.183.0/24
+    telemetry:
+      disabled: "true"
+    vcluster:
+      image: rancher/k3s:v1.28.2-k3s1
+    storage:
+      size: 10Gi
+      className: shared-path-protected
