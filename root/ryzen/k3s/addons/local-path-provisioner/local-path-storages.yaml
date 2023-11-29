@@ -31,7 +31,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: local-path-config
-  namespace: local-path-storage
+  namespace: kube-system
 data:
   config.json: |-
     {
@@ -44,13 +44,9 @@ data:
       name: helper-pod
     spec:
       priorityClassName: system-node-critical
-      tolerations:
-        - key: node.kubernetes.io/disk-pressure
-          operator: Exists
-          effect: NoSchedule
       containers:
       - name: helper-pod
-        image: busybox
+        image: rancher/mirrored-library-busybox:1.36.1
         imagePullPolicy: IfNotPresent
   setup: |-
     #!/bin/sh
