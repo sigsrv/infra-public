@@ -117,6 +117,8 @@ def configure_k3s():
         "server",
         "--cluster-init",
         "--flannel-backend=wireguard-native",
+        "--node-taint",
+        "node-role.kubernetes.io/master=true:NoSchedule",
     )
 
     k3s_token = call(k3s_master_node, "cat", "/var/lib/rancher/k3s/server/node-token").strip()
@@ -128,6 +130,8 @@ def configure_k3s():
             "--flannel-backend=wireguard-native",
             "--server",
             "https://sigsrv-k3s-master-0.k3s.sigsrv.local:6443",
+            "--node-taint",
+            "node-role.kubernetes.io/master=true:NoSchedule",
             environment={
                 "K3S_TOKEN": k3s_token,
             }
@@ -151,21 +155,6 @@ def configure_k3s():
             environment={
                 "K3S_TOKEN": k3s_token,
             }
-        )
-
-
-def configure_kube_taint():
-    k3s_master_node = get_k3s_master_node()
-    for node in iter_k3s_master_nodes():
-        call(
-            k3s_master_node,
-            "k3s",
-            "kubectl",
-            "taint",
-            "nodes",
-            node.name,
-            "node-role.kubernetes.io/master=true:NoSchedule",
-            "--overwrite",
         )
 
 
@@ -323,7 +312,6 @@ def configure_volumes():
 def main():
     configure_k3s_install_script()
     configure_k3s()
-    configure_kube_taint()
     configure_kube_config()
     # configure_tailscale("up")
     configure_addons()
