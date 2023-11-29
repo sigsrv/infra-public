@@ -1,0 +1,2 @@
+sudo ufw allow in on sigsrv-k3s
+sudo ufw allow out on sigsrv-k3s

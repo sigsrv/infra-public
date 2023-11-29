@@ -26,8 +26,8 @@ locals {
 }
 
 resource "lxd_project" "this" {
-  name        = "sigsrv-microk8s"
-  description = "sigsrv-microk8s"
+  name        = "sigsrv-k3s"
+  description = "sigsrv-k3s"
 
   config = {
     "features.images"          = "true"
@@ -63,20 +63,20 @@ resource "lxd_cached_image" "ubuntu_jammy_vm" {
 }
 
 locals {
-  ipv4_address = "10.100.0.0/16"
-  ipv6_address = "fdec:100::0/64"
+  ipv4_address = "10.64.0.0/16"
+  ipv6_address = "fdec:64::0/64"
 
-  ipv4_1_address = "10.100.0.1/16"
-  ipv6_1_address = "fdec:100::1/64"
+  ipv4_1_address = "10.64.0.1/16"
+  ipv6_1_address = "fdec:64::1/64"
 }
 
 resource "lxd_network" "this" {
   project     = lxd_project.this.name
   name        = lxd_project.this.name
-  description = "sigsrv-microk8s"
+  description = "sigsrv-k3s"
 
   config = {
-    "dns.domain"   = "microk8s.sigsrv.local"
+    "dns.domain"   = "k3s.sigsrv.local"
     "ipv4.address" = local.ipv4_1_address
     "ipv4.nat"     = "true"
     "ipv6.address" = local.ipv6_1_address
@@ -87,7 +87,7 @@ resource "lxd_network" "this" {
 resource "lxd_profile" "volumes" {
   project     = lxd_project.this.name
   name        = "${lxd_project.this.name}-volumes"
-  description = "sigsrv-microk8s"
+  description = "sigsrv-k3s"
 
   device {
     name = "volumes"
@@ -103,7 +103,7 @@ resource "lxd_profile" "volumes" {
 resource "lxd_profile" "default" {
   project     = lxd_project.this.name
   name        = lxd_project.this.name
-  description = "sigsrv-microk8s"
+  description = "sigsrv-k3s"
 
   config = {
     "cloud-init.vendor-data" = format("#cloud-config\n%s", yamlencode(
@@ -153,6 +153,10 @@ resource "lxd_volume" "volumes" {
     "snapshots.expiry"   = "4w"
     "snapshots.schedule" = "@daily"
   }
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "lxd_instance" "tailscale" {
@@ -184,7 +188,7 @@ resource "lxd_instance" "tailscale" {
             "tailscale",
             "up",
             "--advertise-routes=${local.ipv4_address},${local.ipv6_address}",
-            "--advertise-tags=tag:sigsrv-microk8s"
+            "--advertise-tags=tag:sigsrv-k3s"
           ],
         ],
       }
@@ -217,20 +221,10 @@ resource "lxd_instance" "master" {
     memory = "4GiB"
   }
 
-  config = {
-    "cloud-init.user-data" = format("#cloud-config\n%s", yamlencode(
-      {
-        "snap" = {
-          "commands" = [
-            "snap install microk8s --classic",
-          ]
-        }
-      }
-    ))
-  }
+  config = {}
 
   lifecycle {
-    prevent_destroy = false
+    prevent_destroy = true
 
     ignore_changes = [
       image,
@@ -257,17 +251,7 @@ resource "lxd_instance" "worker" {
     memory = "8GiB"
   }
 
-  config = {
-    "cloud-init.user-data" = format("#cloud-config\n%s", yamlencode(
-      {
-        "snap" = {
-          "commands" = [
-            "snap install microk8s --classic",
-          ],
-        }
-      }
-    ))
-  }
+  config = {}
 
   lifecycle {
     ignore_changes = [
