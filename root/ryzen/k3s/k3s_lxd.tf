@@ -159,51 +159,6 @@ resource "lxd_volume" "volumes" {
   }
 }
 
-resource "lxd_instance" "tailscale" {
-  count   = 1
-  project = lxd_project.this.name
-  name    = "${lxd_project.this.name}-tailscale"
-  image   = lxd_cached_image.ubuntu_jammy_container.fingerprint
-  type    = "container"
-
-  profiles = [
-    lxd_profile.default.name,
-  ]
-
-  limits = {
-    cpu    = 2
-    memory = "2GiB"
-  }
-
-  config = {
-    "cloud-init.user-data" = format("#cloud-config\n%s", yamlencode(
-      {
-        "runcmd" = [
-          ["sh", "-c", "curl -fsSL https://tailscale.com/install.sh | sh"],
-          [
-            "sh", "-c",
-            "echo 'net.ipv4.ip_forward = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf && echo 'net.ipv6.conf.all.forwarding = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf && sudo sysctl -p /etc/sysctl.d/99-tailscale.conf"
-          ],
-          [
-            "tailscale",
-            "up",
-            "--advertise-routes=${local.ipv4_address},${local.ipv6_address}",
-            "--advertise-tags=tag:sigsrv-k3s"
-          ],
-        ],
-      }
-    ))
-  }
-
-  lifecycle {
-    ignore_changes = [
-      image,
-      config["cloud-init.user-data"],
-      device,
-    ]
-  }
-}
-
 resource "lxd_instance" "master" {
   count   = 3
   project = lxd_project.this.name
