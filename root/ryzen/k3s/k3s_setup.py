@@ -111,13 +111,13 @@ def configure_k3s_install_script():
 
 def configure_k3s():
     k3s_master_node = get_k3s_master_node()
-    # call(
-    #     k3s_master_node,
-    #     "/root/k3s-install.sh",
-    #     "server",
-    #     "--cluster-init",
-    #     "--flannel-backend=wireguard-native",
-    # )
+    call(
+        k3s_master_node,
+        "/root/k3s-install.sh",
+        "server",
+        "--cluster-init",
+        "--flannel-backend=wireguard-native",
+    )
 
     k3s_token = call(k3s_master_node, "cat", "/var/lib/rancher/k3s/server/node-token").strip()
     for node in iter_k3s_master_nodes(ship_first=True):
@@ -321,13 +321,13 @@ def configure_volumes():
 
 
 def main():
-    # configure_k3s_install_script()
-    # configure_k3s()
-    # configure_kube_taint()
+    configure_k3s_install_script()
+    configure_k3s()
+    configure_kube_taint()
     configure_kube_config()
     # configure_tailscale("up")
-    # configure_addons()
-    # configure_volumes()
+    configure_addons()
+    configure_volumes()
 
 
 if __name__ == "__main__":
