@@ -1,0 +1,39 @@
+kind: DatadogAgent
+apiVersion: datadoghq.com/v2alpha1
+metadata:
+  name: datadog
+spec:
+  global:
+    clusterName: sigsrv-k3s
+    site: ap1.datadoghq.com
+    credentials:
+      apiSecret:
+        secretName: datadog-secret
+        keyName: api-key
+      appSecret:
+        secretName: datadog-secret
+        keyName: app-key
+  features:
+    clusterChecks:
+      enabled: true
+      useClusterChecksRunners: true
+    liveContainerCollection:
+      enabled: true
+    liveProcessCollection:
+      enabled: true
+    orchestratorExplorer:
+      enabled: true
+  override:
+    clusterAgent:
+      image:
+        name: gcr.io/datadoghq/cluster-agent:latest
+    nodeAgent:
+      image:
+        name: gcr.io/datadoghq/agent:latest
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
