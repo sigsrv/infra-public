@@ -133,8 +133,6 @@ spec:
               cpu: 500m
               memory: 100Mi
           env:
-            - name: OPERATOR_HOSTNAME
-              value: tailscale-operator
             - name: OPERATOR_SECRET
               value: operator
             - name: OPERATOR_LOGGING
@@ -149,13 +147,24 @@ spec:
               value: /oauth/client_secret
             - name: PROXY_IMAGE
               value: tailscale/tailscale:unstable
-            - name: PROXY_TAGS
-              value: tag:k8s
             - name: APISERVER_PROXY
               value: "false"
             - name: PROXY_FIREWALL_MODE
               value: auto
+          envFrom:
+            - configMapRef:
+                name: tailscale-operator
           volumeMounts:
           - name: oauth
             mountPath: /oauth
             readOnly: true
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tailscale-operator
+  namespace: tailscale
+data:
+  OPERATOR_HOSTNAME: "sigsrv-k3s-tailscale-operator"
+  OPERATOR_INITIAL_TAGS: "tag:sigsrv-k3s-tailscale-operator"
+  PROXY_TAGS: "tag:sigsrv-k3s-tailscale-service"
