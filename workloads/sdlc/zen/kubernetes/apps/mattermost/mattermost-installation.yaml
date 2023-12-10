@@ -1,0 +1,17 @@
+apiVersion: installation.mattermost.com/v1beta1
+kind: Mattermost
+metadata:
+  name: mattermost
+  namespace: mattermost
+spec:
+  size: 100users
+  version: "9.2.3"
+  ingress:
+    enabled: false
+  licenseSecret: ""
+  database:
+    external:
+      secret: mattermost-db-conf
+  fileStore:
+    externalVolume:
+      volumeClaimName: mattermost-pvc
