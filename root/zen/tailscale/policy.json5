@@ -1,0 +1,201 @@
+{
+	"groups": {
+		"group:ecmaxp": ["ecmaxp@ecmaxp.kr"],
+		// shared
+		"group:myang2":   ["ecmaxp@ecmaxp.kr", "3992aszx@gmail.com"],
+		"group:jungooji": ["ecmaxp@ecmaxp.kr", "zzzz465@github"],
+	},
+	"tagOwners": {
+		"tag:ecmaxp-nas":     ["group:ecmaxp"],
+		"tag:sigsrv":         ["group:ecmaxp"],
+		"tag:sigsrv-nas":     ["group:ecmaxp"],
+		"tag:sigsrv-dropbox": ["group:ecmaxp"],
+		"tag:sigsrv-k3s":     ["group:ecmaxp"],
+		"tag:sigsrv-dev":     ["group:ecmaxp"],
+		// https://tailscale.com/kb/1236/kubernetes-operator/
+		"tag:sigsrv-k3s-tailscale-operator":  [],
+		"tag:sigsrv-k3s-tailscale-service":   ["tag:sigsrv-k3s-tailscale-operator"],
+		"tag:sigsrv-sdlc-tailscale-operator": [],
+		"tag:sigsrv-sdlc-tailscale-service":  ["tag:sigsrv-sdlc-tailscale-operator"],
+		"tag:sigsrv-prod-tailscale-operator": [],
+		"tag:sigsrv-prod-tailscale-service":  ["tag:sigsrv-prod-tailscale-operator"],
+		// shared
+		"tag:jungooji": ["group:jungooji"],
+		"tag:myang2":   ["group:myang2"],
+	},
+	"hosts": {
+		"sigsrv.deer-neon.ts.net": "100.111.208.135",
+		"ipv4.k3s.sigsrv.local":   "10.64.0.0/16",
+		"ipv6.k3s.sigsrv.local":   "fdec:64::0/64",
+		// shared
+		"myang2.deer-neon.ts.net":     "100.75.69.166",
+		"myang2-com.deer-neon.ts.net": "100.127.68.99",
+		"jungooji.deer-neon.ts.net":   "100.103.205.6",
+	},
+	"acls": [
+		// sigsrv
+		{
+			"action": "accept",
+			"src":    ["group:ecmaxp"],
+			"dst": [
+				"tag:sigsrv:22", // SSH
+				"tag:sigsrv:8443,8444", // LXC
+			],
+		},
+		// sigsrv NAS
+		{
+			"action": "accept",
+			"src":    ["group:ecmaxp"],
+			"dst": [
+				"tag:sigsrv-nas:22", // SSH
+				"tag:sigsrv-dropbox:22", // SSH
+				"tag:sigsrv-nas:548", // afp
+				"tag:ecmaxp-nas:10000", // Synology
+			],
+		},
+		// sigsrv-k3s kubectl
+		{
+			"action": "accept",
+			"src":    ["group:ecmaxp"],
+			"dst": [
+				"ipv4.k3s.sigsrv.local:6443",
+				"ipv6.k3s.sigsrv.local:6443",
+			],
+		},
+		// sigsrv-k3s ingress
+		{
+			"action": "accept",
+			"src":    ["group:ecmaxp", "tag:sigsrv"],
+			"dst": [
+				"tag:sigsrv-k3s-tailscale-service:443",
+				"tag:sigsrv-sdlc-tailscale-service:443",
+				"tag:sigsrv-prod-tailscale-service:443",
+			],
+		},
+		// sigsrv dev
+		{
+			"action": "accept",
+			"src":    ["group:ecmaxp"],
+			"dst":    ["tag:sigsrv-dev:*"],
+		},
+		// myang2
+		{
+			"action": "accept",
+			"src":    ["group:myang2", "tag:myang2"],
+			"dst": [
+				"tag:myang2:22", // SSH
+				"tag:myang2:6443", // k3s kubectl
+			],
+		},
+		// jungooji
+		{
+			"action": "accept",
+			"src":    ["group:jungooji", "tag:jungooji"],
+			"dst":    ["tag:jungooji:22"],
+		},
+	],
+	"ssh": [
+		// https://tailscale.com/kb/1193/tailscale-ssh/
+		{
+			"action": "check",
+			"src":    ["autogroup:member"],
+			"dst":    ["autogroup:self"],
+			"users":  ["autogroup:nonroot"],
+		},
+		// sigsrv
+		{
+			"action": "check",
+			"src":    ["group:ecmaxp"],
+			"dst":    ["tag:sigsrv"],
+			"users":  ["autogroup:nonroot"],
+		},
+		// sigsrv NAS
+		{
+			"action": "check",
+			"src":    ["group:ecmaxp"],
+			"dst": [
+				"tag:sigsrv-nas",
+				"tag:sigsrv-dropbox",
+			],
+			"users": ["autogroup:nonroot"],
+		},
+		// sigsrv-dev
+		{
+			"action": "check",
+			"src":    ["group:ecmaxp"],
+			"dst":    ["tag:sigsrv-dev"],
+			"users":  ["root", "autogroup:nonroot"],
+		},
+		// myang2
+		{
+			"action": "check",
+			"src":    ["group:myang2"],
+			"dst":    ["tag:myang2"],
+			"users":  ["autogroup:nonroot"],
+		},
+		// jungooji
+		{
+			"action": "check",
+			"src":    ["group:jungooji"],
+			"dst":    ["tag:jungooji"],
+			"users":  ["autogroup:nonroot"],
+		},
+	],
+	"nodeAttrs": [
+		{
+			// https://tailscale.com/kb/1223/tailscale-funnel/
+			"target": ["autogroup:member"],
+			"attr":   ["funnel"],
+		},
+	],
+	"derpMap": {
+		"Regions": {
+			"900": {
+				"RegionID":   900,
+				"RegionCode": "sigsrv",
+				"Nodes": [
+					{
+						"Name":     "sigsrv-public",
+						"RegionID": 900,
+						"HostName": "derp.sigsrv.net",
+					},
+					{
+						"Name":     "sigsrv-private",
+						"RegionID": 900,
+						"HostName": "derp.sigsrv.net",
+						"IPv4":     "10.10.10.10",
+					},
+					{
+						"Name":     "sigsrv-lan",
+						"RegionID": 900,
+						"HostName": "derp.sigsrv.net",
+						"IPv4":     "192.168.200.1",
+					},
+				],
+			},
+		},
+	},
+	"tests": [
+		{
+			"src": "ecmaxp@ecmaxp.kr",
+			"accept": [
+				"sigsrv.deer-neon.ts.net:22",
+				"sigsrv.deer-neon.ts.net:8443", // LXC
+			],
+		},
+		// shared
+		{
+			"src": "zzzz465@github",
+			"accept": [
+				"jungooji.deer-neon.ts.net:22",
+			],
+		},
+		{
+			"src": "3992aszx@gmail.com",
+			"accept": [
+				"myang2.deer-neon.ts.net:22",
+				"myang2-com.deer-neon.ts.net:22",
+			],
+		},
+	],
+}
