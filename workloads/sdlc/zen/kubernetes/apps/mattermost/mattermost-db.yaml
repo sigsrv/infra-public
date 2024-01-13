@@ -3,7 +3,7 @@ kind: "postgresql"
 
 metadata:
   name: "mattermost-db"
-  namespace: mattermost-sdlc
+  namespace: mattermost
   labels:
     team: acid
 
