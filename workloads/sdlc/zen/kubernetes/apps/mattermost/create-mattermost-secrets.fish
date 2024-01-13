@@ -1,7 +1,7 @@
 #!/usr/bin/env fish
 
-set DATABASE_KUBE_CONTEXT sigsrv-sdlc
-set DATABASE_KUBE_NAMESPACE mattermost
+set DATABASE_KUBE_CONTEXT k3s
+set DATABASE_KUBE_NAMESPACE mattermost-sdlc
 set DATABASE_KUBE_NAME mattermost-db
 set DATABASE_HOST $DATABASE_KUBE_NAME.$DATABASE_KUBE_NAMESPACE.svc.cluster.local
 set DATABASE_PORT 5432

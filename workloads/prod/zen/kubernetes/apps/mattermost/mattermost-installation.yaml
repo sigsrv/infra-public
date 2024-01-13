@@ -2,7 +2,7 @@ apiVersion: installation.mattermost.com/v1beta1
 kind: Mattermost
 metadata:
   name: mattermost
-  namespace: mattermost
+  namespace: mattermost-prod
 spec:
   size: 100users
   version: "9.2.3"
