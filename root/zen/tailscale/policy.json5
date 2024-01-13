@@ -2,23 +2,28 @@
 	"groups": {
 		"group:ecmaxp": ["ecmaxp@ecmaxp.kr"],
 		// shared
-		"group:myang2":   ["ecmaxp@ecmaxp.kr", "3992aszx@gmail.com"],
-		"group:jungooji": ["ecmaxp@ecmaxp.kr", "zzzz465@github"],
+		"group:myang2": [
+			"ecmaxp@ecmaxp.kr",
+			"3992aszx@gmail.com",
+			"zzzz465@github",
+			"chj990707@gmail.com",
+		],
+		"group:jungooji": [
+			"ecmaxp@ecmaxp.kr",
+			"zzzz465@github",
+		],
 	},
 	"tagOwners": {
 		"tag:ecmaxp-nas":     ["group:ecmaxp"],
 		"tag:sigsrv":         ["group:ecmaxp"],
 		"tag:sigsrv-nas":     ["group:ecmaxp"],
 		"tag:sigsrv-dropbox": ["group:ecmaxp"],
+		"tag:sigsrv-device":  ["group:ecmaxp"],
 		"tag:sigsrv-k3s":     ["group:ecmaxp"],
 		"tag:sigsrv-dev":     ["group:ecmaxp"],
 		// https://tailscale.com/kb/1236/kubernetes-operator/
-		"tag:sigsrv-k3s-tailscale-operator":  [],
-		"tag:sigsrv-k3s-tailscale-service":   ["tag:sigsrv-k3s-tailscale-operator"],
-		"tag:sigsrv-sdlc-tailscale-operator": [],
-		"tag:sigsrv-sdlc-tailscale-service":  ["tag:sigsrv-sdlc-tailscale-operator"],
-		"tag:sigsrv-prod-tailscale-operator": [],
-		"tag:sigsrv-prod-tailscale-service":  ["tag:sigsrv-prod-tailscale-operator"],
+		"tag:sigsrv-k3s-tailscale-operator": [],
+		"tag:sigsrv-k3s-tailscale-service":  ["tag:sigsrv-k3s-tailscale-operator"],
 		// shared
 		"tag:jungooji": ["group:jungooji"],
 		"tag:myang2":   ["group:myang2"],
@@ -66,11 +71,13 @@
 		{
 			"action": "accept",
 			"src":    ["group:ecmaxp", "tag:sigsrv"],
-			"dst": [
-				"tag:sigsrv-k3s-tailscale-service:443",
-				"tag:sigsrv-sdlc-tailscale-service:443",
-				"tag:sigsrv-prod-tailscale-service:443",
-			],
+			"dst":    ["tag:sigsrv-k3s-tailscale-service:443"],
+		},
+		// sigsrv device
+		{
+			"action": "accept",
+			"src":    ["tag:sigsrv-nas"],
+			"dst":    ["tag:sigsrv-device:22"],
 		},
 		// sigsrv dev
 		{
@@ -119,6 +126,13 @@
 			],
 			"users": ["autogroup:nonroot"],
 		},
+		// sigsrv device
+		{
+			"action": "accept",
+			"src":    ["tag:sigsrv-nas"],
+			"dst":    ["tag:sigsrv-device"],
+			"users":  ["root"],
+		},
 		// sigsrv-dev
 		{
 			"action": "check",
@@ -149,6 +163,7 @@
 		},
 	],
 	"derpMap": {
+		/*
 		"Regions": {
 			"900": {
 				"RegionID":   900,
@@ -174,6 +189,7 @@
 				],
 			},
 		},
+		*/
 	},
 	"tests": [
 		{
