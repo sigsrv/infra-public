@@ -8,7 +8,7 @@ kubectl exec -n vault vault-0 -- \
     -key-threshold=1
 
 for i in (seq 0 2)
-    kubectl exec --context k3s -n vault vault-$i -- \
+    kubectl exec --context sigsrv-k3s -n vault vault-$i -- \
         vault operator unseal \
         (op read "op://Personal/sigsrv-k3s-vault/encrypted/unseal-key" | base64 -d | gpg --decrypt)
 end

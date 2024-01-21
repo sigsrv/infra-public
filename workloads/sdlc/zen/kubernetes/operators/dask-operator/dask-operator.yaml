@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dask-operator
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: dask-operator
+  namespace: helm-charts-sdlc
+spec:
+  repo: https://helm.dask.org
+  chart: dask-kubernetes-operator
+  targetNamespace: dask-operator
+  # valuesContent: |-

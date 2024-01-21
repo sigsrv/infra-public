@@ -7,18 +7,17 @@ spec:
   repo: https://helm.releases.hashicorp.com
   chart: vault
   targetNamespace: vault
-  set:
-    server.dataStorage.storageClass: shared-path-protected
-    server.auditStorage.storageClass: shared-path-protected
   # https://github.com/hashicorp/vault-helm/blob/main/values.yaml
   valuesContent: |-
     server:
+      # logLevel: "debug"
       affinity: ""
       ha:
         enabled: true
         raft:
           enabled: true
           config: |-
+            plugin_directory = "/usr/local/libexec/vault"
             ui = true
 
             listener "tcp" {
@@ -33,6 +32,39 @@ spec:
             }
 
             service_registration "kubernetes" {}
+      dataStorage:
+        storageClass: shared-path-protected
+      auditStorage:
+        storageClass: shared-path-protected
+      volumes:
+        - name: plugins
+          emptyDir: {}
+      volumeMounts:
+        - mountPath: /usr/local/libexec/vault
+          name: plugins
+          readOnly: true
+      extraInitContainers:
+        - name: vault-plugin-op-connect-init
+          image: alpine:3
+          command: [ "/bin/sh", "-c" ]
+          args:
+            - |
+              set -euxo pipefail
+              wget https://github.com/1Password/vault-plugin-secrets-onepassword/releases/download/v${VAULT_PLUGIN_OP_CONNECT_VERSION}/vault-plugin-secrets-onepassword_${VAULT_PLUGIN_OP_CONNECT_VERSION}_${VAULT_PLUGIN_OP_CONNECT_ARCH}.zip -O /tmp/vault-plugin-secrets-onepassword.zip
+              unzip /tmp/vault-plugin-secrets-onepassword.zip -d /tmp
+              chmod +x /tmp/vault-plugin-secrets-onepassword_v${VAULT_PLUGIN_OP_CONNECT_VERSION}
+              mv /tmp/vault-plugin-secrets-onepassword_v${VAULT_PLUGIN_OP_CONNECT_VERSION} $VAULT_PLUGIN_DIR/op-connect
+          env:
+            # https://github.com/1Password/vault-plugin-secrets-onepassword/releases
+            - name: VAULT_PLUGIN_OP_CONNECT_ARCH
+              value: "linux_amd64"
+            - name: VAULT_PLUGIN_OP_CONNECT_VERSION
+              value: "1.1.0"
+            - name: VAULT_PLUGIN_DIR
+              value: /usr/local/libexec/vault
+          volumeMounts:
+            - name: plugins
+              mountPath: /usr/local/libexec/vault
 #      extraSecretEnvironmentVars:
 #      - envName: CONSUL_HTTP_TOKEN
 #        secretName: sigsrv-infra-microk8s-worker-consul-agent

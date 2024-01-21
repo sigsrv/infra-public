@@ -33,4 +33,4 @@ spec:
                   number: 8065
   tls:
     - hosts:
-        - mattermost-prod
+        - mattermost

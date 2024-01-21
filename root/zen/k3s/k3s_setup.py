@@ -311,13 +311,26 @@ def configure_volumes():
     call(k3s_master_node, "touch", "/mnt/volumes/mounted")
 
 
+def configure_registries():
+    content = """
+mirrors:
+  registry.deer-neon.ts.net:
+    endpoint:
+      - "https://registry.deer-neon.ts.net"
+""".strip() + "\n"
+
+    for node in iter_k3s_master_nodes():
+        node.files.put("/etc/rancher/k3s/registries.yaml", content.encode("utf-8"))
+
+
 def main():
     configure_k3s_install_script()
     configure_k3s()
     configure_kube_config()
-    # configure_tailscale("up")
+    configure_tailscale("up")
     configure_addons()
     configure_volumes()
+    configure_registries()
 
 
 if __name__ == "__main__":
