@@ -1,2 +1,4 @@
-sudo ufw allow in on sigsrv-k3s
-sudo ufw allow out on sigsrv-k3s
+sudo ufw allow in on sigsrv-sdlc
+sudo ufw allow out on sigsrv-sdlc
+sudo ufw route allow in on sigsrv-sdlc out on eno1
+sudo ufw route allow in on enx00e04c680005 out on sigsrv-sdlc

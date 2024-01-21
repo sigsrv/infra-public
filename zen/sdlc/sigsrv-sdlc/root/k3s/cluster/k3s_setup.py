@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import shlex
 import shutil
 import ssl
 import subprocess
@@ -7,29 +8,31 @@ import warnings
 from builtins import DeprecationWarning
 from copy import deepcopy
 from pathlib import Path
-import shlex
+from typing import Iterator
 
-from typing import Literal, Iterator
-
+import pylxd.exceptions
 import pylxd.models
 import requests
 import yaml
 from pylxd.client import CERTS_PATH
+
+LXD_PROJECT_NAME = "sigsrv-sdlc"
+K3S_CLUSTER_NODE_NAME = "sigsrv-sdlc-k3s"
+K3S_CLUSTER_NAME = "sigsrv-sdlc"
 
 # TODO: remove this when ws4py is fixed
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", DeprecationWarning)
     ssl.wrap_socket = ssl.SSLContext().wrap_socket
 
-
 client = pylxd.Client(
     endpoint="https://sigsrv:8443",
     verify=os.path.join(CERTS_PATH, "servercerts/sigsrv.crt"),
-    project="sigsrv-k3s",
+    project=LXD_PROJECT_NAME,
 )
 
 
-def shell(instance, *args):
+def shell(instance, *args, environment=None):
     print(f"{instance.name}:", *args)
     subprocess.check_call(
         [
@@ -38,6 +41,10 @@ def shell(instance, *args):
             "--project",
             client.project,
             instance.name,
+            *[
+                f"--env={key}={value}"
+                for key, value in (environment or {}).items()
+            ],
             "--",
             *args,
         ]
@@ -70,7 +77,7 @@ for node in client.instances.all():
 
 
 def get_k3s_master_node() -> pylxd.models.Instance:
-    return NODES["sigsrv-k3s-master-0"]
+    return NODES[f"{K3S_CLUSTER_NODE_NAME}-master-0"]
 
 
 def iter_k3s_master_nodes(ship_first=False) -> Iterator[pylxd.models.Instance]:
@@ -78,12 +85,13 @@ def iter_k3s_master_nodes(ship_first=False) -> Iterator[pylxd.models.Instance]:
         if i == 0 and ship_first:
             continue
 
-        yield NODES[f"sigsrv-k3s-master-{i}"]
+        yield NODES[f"{K3S_CLUSTER_NODE_NAME}-master-{i}"]
 
 
 def iter_k3s_worker_nodes() -> Iterator[pylxd.models.Instance]:
     for i in range(0, 5):
-        yield NODES[f"sigsrv-k3s-worker-{i}"]
+        yield NODES[f"{K3S_CLUSTER_NODE_NAME}-worker-{i}"]
+
 
 def iter_k3s_nodes(*, ship_first=False):
     yield from iter_k3s_master_nodes(ship_first=ship_first)
@@ -111,115 +119,61 @@ def configure_k3s_install_script():
 
 def configure_k3s():
     k3s_master_node = get_k3s_master_node()
-    call(
-        k3s_master_node,
-        "/root/k3s-install.sh",
-        "server",
-        "--cluster-init",
-        "--secrets-encryption",
-        "--flannel-backend=wireguard-native",
-        "--node-taint",
-        "node-role.kubernetes.io/master=true:NoSchedule",
-    )
+
+    call(k3s_master_node, "mkdir", "-p", "/etc/rancher/k3s")
+    k3s_master_node.files.put("/etc/rancher/k3s/config.yaml", yaml.dump(
+        {
+            "cluster-init": True,
+            "secrets-encryption": True,
+            "flannel-backend": "wireguard-native",
+            "node-taint": ["node-role.kubernetes.io/master=true:NoSchedule"],
+        }
+    ))
+
+    try:
+        shell(k3s_master_node, "/root/k3s-install.sh", "server")
+    except subprocess.CalledProcessError:
+        shell(k3s_master_node, "journalctl", "-xeu", "k3s.service")
+        raise
 
     k3s_token = call(k3s_master_node, "cat", "/var/lib/rancher/k3s/server/node-token").strip()
     for node in iter_k3s_master_nodes(ship_first=True):
-        call(
-            node,
-            "/root/k3s-install.sh",
-            "server",
-            "--secrets-encryption",
-            "--flannel-backend=wireguard-native",
-            "--server",
-            "https://sigsrv-k3s-master-0.k3s.sigsrv.local:6443",
-            "--node-taint",
-            "node-role.kubernetes.io/master=true:NoSchedule",
-            environment={
-                "K3S_TOKEN": k3s_token,
-            }
+        call(node, "mkdir", "-p", "/etc/rancher/k3s")
+        node.files.put(
+            "/etc/rancher/k3s/config.yaml",
+            yaml.dump(
+                {
+                    "secrets-encryption": True,
+                    "flannel-backend": "wireguard-native",
+                    "server": f"https://{K3S_CLUSTER_NODE_NAME}-master-0:6443",
+                    "node-taint": ["node-role.kubernetes.io/master=true:NoSchedule"],
+                }
+            )
         )
+
+        try:
+            shell(node, "/root/k3s-install.sh", "server", environment={"K3S_TOKEN": k3s_token})
+        except subprocess.CalledProcessError:
+            shell(node, "journalctl", "-xeu", "k3s.service")
+            raise
 
     for node in iter_k3s_worker_nodes():
-        # try:
-        #     call(
-        #         node,
-        #         "/usr/local/bin/k3s-uninstall.sh"
-        #     )
-        # except RuntimeError:
-        #     pass
-
-        call(
-            node,
-            "/root/k3s-install.sh",
-            "agent",
-            "--server",
-            "https://sigsrv-k3s-master-0.k3s.sigsrv.local:6443",
-            environment={
-                "K3S_TOKEN": k3s_token,
-            }
+        call(node, "mkdir", "-p", "/etc/rancher/k3s")
+        node.files.put(
+            "/etc/rancher/k3s/config.yaml",
+            yaml.dump(
+                {
+                    "server": f"https://{K3S_CLUSTER_NODE_NAME}-master-0:6443",
+                }
+            )
         )
 
+        try:
+            shell(node, "/root/k3s-install.sh", "agent", environment={"K3S_TOKEN": k3s_token})
+        except subprocess.CalledProcessError:
+            shell(node, "journalctl", "-xeu", "k3s.service")
+            raise
 
-def configure_tailscale(mode: Literal["init", "up", "down"]):
-    for node in iter_k3s_nodes():
-        if mode == "init":
-            call(node, "sh", "-c", "curl -fsSL https://tailscale.com/install.sh | sh")
-            call(node, "sh", "-c", (
-                "echo 'net.ipv4.ip_forward = 1'"
-                " | sudo tee -a /etc/sysctl.d/99-tailscale.conf"
-                " && echo 'net.ipv6.conf.all.forwarding = 1'"
-                " | sudo tee -a /etc/sysctl.d/99-tailscale.conf"
-                " && sudo sysctl -p /etc/sysctl.d/99-tailscale.conf"
-            ))
-
-            # try:
-            #     sysctl_conf = node.files.get("/etc/sysctl.d/99-tailscale.conf")
-            # except pylxd.exceptions.NotFound:
-
-            for line in [
-                b"net.ipv4.ip_forward = 1",
-                b"net.ipv6.conf.all.forwarding = 1",
-            ]:
-                pass  # if line not in sysctl_conf:
-
-            call(node,
-                 "tailscale",
-                 "up",
-                 "--authkey=${var.ts_authkey}",
-                 "--ssh",
-                 "--advertise-tags=tag:local-sigsrv-k3s-master"
-             )
-        elif mode == "up":
-            try:
-                call(node, "tailscale", "status")
-            except RuntimeError:
-                shell(node, "tailscale", "up")
-        elif mode == "down":
-            shell(node, "tailscale", "down")
-
-
-def configure_addons():
-    addons = [
-        # core default
-        # "dns",
-        # "ha-cluster",
-        # "helm",
-        # "helm3",
-        # core
-        "cert-manager",
-        "dashboard",
-        "ingress",
-        "metrics-server",
-        "observability",
-        "rbac",
-        # "registry",
-        # community
-        # "community",
-        "argocd",
-        "istio",
-        "jaeger",
-        "knative",
-    ]
 
 class KubeConfigItems:
     def __init__(self, kube_config: "KubeConfig", section_name: str):
@@ -290,46 +244,38 @@ def configure_kube_config():
     remote_cluster = remote.clusters[remote_context["context"]["cluster"]]
     remote_user = remote.users[remote_context["context"]["user"]]
 
-    local.contexts["k3s"] = {
+    local.contexts[K3S_CLUSTER_NAME] = {
         "context": {
-            "cluster": "k3s",
-            "user": "k3s",
+            "cluster": K3S_CLUSTER_NAME,
+            "user": K3S_CLUSTER_NAME,
         }
     }
-    local.clusters["k3s"] = remote_cluster
-    local.clusters["k3s"]["cluster"]["server"] = "https://sigsrv-k3s-master-0.k3s.sigsrv.local:6443"
-    local.users["k3s"] = remote_user
+    local.clusters[K3S_CLUSTER_NAME] = remote_cluster
+    local.clusters[K3S_CLUSTER_NAME]["cluster"][
+        "server"] = f"https://{K3S_CLUSTER_NODE_NAME}-master-0:6443"
+    local.users[K3S_CLUSTER_NAME] = remote_user
 
     with local_kube_config_path.open("w") as f:
         yaml.safe_dump(local.kube_config, f)
 
 
-def configure_volumes():
-    k3s_master_node = get_k3s_master_node()
-    call(k3s_master_node, "stat", "/mnt/volumes")
-    call(k3s_master_node, "mountpoint", "/mnt/volumes")
-    call(k3s_master_node, "touch", "/mnt/volumes/mounted")
-
-
 def configure_registries():
-    content = """
-mirrors:
-  registry.deer-neon.ts.net:
-    endpoint:
-      - "https://registry.deer-neon.ts.net"
-""".strip() + "\n"
-
     for node in iter_k3s_master_nodes():
-        node.files.put("/etc/rancher/k3s/registries.yaml", content.encode("utf-8"))
+        node.files.put("/etc/rancher/k3s/registries.yaml", yaml.dump(
+            {
+                "mirrors": {
+                    f"{K3S_CLUSTER_NAME}.deer-neon.ts.net": {
+                        "endpoint": [f"https://{K3S_CLUSTER_NAME}.deer-neon.ts.net"]
+                    }
+                }
+            }
+        ))
 
 
 def main():
     configure_k3s_install_script()
     configure_k3s()
     configure_kube_config()
-    configure_tailscale("up")
-    configure_addons()
-    configure_volumes()
     configure_registries()
 
 
