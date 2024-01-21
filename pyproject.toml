@@ -9,9 +9,11 @@ classifiers = ["Private :: Do not Upload"]
 [tool.poetry.dependencies]
 python = "^3.12"
 boto3 = "^1.28.58"
-kubernetes = "^28.1.0"
+kubernetes = "^29.0.0"
 pylxd = "^2.3.1"
-setuptools = "^68.2.2"
+setuptools = "^69.0.3"
+cdk8s = "^2.68.27"
+cdk8s-plus-27 = "^2.7.73"
 
 [tool.poetry.group.dev.dependencies]
 boto3-stubs-lite = {extras = ["all"], version = "^1.28.58"}
