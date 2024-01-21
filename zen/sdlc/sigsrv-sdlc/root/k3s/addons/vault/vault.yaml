@@ -1,8 +1,13 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vault
+---
 apiVersion: helm.cattle.io/v1
 kind: HelmChart
 metadata:
   name: vault
-  namespace: helm-charts
+  namespace: vault
 spec:
   repo: https://helm.releases.hashicorp.com
   chart: vault
@@ -16,6 +21,7 @@ spec:
         enabled: true
         raft:
           enabled: true
+          setNodeId: true
           config: |-
             plugin_directory = "/usr/local/libexec/vault"
             ui = true
@@ -26,16 +32,15 @@ spec:
               cluster_address = "[::]:8201"
             }
 
-            storage "consul" {
-              address = "consul-server:8500"
-              path = "vault/"
+            storage "raft" {
+              path = "/vault/data"
             }
 
             service_registration "kubernetes" {}
       dataStorage:
-        storageClass: shared-path-protected
+        storageClass: local-path-protected
       auditStorage:
-        storageClass: shared-path-protected
+        storageClass: local-path-protected
       volumes:
         - name: plugins
           emptyDir: {}
@@ -75,7 +80,7 @@ apiVersion: helm.cattle.io/v1
 kind: HelmChart
 metadata:
   name: vault-secrets-operator
-  namespace: helm-charts
+  namespace: vault
 spec:
   repo: https://helm.releases.hashicorp.com
   chart: vault-secrets-operator
@@ -93,4 +98,46 @@ spec:
             - name: manager
               args:
               - "--client-cache-persistence-model=direct-encrypted"
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vault
+  namespace: vault
+spec:
+  ingressClassName: tailscale
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: vault
+                port:
+                  number: 8200
+  tls:
+    - hosts:
+        - vault-sdlc
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vault-active
+  namespace: vault
+spec:
+  ingressClassName: tailscale
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: vault-active
+                port:
+                  number: 8200
+  tls:
+    - hosts:
+        - vault-active-sdlc
 ---

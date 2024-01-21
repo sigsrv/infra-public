@@ -1,0 +1,38 @@
+kubectl port-forward -n vault vault-0 8200
+export VAULT_ADDR=http://127.0.0.1:8200
+
+for public_key in 715FE376816038A7 685C7B17D23F1A3E BC346E1E0C2D56CF
+    gpg --export --armor $public_key! > $public_key.pub
+end
+
+vault operator init \
+    -pgp-keys=685C7B17D23F1A3E.pub,715FE376816038A7.pub,BC346E1E0C2D56CF.pub \
+    -root-token-pgp-key=BC346E1E0C2D56CF.pub \
+    -key-shares=3 \
+    -key-threshold=2
+
+# pbpaste | base64 --decode | gpg --pinentry-mode cancel --list-packets
+# setup encrypted-unseal-keys to 1password vault
+
+set -l SELECTED_KEYS 1 2 3
+set -l ENCRYPTED_UNSEAL_KEY_NAMES A_YK_5C_13068969_715FE376816038A7 B_YK_5C_23768596_685C7B17D23F1A3E C_YK_5C_Nano_25551278_BC346E1E0C2D56CF
+set -l ENCRYPTED_UNSEAL_KEYS
+for encrypted_unseal_key_name in $ENCRYPTED_UNSEAL_KEY_NAMES
+    set -a ENCRYPTED_UNSEAL_KEYS (op read "op://sigsrv-sdlc/sigsrv-sdlc-vault/encrypted-unseal-keys/$encrypted_unseal_key_name")
+end
+
+set i 0
+for index in $SELECTED_KEYS
+    kubectl exec --context sigsrv-sdlc -n vault vault-$i -c vault -- \
+        vault operator unseal (echo $ENCRYPTED_UNSEAL_KEYS[$index] | base64 -d | gpg --decrypt)
+end
+
+kubectl exec -n vault vault-1 -- vault operator raft join http://vault-0.vault-internal:8200
+kubectl exec -n vault vault-2 -- vault operator raft join http://vault-0.vault-internal:8200
+
+for i in 1 2
+    for index in $SELECTED_KEYS
+        kubectl exec --context sigsrv-sdlc -n vault vault-$i -c vault -- \
+            vault operator unseal (echo $ENCRYPTED_UNSEAL_KEYS[$index] | base64 -d | gpg --decrypt)
+    end
+end
