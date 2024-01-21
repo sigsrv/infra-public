@@ -1,5 +1,5 @@
 #!/usr/bin/env fish
-set OP_DISCORD_GPT_BOT_ROOT_SECRET_PATH "op://Personal/sigsrv-prod-chatgpt-discord-bot-secrets"
+set OP_DISCORD_GPT_BOT_ROOT_SECRET_PATH "op://sigsrv-prod/sigsrv-prod-chatgpt-discord-bot-secrets"
 
 kubectl create ns --context sigsrv-prod chatgpt-discord-bot
 

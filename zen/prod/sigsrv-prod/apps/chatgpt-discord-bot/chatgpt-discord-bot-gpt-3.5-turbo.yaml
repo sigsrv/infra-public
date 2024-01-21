@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: chatgpt-discord-bot-gpt-3dot5-turbo
   namespace: chatgpt-discord-bot
@@ -7,6 +7,7 @@ metadata:
     app: chatgpt-discord-bot
     model: gpt-3.5-turbo
 spec:
+  serviceName: chatgpt-discord-bot-gpt-3dot5-turbo
   replicas: 1
   selector:
     matchLabels:
@@ -21,7 +22,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
         - name: chatgpt-discord-bot
-          image: registry.deer-neon.ts.net/chatgpt-discord-bot:latest
+          image: registry-prod.deer-neon.ts.net/chatgpt-discord-bot:latest
           imagePullPolicy: Always
           resources:
             requests:
@@ -61,6 +62,6 @@ data:
         "sync_commands_globally": true,
         "owner_guild_id": 494354954098835478,
         "owners": [264704516643880961],
-        "chatgpt_tokens_count": 2730911
+        "chatgpt_tokens_count": 0
     }
 ---
