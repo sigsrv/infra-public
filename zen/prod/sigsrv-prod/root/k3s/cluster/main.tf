@@ -2,13 +2,13 @@ terraform {
   required_providers {
     lxd = {
       source  = "terraform-lxd/lxd"
-      version = "1.10.2"
+      version = "2.0.0"
     }
   }
 }
 
 provider "lxd" {
-  lxd_remote {
+  remote {
     default = true
     name    = "sigsrv"
     scheme  = "https"

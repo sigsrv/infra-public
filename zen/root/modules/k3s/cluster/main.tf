@@ -2,7 +2,7 @@ terraform {
   required_providers {
     lxd = {
       source  = "terraform-lxd/lxd"
-      version = "1.10.2"
+      version = "2.0.0"
     }
   }
 }
@@ -23,8 +23,6 @@ resource "lxd_instance" "master" {
     cpu    = 2
     memory = "4GiB"
   }
-
-  config = {}
 
   lifecycle {
     prevent_destroy = false
