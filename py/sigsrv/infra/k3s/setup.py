@@ -334,17 +334,3 @@ def setup_k3s(
     configure_k3s(context)
     configure_kube_config(context)
     configure_registries(context)
-
-
-def main():
-    setup_k3s(
-        lxd_project_name="sigsrv-sdlc",
-        k3s_cluster_node_name="sigsrv-sdlc-k3s",
-        k3s_cluster_name="sigsrv-sdlc",
-        k3s_master_node_count=3,
-        k3s_worker_node_count=5,
-    )
-
-
-if __name__ == "__main__":
-    main()
