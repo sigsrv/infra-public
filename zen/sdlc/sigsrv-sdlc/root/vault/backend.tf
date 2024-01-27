@@ -1,5 +1,5 @@
 provider "vault" {
-  address = var.vault_address
+  address = "https://vault-sdlc.deer-neon.ts.net"
 }
 
 terraform {
