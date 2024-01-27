@@ -1,0 +1,11 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: trust-manager
+  namespace: cert-manager
+spec:
+  repo: https://charts.jetstack.io
+  chart: trust-manager
+  targetNamespace: cert-manager
+  # valuesContent: |-
+---
