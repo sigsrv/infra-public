@@ -21,6 +21,8 @@ spec:
       cpu: 1
       memory: 2Gi
   tlsEnabled: true
+  clientTLSSecret: cockroachdb-root
+  nodeTLSSecret: cockroachdb-node
   image:
     name: cockroachdb/cockroach:v23.1.11
   nodes: 3

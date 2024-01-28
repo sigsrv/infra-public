@@ -20,3 +20,8 @@ data "terraform_remote_state" "vault" {
     secret_suffix  = "vault"
   }
 }
+
+provider "kubernetes" {
+  config_path    = "~/.kube/config"
+  config_context = "sigsrv-sdlc"
+}
