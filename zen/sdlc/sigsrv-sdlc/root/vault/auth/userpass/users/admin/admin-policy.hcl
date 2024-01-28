@@ -57,3 +57,9 @@ path "sys/mounts"
 {
   capabilities = ["read"]
 }
+
+# List, create, update, delete, manage apps
+path "app/*"
+{
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}

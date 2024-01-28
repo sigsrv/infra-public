@@ -1,15 +1,19 @@
-output "internal_url" {
-  value = "http://vault-internal.vault.svc.cluster.local:8200"
+output "vault_public_url" {
+  value = local.vault_public_url
 }
 
-output "pki_vault_mount_type" {
-  value = module.vault-pki.vault_mount_type
+output "vault_internal_url" {
+  value = local.vault_internal_url
 }
 
-output "pki_vault_mount_path" {
+output "vault_root_pki_path" {
   value = module.vault-pki.vault_mount_path
 }
 
-output "pki_root_ca_cert_type" {
-  value = module.vault-pki-root-ca.cert_type
+output "vault_root_pki_ca_cert_type" {
+  value = module.vault-pki.vault_root_ca_cert_type
+}
+
+output "vault_root_pki_ca_cert_certificate" {
+  value = module.vault-pki.vault_root_ca_cert_certificate
 }

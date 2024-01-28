@@ -1,3 +1,11 @@
+# config
+locals {
+  kubernetes_cluster_name = "sigsrv-sdlc"
+
+  vault_public_url   = "https://vault-sdlc.deer-neon.ts.net"
+  vault_internal_url = "http://vault-internal.vault.svc.cluster.local:8200"
+}
+
 # vault auth
 module "vault-auth-kubernetes" {
   source = "./auth/kubernetes"
@@ -20,13 +28,11 @@ module "vault-kubernetes" {
 # vault pki
 module "vault-pki" {
   source = "./pki"
-}
 
-module "vault-pki-root-ca" {
-  source     = "./pki/root-ca"
-  depends_on = [module.vault-pki]
+  vault_public_url   = local.vault_public_url
+  vault_internal_url = local.vault_internal_url
 
-  pki_mount_path = module.vault-pki.vault_mount_path
+  kubernetes_cluster_name = local.kubernetes_cluster_name
 }
 
 # vault secret
