@@ -9,7 +9,7 @@ terraform {
 }
 
 module "dns" {
-  source = "../../../../../packages/aws/dns"
+  source = "../../../../shared/packages/aws/dns"
 }
 
 output "dns" {

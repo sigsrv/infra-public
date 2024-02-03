@@ -10,7 +10,7 @@ terraform {
 
 
 module "vpc" {
-  source = "../../../../../packages/aws/vpc"
+  source = "../../../../shared/packages/aws/vpc"
 
   vpc_cidr = local.config["vpc_cidr"]
   vpc_azs  = local.config["vpc_azs"]

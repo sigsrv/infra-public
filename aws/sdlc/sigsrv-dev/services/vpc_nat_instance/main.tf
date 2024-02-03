@@ -9,7 +9,7 @@ terraform {
 }
 
 module "vpc_nat_instance" {
-  source = "../../../../../packages/aws/vpc_nat_instance"
+  source = "../../../../shared/packages/aws/vpc_nat_instance"
 
   ec2_key_pair    = local.ec2_key_pair
   vpc             = local.vpc
