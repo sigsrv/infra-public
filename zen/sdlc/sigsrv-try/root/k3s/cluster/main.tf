@@ -18,7 +18,7 @@ provider "lxd" {
 }
 
 module "lxd_project" {
-  source = "../../../../../root/modules/lxd/project"
+  source = "../../../../../shared/modules/lxd/project"
 
   lxd_project_name         = "sigsrv-try"
   lxd_storage_pool_name    = "sigsrv-lxd"
@@ -27,7 +27,7 @@ module "lxd_project" {
 }
 
 module "k3s_cluster" {
-  source = "../../../../../root/modules/k3s/cluster"
+  source = "../../../../../shared/modules/k3s/cluster"
 
   lxd_project_name             = module.lxd_project.lxd_project_name
   lxd_storage_pool_name        = module.lxd_project.lxd_storage_pool_name
