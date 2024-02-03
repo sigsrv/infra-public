@@ -11,6 +11,9 @@ vault operator init \
     -key-shares=3 \
     -key-threshold=2
 
+kubectl exec -n vault vault-1 -c vault -- vault operator raft join http://vault-0.vault-internal:8200
+kubectl exec -n vault vault-2 -c vault -- vault operator raft join http://vault-0.vault-internal:8200
+
 # pbpaste | base64 --decode | gpg --pinentry-mode cancel --list-packets
 # setup encrypted-unseal-keys to 1password vault
 
