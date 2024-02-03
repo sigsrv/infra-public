@@ -2,7 +2,7 @@ locals {
   package_path = abspath(path.root)
   package_name = basename(local.package_path)
 
-  aws_account_config_path = "${dirname(local.package_path)}/account.yaml"
+  aws_account_config_path = "${dirname(dirname(local.package_path))}/account.yaml"
   aws_account_config      = yamldecode(file(local.aws_account_config_path))
 
   aws_account_id   = local.aws_account_config["aws_account_id"]
