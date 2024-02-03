@@ -1,6 +1,6 @@
 variable "aws_profile" {
   type    = string
-  default = "sigsrv-root"
+  default = "sso-sigsrv-root"
 }
 
 variable "aws_account_id" {
