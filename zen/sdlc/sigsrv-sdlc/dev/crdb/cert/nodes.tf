@@ -1,8 +1,8 @@
 resource "vault_pki_secret_backend_role" "cockroachdb-node" {
   backend     = module.vault_app_cockroachdb_pki.vault_pki_path
   name        = "${local.cockroachdb_cluster_name}-node"
-  key_type    = "rsa"
-  key_bits    = 4096
+  key_type    = "ec"
+  key_bits    = 384
   ttl         = 31536000 # 1y
   server_flag = true
   client_flag = true
@@ -76,8 +76,8 @@ resource "kubernetes_manifest" "cockroachdb-node" {
       dnsNames    = vault_pki_secret_backend_role.cockroachdb-node.allowed_domains
       ipAddresses = ["127.0.0.1"]
       privateKey = {
-        algorithm = "RSA"
-        size      = 4096
+        algorithm = "ECDSA"
+        size      = 384
       }
     }
   }

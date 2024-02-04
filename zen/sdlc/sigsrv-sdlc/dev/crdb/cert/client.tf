@@ -4,8 +4,8 @@
 resource "vault_pki_secret_backend_role" "cockroachdb-client" {
   backend     = module.vault_app_cockroachdb_pki.vault_pki_path
   name        = "${local.cockroachdb_cluster_name}-client"
-  key_type    = "rsa"
-  key_bits    = 4096
+  key_type    = "ec"
+  key_bits    = 384
   ttl         = 31536000 # 1y
   server_flag = false
   client_flag = true
@@ -63,8 +63,8 @@ resource "kubernetes_manifest" "cockroachdb-root" {
       }
       commonName = vault_pki_secret_backend_cert.cockroachdb-root.common_name
       privateKey = {
-        algorithm = "RSA"
-        size      = 4096
+        algorithm = "ECDSA"
+        size      = 384
       }
     }
   }

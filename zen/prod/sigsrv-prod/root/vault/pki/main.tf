@@ -24,8 +24,8 @@ resource "vault_pki_secret_backend_root_cert" "root_ca" {
   ttl                  = "87600h" # 10 years
   format               = "pem"
   private_key_format   = "der"
-  key_type             = "rsa"
-  key_bits             = 4096
+  key_type             = "ec"
+  key_bits             = 384
   exclude_cn_from_sans = true
   ou                   = "sigsrv-prod"
   organization         = "sigsrv"

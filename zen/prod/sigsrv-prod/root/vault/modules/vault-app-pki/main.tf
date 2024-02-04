@@ -35,8 +35,8 @@ resource "vault_pki_secret_backend_intermediate_cert_request" "intermediate" {
   backend      = vault_mount.app-pki.path
   common_name  = "${local.ca_name} Intermediate CA"
   type         = var.vault_pki_ca_cert_type
-  key_type     = "rsa"
-  key_bits     = 4096
+  key_type     = "ec"
+  key_bits     = 384
   ou           = var.kubernetes_cluster_name
   organization = "sigsrv"
   country      = "KR"
