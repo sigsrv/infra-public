@@ -10,6 +10,9 @@
   networking.hostName = "sigsrv";
   networking.hostId = "0d652ba8";  # zfs
 
+  # nix
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
   # boot
   boot.kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
   boot.loader.systemd-boot.enable = true;
@@ -67,6 +70,8 @@
     unzip
     ripgrep
     fzf
+    screen
+    tmux
 
     # network
     tailscale
@@ -85,7 +90,10 @@
 
   # services
   services.tailscale.enable = true;
-  services.openssh.enable = true;
+  services.openssh = {
+    enable = true;
+    openFirewall = false;
+  };
   services.datadog-agent = {
     enable = true;
     apiKeyFile = "/run/keys/datadog_api_key";
@@ -100,7 +108,6 @@
   };
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [ ];
     interfaces = {
       "enp4s0.100" = {
         allowedTCPPorts = [ 22 ];
