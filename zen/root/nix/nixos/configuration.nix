@@ -45,7 +45,7 @@
 
   # environment
   environment.variables = {
-    EDITOR = pkgs.micro;
+    EDITOR = "micro";
   };
 
   # packages
