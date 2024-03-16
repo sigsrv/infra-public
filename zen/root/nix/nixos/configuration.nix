@@ -96,7 +96,9 @@
   };
   services.datadog-agent = {
     enable = true;
-    apiKeyFile = "/run/keys/datadog_api_key";
+    site = "ap1.datadoghq.com";
+    apiKeyFile = "/run/datadog-keys/datadog_api_key";
+    enableLiveProcessCollection = true;
   };
 
   # networking
