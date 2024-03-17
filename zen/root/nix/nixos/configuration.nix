@@ -74,6 +74,8 @@
     tmux
 
     # network
+    bridge-utils
+    dig
     tailscale
     iperf
     minicom
@@ -83,6 +85,9 @@
     iftop
     iotop
     sysstat
+
+    # cert
+    openssl
   ];
 
   # programs
