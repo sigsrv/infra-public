@@ -595,7 +595,7 @@
     enable = true;
     interfaces = {
       "enp4s0.100" = {
-        allowedTCPPorts = [ 22 ];
+        allowedTCPPorts = config.services.openssh.ports;
       };
     };
     trustedInterfaces = config.networking.nat.internalInterfaces;
