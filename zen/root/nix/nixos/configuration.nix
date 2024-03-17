@@ -606,6 +606,7 @@
   networking.nat = {
     enable = true;
     internalInterfaces = [
+      "enp4s0.100"
       "lxdbr0"
       "sigsrv-nas"
       "sigsrv-try"
@@ -613,6 +614,14 @@
       "sigsrv-prod"
     ];
     externalInterface = "eno1";
+    extraCommands = ''
+      iptables -t nat -A POSTROUTING -s 192.168.0.0/24 -o eno1 -j MASQUERADE
+      iptables -t nat -A POSTROUTING -s 192.168.100.0/24 -o eno1 -j MASQUERADE
+    '';
+    extraStopCommands = ''
+      iptables -t nat -D POSTROUTING -s 192.168.0.0/24 -o eno1 -j MASQUERADE || true
+      iptables -t nat -D POSTROUTING -s 192.168.100.0/24 -o eno1 -j MASQUERADE || true
+    '';
   };
 
   # virtualisation
