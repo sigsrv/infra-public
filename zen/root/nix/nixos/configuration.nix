@@ -599,6 +599,9 @@
       };
     };
     trustedInterfaces = config.networking.nat.internalInterfaces;
+    logRefusedConnections = true;
+    logRefusedPackets = true;
+    rejectPackets = true;
   };
   networking.nat = {
     enable = true;
