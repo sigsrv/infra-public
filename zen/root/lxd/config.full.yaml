@@ -2,6 +2,7 @@
 config:
   core.https_address: :8443
   core.metrics_address: :8444
+  core.storage_buckets_address: :8555
   user.ui_title: sigsrv
 networks:
 - config:
@@ -14,26 +15,60 @@ networks:
   type: bridge
   project: default
 - config:
-    dns.domain: microk8s.sigsrv.local
-    ipv4.address: 10.100.0.1/16
+    dns.domain: nas.sigsrv.local
+    ipv4.address: 10.40.96.1/24
     ipv4.nat: "true"
-    ipv6.address: fdec:100::1/64
+    ipv6.address: fdec:64:16::1/64
     ipv6.nat: "true"
-  description: sigsrv-microk8s
-  name: sigsrv-microk8s
+  description: ""
+  name: sigsrv-nas
+  type: bridge
+  project: default
+- config:
+    dns.domain: sigsrv-prod.sigsrv.local
+    ipv4.address: 10.64.0.1/16
+    ipv4.nat: "true"
+    ipv6.address: fdec:64::1/64
+    ipv6.nat: "true"
+  description: sigsrv-prod
+  name: sigsrv-prod
+  type: bridge
+  project: default
+- config:
+    dns.domain: sigsrv-sdlc.sigsrv.local
+    ipv4.address: 10.128.0.1/16
+    ipv4.nat: "true"
+    ipv6.address: fdec:128::1/64
+    ipv6.nat: "true"
+  description: sigsrv-sdlc
+  name: sigsrv-sdlc
+  type: bridge
+  project: default
+- config:
+    dns.domain: sigsrv-try.sigsrv.local
+    ipv4.address: 10.192.0.1/16
+    ipv4.nat: "true"
+    ipv6.address: fdec:192::1/64
+    ipv6.nat: "true"
+  description: sigsrv-try
+  name: sigsrv-try
   type: bridge
   project: default
 storage_pools:
 - config:
-    ceph.cluster_name: ceph
-    ceph.osd.data_pool_name: sigsrv.lxd.osd.data
-    ceph.osd.pg_num: "1"
-    ceph.osd.pool_name: sigsrv.lxd.osd.meta
-    ceph.user.name: admin
-    volatile.pool.pristine: "true"
+    source: sigsrv-data/sigsrv-lxd
+    volatile.initial_source: sigsrv-data/sigsrv-lxd
+    zfs.pool_name: sigsrv-data/sigsrv-lxd
   description: ""
-  name: microceph-lxd
-  driver: ceph
+  name: sigsrv-lxd
+  driver: zfs
+- config:
+    source: zfs-swap
+    volatile.initial_source: zfs-swap
+    zfs.pool_name: zfs-swap
+  description: ""
+  name: zfs-swap
+  driver: zfs
 profiles:
 - config: {}
   description: Default LXD profile
@@ -43,7 +78,7 @@ profiles:
       type: nic
     root:
       path: /
-      pool: microceph-lxd
+      pool: sigsrv-lxd
       size: 10GiB
       type: disk
   name: default
@@ -66,7 +101,7 @@ projects:
     features.storage.buckets: "true"
     features.storage.volumes: "true"
     limits.containers: "0"
-    limits.disk: 200GiB
+    limits.disk: 1TiB
     limits.instances: "4"
     limits.memory: "34359738368"
     limits.networks: "2"
@@ -76,15 +111,29 @@ projects:
   name: jungooji
 - config:
     features.images: "true"
+    features.profiles: "true"
+    features.storage.buckets: "true"
+    features.storage.volumes: "true"
+    limits.containers: "0"
+    limits.disk: 1TiB
+    limits.instances: "2"
+    limits.memory: "17179869184"
+    limits.networks: "1"
+    limits.virtual-machines: "2"
+    restricted: "false"
+  description: user-mms01276
+  name: mms01276
+- config:
+    features.images: "true"
     features.networks: "false"
     features.networks.zones: "false"
     features.profiles: "true"
     features.storage.buckets: "true"
     features.storage.volumes: "true"
     limits.containers: "0"
-    limits.disk: 200GiB
+    limits.disk: 4TiB
     limits.instances: "4"
-    limits.memory: "34359738368"
+    limits.memory: "68719476736"
     limits.networks: "2"
     limits.virtual-machines: "4"
     restricted: "false"
@@ -97,12 +146,61 @@ projects:
     features.profiles: "true"
     features.storage.buckets: "true"
     features.storage.volumes: "true"
+    limits.containers: "4"
+    limits.cpu: "8"
+    limits.disk: 16TiB
+    limits.instances: "8"
+    limits.memory: "17179869184"
+    limits.networks: "4"
+    limits.virtual-machines: "4"
+    restricted: "false"
+  description: sigsrv-nas
+  name: sigsrv-nas
+- config:
+    features.images: "true"
+    features.networks: "false"
+    features.networks.zones: "true"
+    features.profiles: "true"
+    features.storage.buckets: "true"
+    features.storage.volumes: "true"
     limits.containers: "16"
     limits.cpu: "32"
-    limits.disk: 1TiB
+    limits.disk: 10TiB
     limits.instances: "32"
     limits.memory: 64GiB
     limits.networks: "4"
     limits.virtual-machines: "16"
-  description: sigsrv-microk8s
-  name: sigsrv-microk8s
+  description: sigsrv-prod (managed by Terraform)
+  name: sigsrv-prod
+- config:
+    features.images: "true"
+    features.networks: "false"
+    features.networks.zones: "true"
+    features.profiles: "true"
+    features.storage.buckets: "true"
+    features.storage.volumes: "true"
+    limits.containers: "16"
+    limits.cpu: "32"
+    limits.disk: 10TiB
+    limits.instances: "32"
+    limits.memory: 64GiB
+    limits.networks: "4"
+    limits.virtual-machines: "16"
+  description: sigsrv-sdlc (managed by Terraform)
+  name: sigsrv-sdlc
+- config:
+    features.images: "true"
+    features.networks: "false"
+    features.networks.zones: "true"
+    features.profiles: "true"
+    features.storage.buckets: "true"
+    features.storage.volumes: "true"
+    limits.containers: "16"
+    limits.cpu: "32"
+    limits.disk: 10TiB
+    limits.instances: "32"
+    limits.memory: 64GiB
+    limits.networks: "4"
+    limits.virtual-machines: "16"
+  description: sigsrv-try (managed by Terraform)
+  name: sigsrv-try
