@@ -54,9 +54,8 @@
   # virtualisation
   virtualisation.lxd = {
     enable = true;
-    recommendedSysctlSettings = true;
-    zfsSupport = true;
     ui.enable = true;
+    recommendedSysctlSettings = true;
   };
   virtualisation.lxc = {
     lxcfs.enable = true;
