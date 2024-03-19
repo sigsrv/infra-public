@@ -52,6 +52,7 @@
   };
 
   # virtualisation
+  security.apparmor.enable = true;
   virtualisation.lxd = {
     enable = true;
     ui.enable = true;
