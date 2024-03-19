@@ -51,6 +51,25 @@
     EDITOR = "micro";
   };
 
+  # virtualisation
+  virtualisation.lxd = {
+    enable = true;
+    recommendedSysctlSettings = true;
+    zfsSupport = true;
+    ui.enable = true;
+  };
+  virtualisation.lxc = {
+    lxcfs.enable = true;
+  };
+  systemd.services.lxd = {
+    restartIfChanged = false;
+    path = [
+      pkgs.util-linux
+      config.boot.zfs.package
+      "${config.boot.zfs.package}/lib/udev"
+    ];
+  };
+
   # packages
   environment.systemPackages = with pkgs; [
     # system
@@ -622,25 +641,6 @@
       iptables -t nat -D POSTROUTING -s 192.168.0.0/24 -o eno1 -j MASQUERADE || true
       iptables -t nat -D POSTROUTING -s 192.168.100.0/24 -o eno1 -j MASQUERADE || true
     '';
-  };
-
-  # virtualisation
-  virtualisation.lxd = {
-    enable = true;
-    recommendedSysctlSettings = true;
-    zfsSupport = true;
-    ui.enable = true;
-  };
-  virtualisation.lxc = {
-    lxcfs.enable = true;
-  };
-  systemd.services.lxd = {
-    restartIfChanged = false;
-    path = [
-      pkgs.util-linux
-      config.boot.zfs.package
-      "${config.boot.zfs.package}/lib/udev"
-    ];
   };
 
   # console = {
