@@ -122,7 +122,7 @@
     enable = true;
     # https://ap1.datadoghq.com/organization-settings/api-keys?id=07deaf4e-6196-4b52-91f6-a1514f89d148
     site = "ap1.datadoghq.com";
-    apiKeyFile = "/run/datadog-keys/datadog_api_key";
+    apiKeyFile = "/etc/datadog-keys/datadog_api_key";
     enableLiveProcessCollection = true;
     extraIntegrations = {
       openmetrics = pythonPackages: [];
@@ -134,10 +134,10 @@
           {
             openmetrics_endpoint = "https://127.0.0.1:8443/1.0/metrics";
             tls_verify = false;
-            # sudo openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:secp384r1 -sha384 -keyout /run/datadog-keys/lxd-metrics.key -nodes -out /run/datadog-keys/lxd-metrics.crt -days 3650 -subj "/CN=metrics.local"
-            # sudo lxc config trust add /run/datadog-keys/metrics.crt --type=metrics
-            tls_cert = "/run/datadog-keys/lxd-metrics.crt";
-            tls_private_key = "/run/datadog-keys/lxd-metrics.key";
+            # sudo openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:secp384r1 -sha384 -keyout /etc/datadog-keys/lxd-metrics.key -nodes -out /etc/datadog-keys/lxd-metrics.crt -days 3650 -subj "/CN=metrics.local"
+            # sudo lxc config trust add /etc/datadog-keys/lxd-metrics.crt --type=metrics
+            tls_cert = "/etc/datadog-keys/lxd-metrics.crt";
+            tls_private_key = "/etc/datadog-keys/lxd-metrics.key";
             tags = [ "service:lxd" ];
             max_returned_metrics = 50000;
             min_collection_interval = 10;
