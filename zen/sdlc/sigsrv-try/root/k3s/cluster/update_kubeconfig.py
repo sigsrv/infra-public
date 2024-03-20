@@ -8,14 +8,12 @@ for parent in Path(__file__).parents:
 
 
 def main():
-    from sigsrv.infra.k3s.setup import setup_k3s
+    from sigsrv.infra.k3s.setup import lxd_k3s_update_kubeconfig
 
-    setup_k3s(
+    lxd_k3s_update_kubeconfig(
         lxd_project_name="sigsrv-try",
         k3s_cluster_node_name="sigsrv-try-k3s",
         k3s_cluster_name="sigsrv-try",
-        k3s_master_node_count=2,
-        k3s_worker_node_count=2,
     )
 
 

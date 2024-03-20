@@ -1,4 +1,0 @@
-sudo ufw allow in on sigsrv-try
-sudo ufw allow out on sigsrv-try
-sudo ufw route allow in on sigsrv-try out on eno1
-sudo ufw route allow in on sigsrv-try out on enx00e04c680005

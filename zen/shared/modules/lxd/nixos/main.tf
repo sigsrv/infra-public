@@ -7,22 +7,37 @@ terraform {
   }
 }
 
-variable "project" {
-  type = string
-}
+locals {
+  # lxc
+  lxc_exec_command = join(" ", [
+    "lxc",
+    "exec",
+    "${var.lxd_remote_name}:${var.lxd_instance_name}",
+    "--project",
+    var.lxd_project_name,
+  ])
 
-variable "instance" {
-  type = string
-}
-
-variable "config" {
-  type = map(string)
+  # nixos
+  nixos_default_config = {
+    lxd-dns = templatefile(
+      "${path.module}/lxd-dns.nix",
+      {
+        lxd_dns_server_0 = var.lxd_dns_servers[0],
+        lxd_dns_server_1 = var.lxd_dns_servers[1],
+        lxd_dns_domain   = var.lxd_dns_domain,
+      }
+    )
+  }
+  nixos_current_config = merge(
+    local.nixos_default_config,
+    var.nixos_config
+  )
 }
 
 //noinspection MissingProperty
 resource "lxd_instance_file" "nixos_lxd_nix" {
-  project     = var.project
-  instance    = var.instance
+  project     = var.lxd_project_name
+  instance    = var.lxd_instance_name
   target_path = "/etc/nixos/lxd.nix"
   mode        = "0644"
   content     = <<EOFTF
@@ -32,63 +47,81 @@ resource "lxd_instance_file" "nixos_lxd_nix" {
 
 {
   imports = [
-  %{~ for key, _ in var.config ~}
+  %{~for key, _ in local.nixos_current_config~}
     ./lxd/${key}.nix
-  %{~ endfor ~}
+  %{~endfor~}
   ];
 
-  networking.hostName = "${var.instance}";
+  networking.hostName = "${var.lxd_instance_name}";
 }
 EOFTF
 }
 
 resource "null_resource" "nixos_lxd_folder" {
   triggers = {
-    project  = var.project
-    instance = var.instance
+    lxd_remote_name   = var.lxd_remote_name
+    lxd_project_name  = var.lxd_project_name
+    lxd_instance_name = var.lxd_instance_name
   }
 
   provisioner "local-exec" {
     command = join(" ", [
-      "lxc",
-      "exec",
-      "--project",
-      var.project,
-      var.instance,
+      local.lxc_exec_command,
       "--",
-      "mkdir /etc/nixos/lxd",
+      "mkdir -p /etc/nixos/lxd",
+    ])
+  }
+}
+
+resource "null_resource" "nixos_hostname" {
+  triggers = {
+    lxd_remote_name   = var.lxd_remote_name
+    lxd_project_name  = var.lxd_project_name
+    lxd_instance_name = var.lxd_instance_name
+  }
+
+  provisioner "local-exec" {
+    command = join(" ", [
+      local.lxc_exec_command,
+      "--",
+      "hostname",
+      var.lxd_instance_name,
     ])
   }
 }
 
 //noinspection MissingProperty
 resource "lxd_instance_file" "nixos_lxd_config_nix" {
-  for_each = var.config
-  depends_on = [ null_resource.nixos_lxd_folder ]
+  for_each   = local.nixos_current_config
+  depends_on = [null_resource.nixos_lxd_folder]
 
-  project     = var.project
-  instance    = var.instance
+  project     = var.lxd_project_name
+  instance    = var.lxd_instance_name
   target_path = "/etc/nixos/lxd/${each.key}.nix"
   mode        = "0644"
   content     = each.value
 }
 
 resource "null_resource" "config" {
+  depends_on = [
+    lxd_instance_file.nixos_lxd_config_nix,
+    null_resource.nixos_hostname,
+  ]
+
   triggers = {
-    project  = var.project
-    instance = var.instance
-    config   = join("\n",
-      [for key, value in var.config: "${key}=${sha512(value)}"]
+    lxd_remote_name   = var.lxd_remote_name
+    lxd_project_name  = var.lxd_project_name
+    lxd_instance_name = var.lxd_instance_name
+    nixos_current_config = join("\n",
+      [for key, value in local.nixos_current_config : "${key}=${sha512(value)}"]
     )
   }
 
   provisioner "local-exec" {
     command = join(" ", [
-      "lxc",
-      "exec",
-      "--project",
-      var.project,
-      var.instance,
+      local.lxc_exec_command,
+      "--env",
+      "NIXOS_SWITCH_USE_DIRTY_ENV=1", # https://github.com/NixOS/nixpkgs/issues/262686
       "--",
       "bash -c 'source /etc/profile && nixos-rebuild switch'",
     ])

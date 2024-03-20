@@ -1,4 +1,0 @@
-sudo ufw allow in on sigsrv-prod
-sudo ufw allow out on sigsrv-prod
-sudo ufw route allow in on sigsrv-prod out on eno1
-sudo ufw route allow in on sigsrv-prod out on enx00e04c680005

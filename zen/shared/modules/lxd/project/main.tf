@@ -42,7 +42,7 @@ resource "lxd_network" "this" {
   description = var.lxd_project_name
 
   config = {
-    "dns.domain"   = "${var.lxd_project_name}.sigsrv.local"
+    "dns.domain"   = "${var.lxd_project_name}.lxd.local"
     "ipv4.address" = replace(var.lxd_network_ipv4_address, "0/", "1/")
     "ipv4.nat"     = "true"
     "ipv6.address" = replace(var.lxd_network_ipv6_address, "0/", "1/")
@@ -92,20 +92,4 @@ resource "lxd_profile" "this" {
       size = "50GiB"
     }
   }
-}
-
-resource "lxd_cached_image" "ubuntu_container" {
-  source_remote = "ubuntu"
-  source_image  = "jammy/amd64"
-  type          = "container"
-}
-
-resource "lxd_cached_image" "ubuntu_vm" {
-  source_remote = "ubuntu"
-  source_image  = "jammy/amd64"
-  type          = "virtual-machine"
-
-  depends_on = [
-    lxd_cached_image.ubuntu_container
-  ]
 }

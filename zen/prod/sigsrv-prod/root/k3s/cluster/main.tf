@@ -20,6 +20,7 @@ provider "lxd" {
 module "lxd_project" {
   source = "../../../../../shared/modules/lxd/project"
 
+  lxd_remote_name          = "sigsrv"
   lxd_project_name         = "sigsrv-prod"
   lxd_storage_pool_name    = "sigsrv-lxd"
   lxd_network_ipv4_address = "10.64.0.0/16"
@@ -29,12 +30,15 @@ module "lxd_project" {
 module "k3s_cluster" {
   source = "../../../../../shared/modules/k3s/cluster"
 
-  lxd_project_name             = module.lxd_project.lxd_project_name
-  lxd_storage_pool_name        = module.lxd_project.lxd_storage_pool_name
-  lxd_profile_name             = module.lxd_project.lxd_profile_name
-  lxd_ubuntu_image_fingerprint = module.lxd_project.lxd_ubuntu_image_fingerprint
+  lxd_remote_name       = "sigsrv"
+  lxd_project_name      = module.lxd_project.lxd_project_name
+  lxd_storage_pool_name = module.lxd_project.lxd_storage_pool_name
+  lxd_profile_name      = module.lxd_project.lxd_profile_name
+  lxd_dns_servers       = module.lxd_project.lxd_dns_servers
+  lxd_dns_domain        = module.lxd_project.lxd_dns_domain
+  lxd_nixos_image_alias = "nixos-unstable-vm"
 
-  k3s_cluster_name                  = "sigsrv-prod-k3s"
-  k3s_cluster_master_instance_count = 3
-  k3s_cluster_worker_instance_count = 5
+  k3s_cluster_name = "sigsrv-prod"
+  k3s_master_count = 3
+  k3s_worker_count = 5
 }

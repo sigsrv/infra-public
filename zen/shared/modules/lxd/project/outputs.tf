@@ -10,6 +10,13 @@ output "lxd_profile_name" {
   value = lxd_profile.this.name
 }
 
-output "lxd_ubuntu_image_fingerprint" {
-  value = lxd_cached_image.ubuntu_vm.fingerprint
+output "lxd_dns_servers" {
+  value = [
+    split("/", lxd_network.this.config["ipv4.address"])[0],
+    split("/", lxd_network.this.config["ipv6.address"])[0],
+  ]
+}
+
+output "lxd_dns_domain" {
+  value = lxd_network.this.config["dns.domain"]
 }

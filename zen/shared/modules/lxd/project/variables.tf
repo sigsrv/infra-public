@@ -1,3 +1,7 @@
+variable "lxd_remote_name" {
+  type = string
+}
+
 variable "lxd_project_name" {
   type = string
 }
