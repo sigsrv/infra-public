@@ -1,4 +1,6 @@
 kubectl port-forward -n vault vault-0 8200
+
+
 export VAULT_ADDR=http://127.0.0.1:8200
 
 for public_key in 715FE376816038A7 685C7B17D23F1A3E BC346E1E0C2D56CF
@@ -6,13 +8,10 @@ for public_key in 715FE376816038A7 685C7B17D23F1A3E BC346E1E0C2D56CF
 end
 
 vault operator init \
-    -pgp-keys=685C7B17D23F1A3E.pub,715FE376816038A7.pub,BC346E1E0C2D56CF.pub \
+    -pgp-keys=715FE376816038A7.pub,685C7B17D23F1A3E.pub,BC346E1E0C2D56CF.pub \
     -root-token-pgp-key=BC346E1E0C2D56CF.pub \
     -key-shares=3 \
     -key-threshold=2
-
-kubectl exec -n vault vault-1 -c vault -- vault operator raft join http://vault-0.vault-internal:8200
-kubectl exec -n vault vault-2 -c vault -- vault operator raft join http://vault-0.vault-internal:8200
 
 # pbpaste | base64 --decode | gpg --pinentry-mode cancel --list-packets
 # setup encrypted-unseal-keys to 1password vault

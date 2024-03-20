@@ -5,7 +5,7 @@ end
 vault operator rekey -init \
     -key-shares=3 \
     -key-threshold=2 \
-    -pgp-keys=685C7B17D23F1A3E.pub,715FE376816038A7.pub,BC346E1E0C2D56CF.pub
+    -pgp-keys=715FE376816038A7.pub,685C7B17D23F1A3E.pub,BC346E1E0C2D56CF.pub
 
 set NONCE <NONCE>
 
