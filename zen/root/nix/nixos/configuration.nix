@@ -64,11 +64,21 @@
   networking.firewall = {
     enable = true;
     interfaces = {
+      "eno1" = {
+        allowedTCPPorts = [];
+        allowedUDPPorts = [];
+      };
       "enp4s0.100" = {
         allowedTCPPorts = config.services.openssh.ports;
       };
+      "lxdbr0" = { allowedUDPPorts = [ 53 67 1900 5351 ]; };
+      "userbr0" = { allowedUDPPorts = [ 53 67 1900 5351 ]; };
+      "sigsrv-nas" = { allowedUDPPorts = [ 53 67 1900 5351 ]; };
+      "sigsrv-try" = { allowedUDPPorts = [ 53 67 1900 5351 ]; };
+      "sigsrv-sdlc" = { allowedUDPPorts = [ 53 67 1900 5351 ]; };
+      "sigsrv-prod" = { allowedUDPPorts = [ 53 67 1900 5351 ]; };
     };
-    trustedInterfaces = config.networking.nat.internalInterfaces;
+    trustedInterfaces = [];
     logRefusedConnections = true;
     logRefusedPackets = true;
     rejectPackets = true;
