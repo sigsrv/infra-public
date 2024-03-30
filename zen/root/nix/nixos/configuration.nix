@@ -59,12 +59,7 @@
       interface = "enp4s0";
     };
   };
-  # networking.macvlans = {
-  #   "eno1.lxd" = {
-  #     mode = "vepa";
-  #     interface = "eno1";
-  #   };
-  # };
+  networking.macvlans = {};
   networking.firewall = {
     enable = true;
     interfaces = {
