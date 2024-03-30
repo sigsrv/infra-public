@@ -62,6 +62,7 @@
   networking.macvlans = {};
   networking.firewall = {
     enable = true;
+    allowedUDPPorts = [ 41641 ];
     interfaces = {
       "eno1" = {
         allowedTCPPorts = [];
