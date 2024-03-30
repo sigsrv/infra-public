@@ -610,6 +610,12 @@
       interface = "enp4s0";
     };
   };
+  # networking.macvlans = {
+  #   "eno1.lxd" = {
+  #     mode = "vepa";
+  #     interface = "eno1";
+  #   };
+  # };
   networking.firewall = {
     enable = true;
     interfaces = {
@@ -627,6 +633,7 @@
     internalInterfaces = [
       "enp4s0.100"
       "lxdbr0"
+      "userbr0"
       "sigsrv-nas"
       "sigsrv-try"
       "sigsrv-sdlc"
