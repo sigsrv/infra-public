@@ -17,7 +17,7 @@
   boot.kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.loader.efi.efiSysMountPoint = "/boot/efi";
+  boot.loader.efi.efiSysMountPoint = "/boot";
   boot.supportedFilesystems = [ "zfs" ];
   boot.initrd.luks.devices = {
     root = {
@@ -25,12 +25,6 @@
       preLVM = true;
       allowDiscards = true;
     };
-  };
-
-  # file systems
-  fileSystems."/mnt/ubuntu" = {
-    device = "/dev/disk/by-uuid/160dcea0-183a-4872-8e87-49e8299854fa";
-    fsType = "ext4";
   };
 
   # users
