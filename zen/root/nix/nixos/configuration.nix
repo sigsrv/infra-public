@@ -81,9 +81,12 @@
     trustedInterfaces = [];
     logRefusedConnections = true;
     logRefusedPackets = true;
+    logReversePathDrops = true;
     rejectPackets = true;
+    # checkReversePath = "loose";
   };
   networking.nat = {
+    # for LXD bridge: networking.nat.enable requires for operation bridge
     enable = true;
 
     internalIPs = [
@@ -152,6 +155,7 @@
     iperf
     minicom
     nettools
+    tcpdump
 
     # monitoring
     iftop
