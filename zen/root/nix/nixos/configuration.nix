@@ -2,6 +2,9 @@
 # nixos-help command or https://search.nixos.org/options
 
 { config, lib, pkgs, inputs, ... }: {
+  # https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion
+  system.stateVersion = "23.11"; # Did you read the comment?
+
   imports = [
     ./hardware-configuration.nix
   ];
@@ -43,6 +46,53 @@
   # environment
   environment.variables = {
     EDITOR = "micro";
+  };
+
+  # networking
+  networking.vlans = {
+    "enp4s0.100" = {
+      id = 100;
+      interface = "enp4s0";
+    };
+  };
+  # networking.macvlans = {
+  #   "eno1.lxd" = {
+  #     mode = "vepa";
+  #     interface = "eno1";
+  #   };
+  # };
+  networking.firewall = {
+    enable = true;
+    interfaces = {
+      "enp4s0.100" = {
+        allowedTCPPorts = config.services.openssh.ports;
+      };
+    };
+    trustedInterfaces = config.networking.nat.internalInterfaces;
+    logRefusedConnections = true;
+    logRefusedPackets = true;
+    rejectPackets = true;
+  };
+  networking.nat = {
+    enable = true;
+    internalInterfaces = [
+      "enp4s0.100"
+      "lxdbr0"
+      "userbr0"
+      "sigsrv-nas"
+      "sigsrv-try"
+      "sigsrv-sdlc"
+      "sigsrv-prod"
+    ];
+    externalInterface = "eno1";
+    extraCommands = ''
+      iptables -t nat -A POSTROUTING -s 192.168.0.0/24 -o eno1 -j MASQUERADE
+      iptables -t nat -A POSTROUTING -s 192.168.100.0/24 -o eno1 -j MASQUERADE
+    '';
+    extraStopCommands = ''
+      iptables -t nat -D POSTROUTING -s 192.168.0.0/24 -o eno1 -j MASQUERADE || true
+      iptables -t nat -D POSTROUTING -s 192.168.100.0/24 -o eno1 -j MASQUERADE || true
+    '';
   };
 
   # virtualisation
@@ -112,6 +162,8 @@
     enable = true;
     openFirewall = false;
   };
+
+  # datadog-agent
   services.datadog-agent = {
     enable = true;
     package = inputs.nixpkgs-stable.legacyPackages.${pkgs.system}.datadog-agent;
@@ -597,63 +649,4 @@
       };
     };
   };
-
-  # networking
-  networking.vlans = {
-    "enp4s0.100" = {
-      id = 100;
-      interface = "enp4s0";
-    };
-  };
-  # networking.macvlans = {
-  #   "eno1.lxd" = {
-  #     mode = "vepa";
-  #     interface = "eno1";
-  #   };
-  # };
-  networking.firewall = {
-    enable = true;
-    interfaces = {
-      "enp4s0.100" = {
-        allowedTCPPorts = config.services.openssh.ports;
-      };
-    };
-    trustedInterfaces = config.networking.nat.internalInterfaces;
-    logRefusedConnections = true;
-    logRefusedPackets = true;
-    rejectPackets = true;
-  };
-  networking.nat = {
-    enable = true;
-    internalInterfaces = [
-      "enp4s0.100"
-      "lxdbr0"
-      "userbr0"
-      "sigsrv-nas"
-      "sigsrv-try"
-      "sigsrv-sdlc"
-      "sigsrv-prod"
-    ];
-    externalInterface = "eno1";
-    extraCommands = ''
-      iptables -t nat -A POSTROUTING -s 192.168.0.0/24 -o eno1 -j MASQUERADE
-      iptables -t nat -A POSTROUTING -s 192.168.100.0/24 -o eno1 -j MASQUERADE
-    '';
-    extraStopCommands = ''
-      iptables -t nat -D POSTROUTING -s 192.168.0.0/24 -o eno1 -j MASQUERADE || true
-      iptables -t nat -D POSTROUTING -s 192.168.100.0/24 -o eno1 -j MASQUERADE || true
-    '';
-  };
-
-  # console = {
-  #   font = "Lat2-Terminus16";
-  #   keyMap = "us";
-  #   useXkbConfig = true; # use xkb.options in tty.
-  # };
-
-  # programs.mtr.enable = true;
-  # system.copySystemConfiguration = true;
-
-  # https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion
-  system.stateVersion = "23.11"; # Did you read the comment?
 }
