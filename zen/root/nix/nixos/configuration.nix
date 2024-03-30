@@ -49,6 +49,10 @@
   };
 
   # networking
+  networking.nameservers = [
+    "1.1.1.1"
+    "1.0.0.1"
+  ];
   networking.vlans = {
     "enp4s0.100" = {
       id = 100;
