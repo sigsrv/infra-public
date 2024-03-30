@@ -1,7 +1,7 @@
 # /etc/nixos/configuration.nix
 # nixos-help command or https://search.nixos.org/options
 
-{ config, lib, pkgs, ... }: {
+{ config, lib, pkgs, inputs, ... }: {
   imports = [
     ./hardware-configuration.nix
   ];
@@ -120,6 +120,7 @@
   };
   services.datadog-agent = {
     enable = true;
+    package = inputs.nixpkgs-stable.legacyPackages.${pkgs.system}.datadog-agent;
     # https://ap1.datadoghq.com/organization-settings/api-keys?id=07deaf4e-6196-4b52-91f6-a1514f89d148
     site = "ap1.datadoghq.com";
     apiKeyFile = "/etc/datadog-keys/datadog_api_key";
