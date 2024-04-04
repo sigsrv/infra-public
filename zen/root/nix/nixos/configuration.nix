@@ -53,6 +53,12 @@
     "1.1.1.1"
     "1.0.0.1"
   ];
+  networking.timeServers = [
+    "0.pool.ntp.org"
+    "1.pool.ntp.org"
+    "2.pool.ntp.org"
+    "3.pool.ntp.org"
+  ];
   networking.vlans = {
     "enp4s0.100" = {
       id = 100;
