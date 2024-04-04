@@ -1,10 +1,15 @@
 #!/usr/bin/env fish
-kubectl --context sigsrv-prod create ns tailscale
-
-# https://login.tailscale.com/admin/settings/oauth
-kubectl create secret generic operator-oauth \
-  -n tailscale \
-  --from-literal=client_id=(op read "op://sigsrv-prod/sigsrv-prod-tailscale-operator/username") \
-  --from-literal=client_secret=(op read "op://sigsrv-prod/sigsrv-prod-tailscale-operator/password")
-
-kubectl --context sigsrv-prod apply -f tailscale.yaml
+helm upgrade \
+  --install \
+  --kube-context sigsrv-prod \
+  tailscale-operator \
+  tailscale/tailscale-operator \
+  --namespace=tailscale \
+  --create-namespace \
+  --set-string oauth.clientId=(op read "op://sigsrv-prod/sigsrv-prod-tailscale-operator/username") \
+  --set-string oauth.clientSecret=(op read "op://sigsrv-prod/sigsrv-prod-tailscale-operator/password") \
+  --set-string 'operatorConfig.hostname=sigsrv-prod-tailscale-operator' \
+  --set 'operatorConfig.defaultTags={tag:sigsrv-prod-tailscale-operator}' \
+  --set-string 'proxyConfig.defaultTags=tag:sigsrv-prod-tailscale-service' \
+  --set-string 'proxyConfig.apiServerProxyConfig.mode=true' \
+  --wait
