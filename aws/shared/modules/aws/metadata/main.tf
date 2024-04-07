@@ -31,14 +31,14 @@ locals {
   package   = local.package_name
 
   name = (
-  strcontains(local.account, local.env)
-  ? "${local.account}-${local.package_name}"
-  : "${local.account}-${local.env}-${local.package_name}"
+    strcontains(local.account, local.env)
+    ? "${local.account}-${local.package_name}"
+    : "${local.account}-${local.env}-${local.package_name}"
   )
 
   path = (
-  strcontains(local.account, local.env)
-  ? "${local.account}/${local.package_name}"
-  : "${local.account}/${local.env}/${local.package_name}"
+    strcontains(local.account, local.env)
+    ? "${local.account}/${local.package_name}"
+    : "${local.account}/${local.env}/${local.package_name}"
   )
 }

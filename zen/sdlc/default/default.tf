@@ -37,7 +37,7 @@ module "nixos-test-conf" {
   source   = "../../shared/modules/lxd/nixos"
   project  = lxd_instance.nixos-test.project
   instance = lxd_instance.nixos-test.name
-  config   = {
+  config = {
     default = file("nixos-test.nix")
   }
 }

@@ -18,14 +18,14 @@ locals {
   target_safe_controls = flatten(
     [
       for target_ou_name, control_names in var.enabled_safe_controls : [
-      for control_name in control_names : {
-        id                 = "${target_ou_name}:${var.aws_region}:${control_name}"
-        target_ou_name     = target_ou_name
-        target_identifier  = local.root_ous[target_ou_name].arn
-        control_name       = control_name
-        control_identifier = "arn:aws:controltower:${var.aws_region}::control/${control_name}"
-      }
-    ]
+        for control_name in control_names : {
+          id                 = "${target_ou_name}:${var.aws_region}:${control_name}"
+          target_ou_name     = target_ou_name
+          target_identifier  = local.root_ous[target_ou_name].arn
+          control_name       = control_name
+          control_identifier = "arn:aws:controltower:${var.aws_region}::control/${control_name}"
+        }
+      ]
     ]
   )
 }
@@ -48,15 +48,15 @@ locals {
   target_unsafe_controls = flatten(
     [
       for target_ou_name, control_names in var.enabled_unsafe_controls : [
-      for control_name, control_uid in control_names : {
-        id                 = "${target_ou_name}:${var.aws_region}:${control_name}:${control_uid}"
-        target_ou_name     = target_ou_name
-        target_identifier  = local.root_ous[target_ou_name].arn
-        control_name       = control_name
-        control_uid        = control_uid
-        control_identifier = "arn:aws:controltower:${var.aws_region}::control/${control_uid}"
-      }
-    ]
+        for control_name, control_uid in control_names : {
+          id                 = "${target_ou_name}:${var.aws_region}:${control_name}:${control_uid}"
+          target_ou_name     = target_ou_name
+          target_identifier  = local.root_ous[target_ou_name].arn
+          control_name       = control_name
+          control_uid        = control_uid
+          control_identifier = "arn:aws:controltower:${var.aws_region}::control/${control_uid}"
+        }
+      ]
     ]
   )
 }

@@ -3,7 +3,7 @@ module "metadata" {
 }
 
 locals {
-  env  = module.metadata.env
+  env = module.metadata.env
   # Error: expected length of name_prefix to be in the range (1 - 38)
   # module.nat_instance.aws_iam_role.this
   name = substr(module.metadata.name, 0, 38)

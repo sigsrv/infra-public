@@ -39,8 +39,8 @@ output "aws_global" {
     default_tags        = local.aws_tags
 
     # account
-    account_name     = local.aws_account_name
-    account_id       = local.aws_account_id
+    account_name         = local.aws_account_name
+    account_id           = local.aws_account_id
     account_root_iam_arn = local.aws_account_root_iam_arn
   }
 }

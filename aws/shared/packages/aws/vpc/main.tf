@@ -4,7 +4,7 @@ module "metadata" {
 
 locals {
   env  = module.metadata.env
-  name = module.metadata.aws.account_name  # override for vpc
+  name = module.metadata.aws.account_name # override for vpc
 }
 
 module "vpc" {
@@ -30,7 +30,7 @@ module "vpc" {
   enable_ipv6                                   = true
   public_subnet_assign_ipv6_address_on_creation = true
 
-  public_subnet_ipv6_prefixes  = [0, 1, 2]
+  public_subnet_ipv6_prefixes = [0, 1, 2]
   private_subnet_ipv6_prefixes = [
     3, 4, 5
   ]
