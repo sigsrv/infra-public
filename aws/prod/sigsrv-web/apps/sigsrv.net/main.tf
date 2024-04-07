@@ -16,9 +16,24 @@ module "cloudfront_redirector" {
     "sigsrv.box",
   ]
 
+  route53_records = {
+    "sigsrv.box" = {
+      zone_id = module.dns-sigsrv-box.route53_zone.zone_id
+    }
+  }
+
   target_url = "https://keybase.io/sigsrv"
 }
 
 output "domain_name" {
   value = module.cloudfront_redirector.domain_name
+}
+
+module "dns-sigsrv-box" {
+  source        = "../../../../shared/packages/aws/dns"
+  public_domain = "sigsrv.box"
+}
+
+output "dns-sigsrv-box" {
+  value = module.dns-sigsrv-box.route53_zone
 }
