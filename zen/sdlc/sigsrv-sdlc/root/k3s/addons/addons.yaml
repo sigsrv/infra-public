@@ -13,6 +13,8 @@ spec:
             namespace: istio-system
           - name: registry
             namespace: container-registry
+          - name: local-path-protected
+            namespace: kube-system
   template:
     metadata:
       name: "addon-{{name}}"
