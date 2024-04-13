@@ -3,7 +3,9 @@ kubectl --context sigsrv-sdlc create ns argocd
 kubectl --context sigsrv-sdlc apply -k "https://github.com/argoproj/argo-cd/manifests/crds?ref=stable"
 kubectl --context sigsrv-sdlc apply -f argocd.yaml
 
-argocd login argocd-sdlc.deer-neon.ts.net \
+argocd login \
+    --name sigsrv-sdlc \
+    argocd-sdlc.deer-neon.ts.net \
     --username admin \
     --password (kubectl view-secret --context sigsrv-sdlc -n argocd argocd-initial-admin-secret password -q)
 
