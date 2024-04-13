@@ -17,6 +17,8 @@ spec:
             namespace: container-registry
           - name: local-path-protected
             namespace: kube-system
+          - name: vault
+            namespace: vault
   template:
     metadata:
       name: "addon-{{name}}"
@@ -69,6 +71,7 @@ spec:
     - https://istio-release.storage.googleapis.com/charts
     - https://opensource.zalando.com/postgres-operator/charts/postgres-operator
     - https://opensource.zalando.com/postgres-operator/charts/postgres-operator-ui
+    - https://helm.releases.hashicorp.com
   destinations:
     - name: in-cluster
       namespace: "*"

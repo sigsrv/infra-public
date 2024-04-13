@@ -1,98 +1,28 @@
-apiVersion: helm.cattle.io/v1
-kind: HelmChart
+apiVersion: argoproj.io/v1alpha1
+kind: Application
 metadata:
   name: vault
-  namespace: vault
+  namespace: argocd
 spec:
-  repo: https://helm.releases.hashicorp.com
-  chart: vault
-  targetNamespace: vault
-  # https://github.com/hashicorp/vault-helm/blob/main/values.yaml
-  valuesContent: |-
-    server:
-      # logLevel: "debug"
-      affinity: ""
-      ha:
-        enabled: true
-        raft:
-          enabled: true
-          setNodeId: true
-          config: |-
-            plugin_directory = "/usr/local/libexec/vault"
-            ui = true
+  project: addons
 
-            listener "tcp" {
-              tls_disable = 1
-              address = "[::]:8200"
-              cluster_address = "[::]:8201"
-            }
+  sources:
+    - repoURL: "https://helm.releases.hashicorp.com"
+      targetRevision: "0.27.0"
+      chart: vault
+      helm:
+        valueFiles:
+          - $values/zen/sdlc/sigsrv-sdlc/root/k3s/addons/vault/vault-values.yaml
+    - repoURL: 'git@github.com:sigsrv/infra.git'
+      targetRevision: HEAD
+      ref: values
 
-            storage "raft" {
-              path = "/vault/data"
-            }
+  destination:
+    name: in-cluster
+    namespace: vault
 
-            service_registration "kubernetes" {}
-      dataStorage:
-        storageClass: local-path-protected
-      auditStorage:
-        storageClass: local-path-protected
-      volumes:
-        - name: plugins
-          emptyDir: {}
-      volumeMounts:
-        - mountPath: /usr/local/libexec/vault
-          name: plugins
-          readOnly: true
-      extraInitContainers:
-        - name: vault-plugin-op-connect-init
-          image: alpine:3
-          command: [ "/bin/sh", "-c" ]
-          args:
-            - |
-              set -euxo pipefail
-              wget https://github.com/1Password/vault-plugin-secrets-onepassword/releases/download/v${VAULT_PLUGIN_OP_CONNECT_VERSION}/vault-plugin-secrets-onepassword_${VAULT_PLUGIN_OP_CONNECT_VERSION}_${VAULT_PLUGIN_OP_CONNECT_ARCH}.zip -O /tmp/vault-plugin-secrets-onepassword.zip
-              unzip /tmp/vault-plugin-secrets-onepassword.zip -d /tmp
-              chmod +x /tmp/vault-plugin-secrets-onepassword_v${VAULT_PLUGIN_OP_CONNECT_VERSION}
-              mv /tmp/vault-plugin-secrets-onepassword_v${VAULT_PLUGIN_OP_CONNECT_VERSION} $VAULT_PLUGIN_DIR/op-connect
-          env:
-            # https://github.com/1Password/vault-plugin-secrets-onepassword/releases
-            - name: VAULT_PLUGIN_OP_CONNECT_ARCH
-              value: "linux_amd64"
-            - name: VAULT_PLUGIN_OP_CONNECT_VERSION
-              value: "1.1.0"
-            - name: VAULT_PLUGIN_DIR
-              value: /usr/local/libexec/vault
-          volumeMounts:
-            - name: plugins
-              mountPath: /usr/local/libexec/vault
-#      extraSecretEnvironmentVars:
-#      - envName: CONSUL_HTTP_TOKEN
-#        secretName: sigsrv-infra-microk8s-worker-consul-agent
-#        secretKey: CONSUL_HTTP_TOKEN
----
-# TODO: https://developer.hashicorp.com/vault/tutorials/kubernetes/vault-secrets-operator
-apiVersion: helm.cattle.io/v1
-kind: HelmChart
-metadata:
-  name: vault-secrets-operator
-  namespace: vault
-spec:
-  repo: https://helm.releases.hashicorp.com
-  chart: vault-secrets-operator
-  targetNamespace: vault
-  valuesContent: |-
-    defaultVaultConnection:
-      enabled: true
-    
-      address: "http://vault.vault.svc.cluster.local:8200"
-      skipTLSVerify: false
-      spec:
-        template:
-          spec:
-            containers:
-            - name: manager
-              args:
-              - "--client-cache-persistence-model=direct-encrypted"
+  syncPolicy:
+    automated: null
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
