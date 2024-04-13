@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tailscale-operator
+  namespace: argocd
+spec:
+  project: addons
+
+  sources:
+    - repoURL: "https://pkgs.tailscale.com/helmcharts"
+      targetRevision: "1.62.1"
+      chart: tailscale-operator
+      helm:
+        valueFiles:
+          - $values/zen/sdlc/sigsrv-sdlc/root/k3s/addons/tailscale-operator/tailscale-operator-values.yaml
+    - repoURL: 'git@github.com:sigsrv/infra.git'
+      targetRevision: HEAD
+      ref: values
+
+  destination:
+    name: in-cluster
+    namespace: tailscale
+
+  syncPolicy:
+    automated: null
