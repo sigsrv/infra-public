@@ -262,17 +262,20 @@ resource "lxd_instance_file" "k3s-master-config-0" {
   instance    = lxd_instance.k3s-master[0].name
   target_path = "/etc/nixos/k3s-config"
   mode        = "0600"
-  content = jsonencode({
-    cluster-init       = true
-    server             = null
-    secrets-encryption = true
-    flannel-backend    = "wireguard-native"
-    node-taint         = ["node-role.kubernetes.io/master=true:NoSchedule"]
-    tls-san = [
-      lxd_instance.k3s-master[0].name,
-      "${lxd_instance.k3s-master[0].name}.${var.lxd_dns_domain}",
-    ]
-  })
+  content = jsonencode(merge(
+    {
+      cluster-init       = true
+      server             = null
+      secrets-encryption = true
+      flannel-backend    = "wireguard-native"
+      node-taint         = ["node-role.kubernetes.io/master=true:NoSchedule"]
+      tls-san = [
+        lxd_instance.k3s-master[0].name,
+        "${lxd_instance.k3s-master[0].name}.${var.lxd_dns_domain}",
+      ]
+    },
+    var.k3s_master_config,
+  ))
 }
 
 //noinspection MissingProperty
@@ -282,17 +285,20 @@ resource "lxd_instance_file" "k3s-master-config-1" {
   instance    = lxd_instance.k3s-master[count.index + 1].name
   target_path = "/etc/nixos/k3s-config"
   mode        = "0600"
-  content = jsonencode({
-    cluster-init       = false
-    server             = local.master_k3s_server_url
-    secrets-encryption = true
-    flannel-backend    = "wireguard-native"
-    node-taint         = ["node-role.kubernetes.io/master=true:NoSchedule"]
-    tls-san = [
-      lxd_instance.k3s-master[count.index + 1].name,
-      "${lxd_instance.k3s-master[count.index + 1].name}.${var.lxd_dns_domain}",
-    ]
-  })
+  content = jsonencode(merge(
+    {
+      cluster-init       = false
+      server             = local.master_k3s_server_url
+      secrets-encryption = true
+      flannel-backend    = "wireguard-native"
+      node-taint         = ["node-role.kubernetes.io/master=true:NoSchedule"]
+      tls-san = [
+        lxd_instance.k3s-master[count.index + 1].name,
+        "${lxd_instance.k3s-master[count.index + 1].name}.${var.lxd_dns_domain}",
+      ]
+    },
+    var.k3s_master_config,
+  ))
 }
 
 //noinspection MissingProperty

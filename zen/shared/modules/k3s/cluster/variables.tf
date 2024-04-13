@@ -30,6 +30,11 @@ variable "k3s_cluster_name" {
   type = string
 }
 
+variable "k3s_master_config" {
+  type    = map(any)
+  default = {}
+}
+
 variable "k3s_master_count" {
   type    = number
   default = 3

@@ -42,4 +42,8 @@ module "k3s_cluster" {
   k3s_cluster_name = "sigsrv-sdlc"
   k3s_master_count = 3
   k3s_worker_count = 5
+
+  k3s_master_config = {
+    disable = ["traefik"]
+  }
 }
