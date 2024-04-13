@@ -44,8 +44,6 @@ spec:
     - name: in-cluster
       namespace: "*"
       server: https://kubernetes.default.svc
-  signatureKeys:
-    - keyID: E140ACF016A3604F  # https://keybase.io/ecmaxp/pgp_keys.asc
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"
