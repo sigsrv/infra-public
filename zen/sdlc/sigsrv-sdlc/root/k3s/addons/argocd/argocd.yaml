@@ -36,3 +36,21 @@ spec:
     - hosts:
         - argocd-sdlc
 ---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: addons
+  namespace: argocd
+spec:
+  sourceRepos:
+    - https://charts.jetstack.io
+  destinations:
+    - name: in-cluster
+      namespace: "*"
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

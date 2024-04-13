@@ -1,11 +1,19 @@
-apiVersion: helm.cattle.io/v1
-kind: HelmChart
+apiVersion: argoproj.io/v1alpha1
+kind: Application
 metadata:
   name: cert-manager
-  namespace: cert-manager
+  namespace: argocd
 spec:
-  repo: https://charts.jetstack.io
-  chart: cert-manager
-  targetNamespace: cert-manager
-  # valuesContent: |-
----
+  project: addons
+
+  source:
+    repoURL: "https://charts.jetstack.io"
+    targetRevision: "1.14.4"
+    chart: cert-manager
+
+  destination:
+    name: in-cluster
+    namespace: cert-manager
+
+  syncPolicy:
+    automated: null
