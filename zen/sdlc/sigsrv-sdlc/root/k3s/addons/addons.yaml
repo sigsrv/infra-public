@@ -32,6 +32,11 @@ spec:
       destination:
         name: in-cluster
         namespace: "{{namespace}}"
+
+      syncPolicy:
+        automated: null
+        syncOptions:
+          - CreateNamespace=true
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
