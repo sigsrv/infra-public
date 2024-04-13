@@ -11,10 +11,8 @@ spec:
             namespace: cert-manager
           - name: istio
             namespace: istio-system
-            project: addons-external
           - name: registry
             namespace: container-registry
-            project: addons-internal
   template:
     metadata:
       name: "addon-{{name}}"
