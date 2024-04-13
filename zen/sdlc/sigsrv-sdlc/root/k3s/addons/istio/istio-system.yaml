@@ -1,32 +1,60 @@
-apiVersion: helm.cattle.io/v1
-kind: HelmChart
+apiVersion: argoproj.io/v1alpha1
+kind: Application
 metadata:
   name: istio-base
-  namespace: istio-system
+  namespace: argocd
 spec:
-  repo: https://istio-release.storage.googleapis.com/charts
-  chart: base
-  targetNamespace: istio-system
-  valuesContent: |-
-    defaultRevision: default
+  project: addons
+
+  source:
+    repoURL: "https://istio-release.storage.googleapis.com/charts"
+    targetRevision: "1.21.1"
+    chart: base
+
+  destination:
+    name: in-cluster
+    namespace: istio-system
+
+  syncPolicy:
+    automated: null
 ---
-apiVersion: helm.cattle.io/v1
-kind: HelmChart
+apiVersion: argoproj.io/v1alpha1
+kind: Application
 metadata:
   name: istiod
-  namespace: istio-system
+  namespace: argocd
 spec:
-  repo: https://istio-release.storage.googleapis.com/charts
-  chart: istiod
-  targetNamespace: istio-system
+  project: addons
+
+  source:
+    repoURL: "https://istio-release.storage.googleapis.com/charts"
+    targetRevision: "1.21.1"
+    chart: istiod
+
+  destination:
+    name: in-cluster
+    namespace: istio-system
+
+  syncPolicy:
+    automated: null
 ---
-apiVersion: helm.cattle.io/v1
-kind: HelmChart
+apiVersion: argoproj.io/v1alpha1
+kind: Application
 metadata:
-  name: istio-ingress
-  namespace: istio-ingress
+  name: istio-ingressgateway
+  namespace: argocd
 spec:
-  repo: https://istio-release.storage.googleapis.com/charts
-  chart: gateway
-  targetNamespace: istio-ingress
+  project: addons
+
+  source:
+    repoURL: "https://istio-release.storage.googleapis.com/charts"
+    targetRevision: "1.21.1"
+    chart: gateway
+
+  destination:
+    name: in-cluster
+    namespace: istio-system
+
+  syncPolicy:
+    automated: null
 ---

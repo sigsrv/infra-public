@@ -44,6 +44,7 @@ metadata:
 spec:
   sourceRepos:
     - https://charts.jetstack.io
+    - https://istio-release.storage.googleapis.com/charts
   destinations:
     - name: in-cluster
       namespace: "*"
