@@ -9,7 +9,6 @@ spec:
         elements:
           - name: cert-manager
             namespace: cert-manager
-            project: addons-external
           - name: istio
             namespace: istio-system
             project: addons-external
@@ -21,7 +20,7 @@ spec:
       name: "addon-{{name}}"
       namespace: argocd
     spec:
-      project: "{{project}}"
+      project: addons-app
 
       source:
         path: "zen/sdlc/sigsrv-sdlc/root/k3s/addons/{{name}}"
@@ -35,7 +34,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: addons-internal
+  name: addons-app
   namespace: argocd
 spec:
   sourceRepos:
@@ -54,10 +53,11 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: addons-external
+  name: addons
   namespace: argocd
 spec:
   sourceRepos:
+    - git@github.com:sigsrv/infra.git
     - https://charts.jetstack.io
     - https://istio-release.storage.googleapis.com/charts
   destinations:
