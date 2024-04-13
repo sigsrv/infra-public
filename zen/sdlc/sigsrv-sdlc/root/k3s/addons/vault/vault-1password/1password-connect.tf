@@ -8,6 +8,24 @@ path "secret/data/addon/1password/*" {
 EOF
 }
 
+terraform {
+  backend "kubernetes" {
+    config_path    = "~/.kube/config"
+    config_context = "sigsrv-sdlc"
+    namespace      = "vault"
+    secret_suffix  = "vault-1password"
+  }
+}
+
+provider "kubernetes" {
+  config_path    = "~/.kube/config"
+  config_context = "sigsrv-sdlc"
+}
+
+provider "vault" {
+  address = "https://vault-sdlc.deer-neon.ts.net"
+}
+
 resource "kubernetes_service_account" "this" {
   metadata {
     name      = local.name
