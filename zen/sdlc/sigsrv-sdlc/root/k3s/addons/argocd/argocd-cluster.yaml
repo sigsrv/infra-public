@@ -1,0 +1,49 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cluster
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: cluster-addon
+            namespace: argocd
+            path: "zen/sdlc/sigsrv-sdlc/root/k3s/addons"
+  template:
+    metadata:
+      name: "{{name}}"
+      namespace: argocd
+    spec:
+      project: cluster
+
+      source:
+        path: "{{path}}"
+        repoURL: 'git@github.com:sigsrv/infra.git'
+        targetRevision: HEAD
+
+      destination:
+        name: in-cluster
+        namespace: "{{namespace}}"
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: cluster
+  namespace: argocd
+spec:
+  sourceRepos:
+    - git@github.com:sigsrv/infra.git
+  destinations:
+    - name: in-cluster
+      namespace: "*"
+      server: https://kubernetes.default.svc
+  signatureKeys:
+    - keyID: E140ACF016A3604F  # https://keybase.io/ecmaxp/pgp_keys.asc
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+---
