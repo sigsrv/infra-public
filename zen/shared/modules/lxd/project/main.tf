@@ -47,6 +47,7 @@ resource "lxd_network" "this" {
     "ipv4.nat"     = "true"
     "ipv6.address" = replace(var.lxd_network_ipv6_address, "0/", "1/")
     "ipv6.nat"     = "true"
+    "dns.search"   = join(",", ["1.1.1.1", "1.0.0.1"])
   }
 }
 
@@ -72,6 +73,9 @@ resource "lxd_profile" "this" {
     ))
     "snapshots.expiry"   = "4w"
     "snapshots.schedule" = "@daily"
+    "limits.cpu"         = "2"
+    "limits.memory"      = "4GiB"
+    "migration.stateful" = "true"
   }
 
   device {
@@ -87,9 +91,10 @@ resource "lxd_profile" "this" {
     name = "root"
     type = "disk"
     properties = {
-      pool = local.lxd_storage_pool.default.name
-      path = "/"
-      size = "50GiB"
+      pool         = local.lxd_storage_pool.default.name
+      path         = "/"
+      size         = "50GiB"
+      "size.state" = "4GiB"
     }
   }
 }
