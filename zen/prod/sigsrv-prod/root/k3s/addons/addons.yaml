@@ -1,0 +1,82 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: addons-app
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: registry
+            namespace: container-registry
+          - name: local-path-protected
+            namespace: kube-system
+          - name: tailscale-operator
+            namespace: tailscale
+          - name: vault
+            namespace: vault
+  template:
+    metadata:
+      name: "addon-{{name}}"
+      namespace: argocd
+    spec:
+      project: addons-app
+
+      source:
+        path: "zen/prod/sigsrv-prod/root/k3s/addons/{{name}}"
+        repoURL: 'git@github.com:sigsrv/infra.git'
+        targetRevision: HEAD
+
+      destination:
+        name: in-cluster
+        namespace: "{{namespace}}"
+
+      syncPolicy:
+        automated: null
+        syncOptions:
+          - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: addons-app
+  namespace: argocd
+spec:
+  sourceRepos:
+    - git@github.com:sigsrv/infra.git
+  destinations:
+    - name: in-cluster
+      namespace: "*"
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: addons
+  namespace: argocd
+spec:
+  sourceRepos:
+    - git@github.com:sigsrv/infra.git
+    - https://charts.jetstack.io
+    - https://istio-release.storage.googleapis.com/charts
+    - https://opensource.zalando.com/postgres-operator/charts/postgres-operator
+    - https://opensource.zalando.com/postgres-operator/charts/postgres-operator-ui
+    - https://pkgs.tailscale.com/helmcharts
+    - https://helm.releases.hashicorp.com
+  destinations:
+    - name: in-cluster
+      namespace: "*"
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+---
