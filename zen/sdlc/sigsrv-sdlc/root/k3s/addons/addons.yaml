@@ -11,6 +11,8 @@ spec:
             namespace: cert-manager
           - name: istio
             namespace: istio-system
+          - name: postgres-operator
+            namespace: postgres-operator
           - name: registry
             namespace: container-registry
           - name: local-path-protected
@@ -60,6 +62,7 @@ spec:
     - git@github.com:sigsrv/infra.git
     - https://charts.jetstack.io
     - https://istio-release.storage.googleapis.com/charts
+    - https://opensource.zalando.com/postgres-operator/charts
   destinations:
     - name: in-cluster
       namespace: "*"

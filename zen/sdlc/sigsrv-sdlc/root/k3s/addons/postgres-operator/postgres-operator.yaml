@@ -1,22 +1,44 @@
-apiVersion: helm.cattle.io/v1
-kind: HelmChart
+apiVersion: argoproj.io/v1alpha1
+kind: Application
 metadata:
   name: postgres-operator
-  namespace: postgres-operator
+  namespace: argocd
 spec:
-  repo: https://opensource.zalando.com/postgres-operator/charts/postgres-operator
-  chart: postgres-operator
-  targetNamespace: postgres-operator
-  # valuesContent: |-
+  project: addons
+
+  source:
+    repoURL: "https://opensource.zalando.com/postgres-operator/charts"
+    targetRevision: "1.4.0"
+    chart: postgres-operator
+
+  destination:
+    name: in-cluster
+    namespace: postgres-operator
+
+  syncPolicy:
+    automated: null
+    syncOptions:
+      - CreateNamespace=true
 ---
-apiVersion: helm.cattle.io/v1
-kind: HelmChart
+apiVersion: argoproj.io/v1alpha1
+kind: Application
 metadata:
   name: postgres-operator-ui
-  namespace: postgres-operator
+  namespace: argocd
 spec:
-  repo: https://opensource.zalando.com/postgres-operator/charts/postgres-operator-ui
-  chart: postgres-operator-ui
-  targetNamespace: postgres-operator
-  # valuesContent: |-
+  project: addons
+
+  source:
+    repoURL: "https://opensource.zalando.com/postgres-operator/charts"
+    targetRevision: "1.4.0"
+    chart: postgres-operator-ui
+
+  destination:
+    name: in-cluster
+    namespace: postgres-operator
+
+  syncPolicy:
+    automated: null
+    syncOptions:
+      - CreateNamespace=true
 ---
