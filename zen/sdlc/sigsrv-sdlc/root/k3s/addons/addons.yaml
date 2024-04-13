@@ -11,12 +11,12 @@ spec:
             namespace: cert-manager
           - name: istio
             namespace: istio-system
+          - name: local-path-protected
+            namespace: kube-system
           - name: postgres-operator
             namespace: postgres-operator
           - name: registry
             namespace: container-registry
-          - name: local-path-protected
-            namespace: kube-system
           - name: tailscale-operator
             namespace: tailscale
           - name: vault
@@ -70,11 +70,11 @@ spec:
   sourceRepos:
     - git@github.com:sigsrv/infra.git
     - https://charts.jetstack.io
+    - https://helm.releases.hashicorp.com
     - https://istio-release.storage.googleapis.com/charts
     - https://opensource.zalando.com/postgres-operator/charts/postgres-operator
     - https://opensource.zalando.com/postgres-operator/charts/postgres-operator-ui
     - https://pkgs.tailscale.com/helmcharts
-    - https://helm.releases.hashicorp.com
   destinations:
     - name: in-cluster
       namespace: "*"
