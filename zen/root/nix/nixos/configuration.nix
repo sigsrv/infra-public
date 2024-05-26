@@ -18,6 +18,9 @@
 
   # boot
   boot.kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
+  boot.kernelParams = [
+    "zfs.zfs_arc_max=34359738368"  # 32 GB
+  ];
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.efi.efiSysMountPoint = "/boot";
@@ -60,9 +63,9 @@
     "3.pool.ntp.org"
   ];
   networking.vlans = {
-    "enp4s0.100" = {
+    "enp5s0.100" = {
       id = 100;
-      interface = "enp4s0";
+      interface = "enp5s0";
     };
   };
   networking.macvlans = {};
@@ -74,7 +77,7 @@
         allowedTCPPorts = [];
         allowedUDPPorts = [];
       };
-      "enp4s0.100" = {
+      "enp5s0.100" = {
         allowedTCPPorts = config.services.openssh.ports;
       };
       "lxdbr0" = { allowedUDPPorts = [ 53 67 1900 5351 ]; };
@@ -84,7 +87,7 @@
       "sigsrv-sdlc" = { allowedUDPPorts = [ 53 67 1900 5351 ]; };
       "sigsrv-prod" = { allowedUDPPorts = [ 53 67 1900 5351 ]; };
     };
-    trustedInterfaces = [];
+    trustedInterfaces = ["enp5s0" "enp5s0.100"];
     logRefusedConnections = true;
     logRefusedPackets = true;
     logReversePathDrops = true;
@@ -101,7 +104,7 @@
     ];
 
     internalInterfaces = [
-      "enp4s0.100"
+      "enp5s0.100"
       "lxdbr0"
       "userbr0"
       "sigsrv-nas"
@@ -185,7 +188,7 @@
   # datadog-agent
   services.datadog-agent = {
     enable = true;
-    package = inputs.nixpkgs-stable.legacyPackages.${pkgs.system}.datadog-agent;
+    package = inputs.nixpkgs-legacy.legacyPackages.${pkgs.system}.datadog-agent;
     # https://ap1.datadoghq.com/organization-settings/api-keys?id=07deaf4e-6196-4b52-91f6-a1514f89d148
     site = "ap1.datadoghq.com";
     apiKeyFile = "/etc/datadog-keys/datadog_api_key";
