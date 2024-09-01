@@ -6,6 +6,11 @@ locals {
   vault_internal_url = "http://vault-internal.vault.svc.cluster.local:8200"
 }
 
+# vault apps
+module "vault-apps" {
+  source = "./apps"
+}
+
 # vault auth
 module "vault-auth-kubernetes" {
   source = "./auth/kubernetes"
