@@ -14,11 +14,12 @@ spec:
         valuesObject:
           operatorConfig:
             hostname: sigsrv-prod-tailscale-operator
-            defaultTags: {tag:sigsrv-prod-tailscale-operator}
+            defaultTags:
+              - tag:sigsrv-prod-tailscale-operator
           proxyConfig:
             defaultTags: tag:sigsrv-prod-tailscale-service
             apiServerProxyConfig:
-                mode: true
+              mode: true
 
   destination:
     name: in-cluster
