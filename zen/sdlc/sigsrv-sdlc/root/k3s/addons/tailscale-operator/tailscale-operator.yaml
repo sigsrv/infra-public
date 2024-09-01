@@ -11,11 +11,14 @@ spec:
       targetRevision: "1.62.1"
       chart: tailscale-operator
       helm:
-        valueFiles:
-          - $values/zen/sdlc/sigsrv-sdlc/root/k3s/addons/tailscale-operator/tailscale-operator-values.yaml
-    - repoURL: 'git@github.com:sigsrv/infra.git'
-      targetRevision: HEAD
-      ref: values
+        valuesObject:
+          operatorConfig:
+            hostname: sigsrv-sdlc-tailscale-operator
+            defaultTags: {tag:sigsrv-sdlc-tailscale-operator}
+          proxyConfig:
+            defaultTags: tag:sigsrv-sdlc-tailscale-service
+            apiServerProxyConfig:
+                mode: true
 
   destination:
     name: in-cluster
