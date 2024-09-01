@@ -7,6 +7,8 @@ spec:
   generators:
     - list:
         elements:
+          - name: 1password-connect
+            namespace: 1password-connect
           - name: cert-manager
             namespace: cert-manager
           - name: istio
@@ -75,6 +77,7 @@ spec:
     - https://opensource.zalando.com/postgres-operator/charts/postgres-operator
     - https://opensource.zalando.com/postgres-operator/charts/postgres-operator-ui
     - https://pkgs.tailscale.com/helmcharts
+    - https://1password.github.io/connect-helm-charts
   destinations:
     - name: in-cluster
       namespace: "*"
