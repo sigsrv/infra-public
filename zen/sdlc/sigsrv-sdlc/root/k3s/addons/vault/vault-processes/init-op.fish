@@ -11,5 +11,5 @@ vault kv put -cas 0 secret/addon/1password/onepassword-token token=(op read $OP_
 # setup op
 vault secrets enable --path="op" op-connect
 vault write op/config \
-    op_connect_host=http://onepassword-connect.1password.svc.cluster.local:8080 \
+    op_connect_host=http://onepassword-connect.1password-connect.svc.cluster.local:8080 \
     op_connect_token=(vault kv get -field=token secret/addon/1password/onepassword-token)
