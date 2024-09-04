@@ -16,6 +16,9 @@
   # nix
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+  # zfs
+  services.zfs.autoScrub.enable = true;
+
   # boot
   boot.kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
   boot.kernelParams = [
