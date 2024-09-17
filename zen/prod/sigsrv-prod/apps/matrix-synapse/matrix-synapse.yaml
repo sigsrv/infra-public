@@ -1,0 +1,46 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: matrix-synapse
+  namespace: argocd
+spec:
+  project: apps
+
+  sources:
+    - repoURL: "https://ananace.gitlab.io/charts"
+      targetRevision: "3.9.11"
+      chart: matrix-synapse
+      helm:
+        valuesObject:
+          serverName: matrix-prod.deer-neon.ts.net
+          wellknown:
+            enabled: true
+
+  destination:
+    name: in-cluster
+    namespace: synapse
+
+  syncPolicy:
+    automated: null
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: matrix
+  namespace: synapse
+spec:
+  ingressClassName: tailscale
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: matrix-synapse
+                port:
+                  number: 8008
+  tls:
+    - hosts:
+        - matrix-prod
+---
