@@ -7,6 +7,9 @@ spec:
   generators:
     - list:
         elements:
+          - name: cluster-apps
+            namespace: argocd
+            path: "zen/sdlc/sigsrv-sdlc/apps"
           - name: cluster-addon
             namespace: argocd
             path: "zen/sdlc/sigsrv-sdlc/cluster/addons"
