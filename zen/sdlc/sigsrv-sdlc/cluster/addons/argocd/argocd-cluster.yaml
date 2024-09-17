@@ -9,7 +9,7 @@ spec:
         elements:
           - name: cluster-addon
             namespace: argocd
-            path: "zen/prod/sigsrv-prod/root/k3s/addons"
+            path: "zen/sdlc/sigsrv-sdlc/cluster/addons"
   template:
     metadata:
       name: "{{name}}"

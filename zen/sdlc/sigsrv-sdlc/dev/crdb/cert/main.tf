@@ -13,7 +13,7 @@ locals {
 }
 
 module "vault_app_secret" {
-  source = "../../../root/vault/modules/vault-app-secret"
+  source = "../../../cluster/addons/vault/policy/modules/vault-app-secret"
 
   kubernetes_cluster_name  = local.kubernetes_cluster_name
   kubernetes_app_namespace = local.kubernetes_app_namespace
@@ -21,7 +21,7 @@ module "vault_app_secret" {
 }
 
 module "vault_app_pki" {
-  source = "../../../root/vault/modules/vault-app-pki"
+  source = "../../../cluster/addons/vault/policy/modules/vault-app-pki"
 
   kubernetes_cluster_name  = local.kubernetes_cluster_name
   kubernetes_app_namespace = local.kubernetes_app_namespace
@@ -35,7 +35,7 @@ module "vault_app_pki" {
 }
 
 module "vault_app_cockroachdb_pki" {
-  source = "../../../root/vault/modules/vault-app-pki"
+  source = "../../../cluster/addons/vault/policy/modules/vault-app-pki"
 
   kubernetes_cluster_name  = local.kubernetes_cluster_name
   kubernetes_app_namespace = local.kubernetes_app_namespace

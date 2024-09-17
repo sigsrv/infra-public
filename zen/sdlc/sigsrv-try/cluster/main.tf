@@ -19,17 +19,17 @@ provider "lxd" {
 }
 
 module "lxd_project" {
-  source = "../../../../../shared/modules/lxd/project"
+  source = "../../../shared/modules/lxd/project"
 
   lxd_remote_name          = "sigsrv"
-  lxd_project_name         = "sigsrv-sdlc"
+  lxd_project_name         = "sigsrv-try"
   lxd_storage_pool_name    = "sigsrv-lxd"
-  lxd_network_ipv4_address = "10.128.0.0/16"
-  lxd_network_ipv6_address = "fdec:128::0/64"
+  lxd_network_ipv4_address = "10.192.0.0/16"
+  lxd_network_ipv6_address = "fdec:192::0/64"
 }
 
 module "k3s_cluster" {
-  source = "../../../../../shared/modules/k3s/cluster"
+  source = "../../../shared/modules/k3s/cluster"
 
   lxd_remote_name       = "sigsrv"
   lxd_project_name      = module.lxd_project.lxd_project_name
@@ -39,11 +39,7 @@ module "k3s_cluster" {
   lxd_dns_domain        = module.lxd_project.lxd_dns_domain
   lxd_nixos_image_alias = "nixos-unstable-vm"
 
-  k3s_cluster_name = "sigsrv-sdlc"
-  k3s_master_count = 3
-  k3s_worker_count = 5
-
-  k3s_master_config = {
-    disable = ["traefik"]
-  }
+  k3s_cluster_name = "sigsrv-try"
+  k3s_master_count = 2
+  k3s_worker_count = 2
 }

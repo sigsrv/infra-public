@@ -18,7 +18,7 @@ provider "lxd" {
 }
 
 module "lxd_project" {
-  source = "../../../../../shared/modules/lxd/project"
+  source = "../../../shared/modules/lxd/project"
 
   lxd_remote_name          = "sigsrv"
   lxd_project_name         = "sigsrv-prod"
@@ -28,7 +28,7 @@ module "lxd_project" {
 }
 
 module "k3s_cluster" {
-  source = "../../../../../shared/modules/k3s/cluster"
+  source = "../../../shared/modules/k3s/cluster"
 
   lxd_remote_name       = "sigsrv"
   lxd_project_name      = module.lxd_project.lxd_project_name

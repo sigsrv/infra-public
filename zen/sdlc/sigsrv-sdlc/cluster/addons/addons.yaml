@@ -9,8 +9,14 @@ spec:
         elements:
           - name: 1password-connect
             namespace: 1password-connect
+          - name: cert-manager
+            namespace: cert-manager
+          - name: istio
+            namespace: istio-system
           - name: local-path-protected
             namespace: kube-system
+          - name: postgres-operator
+            namespace: postgres-operator
           - name: registry
             namespace: container-registry
           - name: tailscale-operator
@@ -25,7 +31,7 @@ spec:
       project: addons-app
 
       source:
-        path: "zen/prod/sigsrv-prod/root/k3s/addons/{{name}}"
+        path: "zen/sdlc/sigsrv-sdlc/cluster/addons/{{name}}"
         repoURL: 'git@github.com:sigsrv/infra.git'
         targetRevision: HEAD
 
