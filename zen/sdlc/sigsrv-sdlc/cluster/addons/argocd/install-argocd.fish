@@ -1,13 +1,17 @@
 #!/usr/bin/env fish
-kubectl --context sigsrv-sdlc create ns argocd
-kubectl --context sigsrv-sdlc apply -k "https://github.com/argoproj/argo-cd/manifests/crds?ref=stable"
-kubectl --context sigsrv-sdlc apply -f argocd.yaml
+function kubectl
+    command kubectl --context "sigsrv-sdlc" --namespace "argocd" $argv
+end
+
+kubectl create ns argocd
+kubectl apply -k "https://github.com/argoproj/argo-cd/manifests/crds?ref=stable"
+kubectl apply -f argocd.yaml
 
 argocd login \
     --name sigsrv-sdlc \
     argocd-sdlc.deer-neon.ts.net \
     --username admin \
-    --password (kubectl view-secret --context sigsrv-sdlc -n argocd argocd-initial-admin-secret password -q)
+    --password (kubectl view-secret argocd-initial-admin-secret password -q)
 
 curl "https://keybase.io/ecmaxp/pgp_keys.asc" > pgp_keys.asc
 argocd gpg add --from pgp_keys.asc
@@ -22,4 +26,4 @@ argocd repo add \
     git@github.com:sigsrv/infra.git
 rm -f /tmp/argocd-ssh.key
 
-kubectl --context sigsrv-prod apply -f argocd-cluster.yaml
+kubectl apply -f argocd-cluster.yaml

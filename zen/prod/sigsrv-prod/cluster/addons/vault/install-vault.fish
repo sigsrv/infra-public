@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 function kubectl
-    command kubectl --context "sigsrv-sdlc" --namespace "vault" $argv
+    return command kubectl --context "sigsrv-prod" --namespace "vault" $argv
 end
 
 kubectl create ns vault
