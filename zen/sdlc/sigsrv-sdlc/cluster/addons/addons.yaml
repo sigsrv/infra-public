@@ -71,13 +71,13 @@ metadata:
 spec:
   sourceRepos:
     - git@github.com:sigsrv/infra.git
+    - https://1password.github.io/connect-helm-charts
     - https://charts.jetstack.io
     - https://helm.releases.hashicorp.com
     - https://istio-release.storage.googleapis.com/charts
     - https://opensource.zalando.com/postgres-operator/charts/postgres-operator
     - https://opensource.zalando.com/postgres-operator/charts/postgres-operator-ui
     - https://pkgs.tailscale.com/helmcharts
-    - https://1password.github.io/connect-helm-charts
   destinations:
     - name: in-cluster
       namespace: "*"
