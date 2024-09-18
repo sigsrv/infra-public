@@ -1,0 +1,42 @@
+apiVersion: crdb.cockroachlabs.com/v1alpha1
+kind: CrdbCluster
+metadata:
+  name: cockroachdb-simple
+  namespace: dev
+spec:
+  dataStore:
+    pvc:
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: "10Gi"
+        volumeMode: Filesystem
+        storageClassName: "rook-ceph-fs"
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2Gi
+    limits:
+      cpu: 2
+      memory: 8Gi
+  tlsEnabled: true
+  image:
+    name: cockroachdb/cockroach:v24.2.0
+  nodes: 3
+  additionalLabels:
+    crdb: is-cool
+
+  affinity:
+    podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/instance
+                operator: In
+                values:
+                - cockroachdb
+            topologyKey: kubernetes.io/hostname
