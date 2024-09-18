@@ -19,6 +19,8 @@ spec:
             namespace: postgres-operator
           - name: registry
             namespace: container-registry
+          - name: rook-ceph
+            namespace: rook-ceph
           - name: tailscale-operator
             namespace: tailscale
           - name: vault
@@ -73,6 +75,7 @@ spec:
     - git@github.com:sigsrv/infra.git
     - https://1password.github.io/connect-helm-charts
     - https://charts.jetstack.io
+    - https://charts.rook.io/release
     - https://helm.releases.hashicorp.com
     - https://istio-release.storage.googleapis.com/charts
     - https://opensource.zalando.com/postgres-operator/charts/postgres-operator

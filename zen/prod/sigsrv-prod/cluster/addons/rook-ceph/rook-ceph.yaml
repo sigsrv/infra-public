@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rook-ceph
+  namespace: argocd
+spec:
+  project: addons
+
+  source:
+    repoURL: "https://charts.rook.io/release"
+    targetRevision: "v1.15.1"
+    chart: rook-ceph
+    helm:
+      valuesObject:
+        crds:
+          enabled: false
+
+        # nixos
+        csi:
+          csiRBDPluginVolume:
+            - name: lib-modules
+              hostPath:
+                path: /run/booted-system/kernel-modules/lib/modules/
+            - name: host-nix
+              hostPath:
+                path: /nix
+          csiRBDPluginVolumeMount:
+            - name: host-nix
+              mountPath: /nix
+              readOnly: true
+          csiCephFSPluginVolume:
+            - name: lib-modules
+              hostPath:
+                path: /run/booted-system/kernel-modules/lib/modules/
+            - name: host-nix
+              hostPath:
+                path: /nix
+          csiCephFSPluginVolumeMount:
+            - name: host-nix
+              mountPath: /nix
+              readOnly: true
+
+  destination:
+    name: in-cluster
+    namespace: rook-ceph
+
+  syncPolicy:
+    automated: null
