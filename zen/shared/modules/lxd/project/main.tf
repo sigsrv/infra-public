@@ -28,7 +28,7 @@ resource "lxd_project" "this" {
     "features.networks.zones"  = "true"
     "limits.containers"        = "16"
     "limits.cpu"               = "32"
-    "limits.disk"              = "10TiB"
+    "limits.disk"              = "20TiB"
     "limits.instances"         = "32"
     "limits.memory"            = "64GiB"
     "limits.networks"          = "4"

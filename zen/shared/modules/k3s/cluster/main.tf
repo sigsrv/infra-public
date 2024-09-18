@@ -45,6 +45,7 @@ resource "lxd_instance" "k3s-worker" {
   profiles = [
     var.lxd_profile_name,
     lxd_profile.k3s-worker-data[count.index].name,
+    lxd_profile.k3s-worker-rook-ceph[count.index].name,
   ]
 
   limits = {
@@ -93,6 +94,22 @@ resource "lxd_profile" "k3s-worker-data" {
   }
 }
 
+resource "lxd_profile" "k3s-worker-rook-ceph" {
+  count       = var.k3s_worker_count
+  project     = var.lxd_project_name
+  name        = "${var.k3s_cluster_name}-k3s-worker-rook-ceph-${count.index}"
+  description = var.k3s_cluster_name
+
+  device {
+    name = "k3s-worker-rook-ceph"
+    type = "disk"
+    properties = {
+      pool   = var.lxd_storage_pool_name
+      source = lxd_volume.k3s-worker-rook-ceph[count.index].name
+    }
+  }
+}
+
 resource "lxd_volume" "k3s-master-data" {
   count        = var.k3s_master_count
   project      = var.lxd_project_name
@@ -115,6 +132,24 @@ resource "lxd_volume" "k3s-worker-data" {
   count        = var.k3s_worker_count
   project      = var.lxd_project_name
   name         = "${var.k3s_cluster_name}-k3s-worker-data-${count.index}"
+  pool         = var.lxd_storage_pool_name
+  content_type = "block"
+
+  config = {
+    size                 = "1TiB"
+    "snapshots.expiry"   = "4w"
+    "snapshots.schedule" = "@daily"
+  }
+
+  lifecycle {
+    prevent_destroy = false
+  }
+}
+
+resource "lxd_volume" "k3s-worker-rook-ceph" {
+  count        = var.k3s_worker_count
+  project      = var.lxd_project_name
+  name         = "${var.k3s_cluster_name}-k3s-worker-rook-ceph-${count.index}"
   pool         = var.lxd_storage_pool_name
   content_type = "block"
 
@@ -234,6 +269,7 @@ module "k3s-worker-nixos" {
 
   depends_on = [
     null_resource.k3s-worker-data-format,
+    lxd_volume.k3s-worker-rook-ceph, // format is not required for this volume
   ]
 
   lxd_remote_name   = var.lxd_remote_name
