@@ -1,8 +1,8 @@
 resource "vault_mount" "pki" {
   type                      = "pki"
   path                      = "pki"
-  default_lease_ttl_seconds = 157680000 # 5y
-  max_lease_ttl_seconds     = 315360000 # 10y
+  default_lease_ttl_seconds = 315360000  # 10y
+  max_lease_ttl_seconds     = 3153600000 # 100y
 }
 
 resource "vault_pki_secret_backend_config_urls" "pki" {
@@ -21,7 +21,7 @@ resource "vault_pki_secret_backend_root_cert" "root_ca" {
   backend              = vault_mount.pki.path
   type                 = "internal"
   common_name          = "${var.kubernetes_cluster_name} Root CA"
-  ttl                  = "87600h" # 10 years
+  ttl                  = "876000h" # 100 years
   format               = "pem"
   private_key_format   = "der"
   key_type             = "ec"
