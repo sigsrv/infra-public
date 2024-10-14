@@ -1,13 +1,7 @@
 locals {
   app_roles = {
-    "langbot/langbot-openai" = {
-      "op/vaults/sigsrv-prod/items/sigsrv-prod-langbot-secrets-openai" = ["read"]
-    }
-    "langbot/langbot-claude" = {
-      "op/vaults/sigsrv-prod/items/sigsrv-prod-langbot-secrets-claude" = ["read"]
-    }
-    "langbot/langbot-gemini" = {
-      "op/vaults/sigsrv-prod/items/sigsrv-prod-langbot-secrets-gemini" = ["read"]
+    "langbot/langbot" = {
+      "op/vaults/sigsrv-prod/items/sigsrv-prod-langbot-secrets-*" = ["read"]
     }
   }
 }
