@@ -16,10 +16,10 @@ spec:
   resources:
     requests:
       cpu: 100m
-      memory: 1Gi
+      memory: 512Mi
     limits:
       cpu: 1
-      memory: 2Gi
+      memory: 512Mi
   tlsEnabled: true
   clientTLSSecret: cockroachdb-root
   nodeTLSSecret: cockroachdb-node

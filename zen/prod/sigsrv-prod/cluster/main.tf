@@ -22,7 +22,7 @@ module "lxd_project" {
 
   lxd_remote_name          = "sigsrv"
   lxd_project_name         = "sigsrv-prod"
-  lxd_storage_pool_name    = "sigsrv-lxd"
+  lxd_storage_pool_name    = "nvme"
   lxd_network_ipv4_address = "10.64.0.0/16"
   lxd_network_ipv6_address = "fdec:64::0/64"
 }

@@ -76,6 +76,7 @@ spec:
     - https://1password.github.io/connect-helm-charts
     - https://charts.jetstack.io
     - https://charts.rook.io/release
+    - https://github.com/knative/operator.git
     - https://helm.releases.hashicorp.com
     - https://istio-release.storage.googleapis.com/charts
     - https://opensource.zalando.com/postgres-operator/charts/postgres-operator

@@ -15,6 +15,14 @@ spec:
           serverName: matrix-sdlc.deer-neon.ts.net
           wellknown:
             enabled: true
+            externalPostgresql:
+              host: matrix-synapse-postgres
+              port: 5432
+              username: synapse
+              password: synapse
+              database: synapse
+              sslmode: prefer
+              extraArgs: {}
 
   destination:
     name: in-cluster

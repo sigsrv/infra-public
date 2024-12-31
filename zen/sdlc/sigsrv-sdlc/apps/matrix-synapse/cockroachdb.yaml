@@ -1,8 +1,8 @@
 apiVersion: crdb.cockroachlabs.com/v1alpha1
 kind: CrdbCluster
 metadata:
-  name: cockroachdb-simple
-  namespace: dev
+  name: matrix-synapse-cockroachdb
+  namespace: synapse
 spec:
   dataStore:
     pvc:
@@ -13,30 +13,28 @@ spec:
           requests:
             storage: "10Gi"
         volumeMode: Filesystem
-        storageClassName: "rook-ceph-fs"
+        storageClassName: "rook-ceph-fs-protected"
   resources:
     requests:
       cpu: 100m
-      memory: 512Mi
+      memory: 1Gi
     limits:
       cpu: 1
-      memory: 512Mi
+      memory: 1Gi
   tlsEnabled: true
   image:
     name: cockroachdb/cockroach:v24.2.0
   nodes: 3
-  additionalLabels:
-    crdb: is-cool
 
   affinity:
     podAntiAffinity:
         preferredDuringSchedulingIgnoredDuringExecution:
         - weight: 100
           podAffinityTerm:
+            topologyKey: kubernetes.io/hostname
             labelSelector:
               matchExpressions:
               - key: app.kubernetes.io/instance
                 operator: In
                 values:
                 - cockroachdb
-            topologyKey: kubernetes.io/hostname

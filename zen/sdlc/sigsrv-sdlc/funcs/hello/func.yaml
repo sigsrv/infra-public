@@ -1,8 +1,8 @@
 specVersion: 0.35.0
 name: hello
 runtime: python
-registry: registry.deer-neon.ts.net
-image: registry.deer-neon.ts.net/hello:latest
+registry: registry-sdlc.deer-neon.ts.net
+image: registry-sdlc.deer-neon.ts.net/hello:latest
 imageDigest: sha256:8c8ea4bc260f7b15d1d3c92872aa54bbc634e018087bed53a58f602fdf8380e9
 created: 2023-10-22T21:10:49.119274+09:00
 build:
