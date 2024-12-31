@@ -347,3 +347,6 @@ terraform.rc
 terragrunt-debug.tfvars.json
 
 # End of https://www.toptal.com/developers/gitignore/api/terraform,terragrunt,helm,python,rust,go,intellij+all
+
+kubeconfig
+talosconfig
