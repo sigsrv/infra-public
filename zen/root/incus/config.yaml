@@ -1,5 +1,0 @@
-config:
-  cluster.https_address: sigsrv.deer-neon.ts.net:8443
-  core.https_address: sigsrv.deer-neon.ts.net:8443
-  core.metrics_address: sigsrv.deer-neon.ts.net:8444
-  user.ui_title: sigsrv
