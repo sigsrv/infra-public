@@ -17,6 +17,10 @@ resource "aws_acm_certificate" "this" {
   tags = {
     Name = local.name
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_s3_bucket" "this" {
@@ -118,18 +122,4 @@ function handler(event) {
   }
 }
 EOF
-}
-
-resource "aws_route53_record" "this" {
-  for_each = var.route53_records
-
-  zone_id = each.value.zone_id
-  name    = each.value.name != null ? each.value.name : ""
-  type    = "A"
-
-  alias {
-    name                   = aws_cloudfront_distribution.this.domain_name
-    zone_id                = aws_cloudfront_distribution.this.hosted_zone_id
-    evaluate_target_health = false
-  }
 }

@@ -14,7 +14,6 @@ module "cloudfront_redirector" {
   domain_names = [
     "ecmaxp.kr",
     "ecmaxp.pe.kr",
-    "ecmaxp.box",
   ]
 
   target_url = "https://keybase.io/ecmaxp"
