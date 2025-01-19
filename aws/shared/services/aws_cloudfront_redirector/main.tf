@@ -1,12 +1,3 @@
-module "metadata" {
-  source = "./aws_metadata"
-}
-
-locals {
-  env  = module.metadata.env
-  name = module.metadata.name
-}
-
 resource "aws_acm_certificate" "this" {
   provider = aws.global
 
@@ -15,7 +6,7 @@ resource "aws_acm_certificate" "this" {
   validation_method         = "EMAIL"
 
   tags = {
-    Name = local.name
+    Name = var.name
   }
 
   lifecycle {
@@ -84,7 +75,7 @@ resource "aws_cloudfront_distribution" "this" {
   }
 
   tags = {
-    Name = local.name
+    Name = var.name
   }
 }
 
@@ -92,7 +83,7 @@ resource "aws_cloudfront_function" "this" {
   provider = aws.global
   publish  = true # debug only
 
-  name    = replace(local.name, ".", "-")
+  name    = replace(var.name, ".", "-")
   runtime = "cloudfront-js-2.0"
   code    = <<EOF
 function handler(event) {

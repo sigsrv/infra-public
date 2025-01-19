@@ -1,13 +1,12 @@
 module "aws_cloudfront_redirector" {
   source = "../../../../shared/services/aws_cloudfront_redirector"
 
-  domain_names = [
-    "sigsrv.net",
-  ]
+  name         = local.name
+  domain_names = var.domain_names
+  target_url   = var.target_url
 
-  target_url = "https://keybase.io/sigsrv"
-}
-
-output "domain_name" {
-  value = module.aws_cloudfront_redirector.domain_name
+  providers = {
+    aws        = aws
+    aws.global = aws.global
+  }
 }

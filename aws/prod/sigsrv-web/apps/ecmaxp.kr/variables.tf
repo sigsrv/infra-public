@@ -1,7 +1,3 @@
-variable "name" {
-  type = string
-}
-
 variable "domain_names" {
   type = list(string)
 }
