@@ -8,8 +8,8 @@ terraform {
   }
 }
 
-module "cloudfront_redirector" {
-  source = "../../../../shared/packages/aws/cloudfront_redirector"
+module "aws_cloudfront_redirector" {
+  source = "../../../../shared/services/aws_cloudfront_redirector"
 
   domain_names = [
     "ecmaxp.kr",
@@ -20,5 +20,5 @@ module "cloudfront_redirector" {
 }
 
 output "domain_name" {
-  value = module.cloudfront_redirector.domain_name
+  value = module.aws_cloudfront_redirector.domain_name
 }

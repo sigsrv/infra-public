@@ -1,5 +1,5 @@
 module "metadata" {
-  source = "../../../modules/aws/metadata"
+  source = "./aws_metadata"
 }
 
 locals {
