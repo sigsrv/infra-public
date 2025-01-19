@@ -1,13 +1,3 @@
-terraform {
-  cloud {
-    organization = "sigsrv-prod-web"
-
-    workspaces {
-      name = "apps-sigsrv-net"
-    }
-  }
-}
-
 module "aws_cloudfront_redirector" {
   source = "../../../../shared/services/aws_cloudfront_redirector"
 
