@@ -3,7 +3,7 @@ terraform {
     organization = "sigsrv-prod-web"
 
     workspaces {
-      name = "apps-sigsrv-net"
+      name = "apps-aws_cloudfront_redirectors"
     }
   }
 }
