@@ -7,4 +7,4 @@ aws_account_id: "113283726464"
 aws_profile: sso-sigsrv-workloads-sdlc
 aws_region: ap-northeast-2
 
-public_domain: sdlc.box
+public_domain: sigsrv.dev

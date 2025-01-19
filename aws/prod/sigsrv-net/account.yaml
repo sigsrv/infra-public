@@ -7,4 +7,4 @@ aws_account_id: "466090905152"
 aws_profile: sso-sigsrv-workloads-prod-net
 aws_region: ap-northeast-2
 
-public_domain: prod.box
+public_domain: sigsrv.net
