@@ -1,7 +1,27 @@
 terraform {
-  backend "local" {}
+  backend "s3" {
+    profile        = local.tfstate.profile
+    region         = local.tfstate.region
+    assume_role    = local.tfstate.assume_role
+    bucket         = local.tfstate.bucket
+    key            = local.tfstate.key
+    encrypt        = local.tfstate.encrypt
+    dynamodb_table = local.tfstate.dynamodb_table
+  }
 
   encryption {
+    key_provider "aws_kms" "kms_key" {
+      profile     = local.tfstate.profile
+      region      = local.tfstate.region
+      assume_role = local.tfstate.assume_role
+      kms_key_id  = local.tfstate.kms_key_id
+      key_spec    = local.tfstate.key_spec
+    }
+
+    method "aes_gcm" "kms_key" {
+      keys = key_provider.aws_kms.kms_key
+    }
+
     # "op://sigsrv-prod/sigsrv-infra tfstate encryption/password"
     key_provider "pbkdf2" "tfstate_encryption_passphrase" {
       passphrase = var.tfstate_encryption_passphrase
@@ -13,12 +33,20 @@ terraform {
 
     state {
       enforced = true
-      method   = method.aes_gcm.tfstate_encryption_passphrase
+      method   = method.aes_gcm.kms_key
+
+      fallback {
+        method = method.aes_gcm.tfstate_encryption_passphrase
+      }
     }
 
     plan {
       enforced = true
-      method   = method.aes_gcm.tfstate_encryption_passphrase
+      method   = method.aes_gcm.kms_key
+
+      fallback {
+        method = method.aes_gcm.tfstate_encryption_passphrase
+      }
     }
   }
 }

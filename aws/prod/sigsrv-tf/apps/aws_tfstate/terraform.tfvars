@@ -4,15 +4,23 @@ s3_bucket_name      = "sigsrv-infra-tfstate"
 dynamodb_table_name = "sigsrv-infra-tfstate-lock"
 
 aws_accounts = {
+  # root
+  "sigsrv-root" = "607292096646"
   # prod
   "sigsrv-workloads-prod-nas" = "428959989222"
   "sigsrv-workloads-prod-net" = "466090905152"
+  "sigsrv-workloads-prod-tf"  = "820242943905"
   "sigsrv-workloads-prod-web" = "058264144717"
   # sdlc
   "sigsrv-workloads-sdlc" = "113283726464"
 }
 
 s3_object_keys = {
+  # root
+  "sigsrv-root" = [
+    "test/root/sigsrv-root",
+    "aws/root",
+  ]
   # prod
   "sigsrv-workloads-prod-nas" = [
     "test/prod/sigsrv-nas",
@@ -24,6 +32,10 @@ s3_object_keys = {
     "clusters/prod",
     "clusters/shared",
     "users",
+  ]
+  "sigsrv-workloads-prod-tf" = [
+    "test/prod/sigsrv-tf",
+    "aws/prod/sigsrv-tf",
   ]
   "sigsrv-workloads-prod-web" = [
     "test/prod/sigsrv-web",
