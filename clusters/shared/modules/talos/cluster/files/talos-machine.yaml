@@ -1,0 +1,29 @@
+version: v1alpha1
+machine:
+  network:
+    hostname: ${hostname}
+  install:
+    disk: /dev/sda
+    image: ${install_image}
+  systemDiskEncryption:
+    ephemeral:
+      provider: luks2
+      keys:
+        - slot: 0
+          tpm: {}
+    state:
+      provider: luks2
+      keys:
+        - slot: 0
+          tpm: {}
+  features:
+    rbac: true
+    stableHostname: true
+    apidCheckExtKeyUsage: true
+    diskQuotaSupport: true
+    kubePrism:
+      enabled: true
+      port: 7445
+    hostDNS:
+      enabled: true
+      forwardKubeDNSToHost: true

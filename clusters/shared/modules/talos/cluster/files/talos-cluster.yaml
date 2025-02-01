@@ -1,0 +1,15 @@
+version: v1alpha1
+cluster:
+  network:
+    dnsDomain: cluster.local
+    podSubnets:
+      - 10.244.0.0/16
+    serviceSubnets:
+      - 10.96.0.0/12
+  discovery:
+    enabled: true
+    registries:
+      kubernetes:
+        disabled: true
+      service:
+        endpoint: https://discovery.talos.dev/
