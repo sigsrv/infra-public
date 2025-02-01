@@ -57,30 +57,6 @@ locals {
     ? "${var.aws_account_name}/${local.package_name}"
     : "${var.aws_account_name}/${var.env}/${local.package_name}"
   )
-
-  tfstate = {
-    # aws
-    region  = "ap-northeast-2"
-    profile = var.aws_profile
-    assume_role = {
-      role_arn = "arn:aws:iam::820242943905:role/sigsrv-infra-tfstate-${var.aws_account_name}"
-    }
-
-    # dynamodb
-    dynamodb_table = "sigsrv-infra-tfstate-lock"
-
-    # s3
-    bucket = "sigsrv-infra-tfstate"
-    key = "${trimprefix(
-      abspath(path.root),
-      "/Users/ecmaxp/Library/Mobile Documents/com~apple~CloudDocs/Projects/sigsrv-infra/"
-    )}/terraform.tfstate"
-    encrypt = true
-
-    # kms
-    kms_key_id = "alias/sigsrv-infra-tfstate-kms-key"
-    key_spec   = "AES_256"
-  }
 }
 
 # variables
