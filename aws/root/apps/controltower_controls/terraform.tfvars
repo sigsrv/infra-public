@@ -1,7 +1,3 @@
-aws_profile    = "sigsrv-root"
-aws_account_id = "607292096646" # sigsrv
-aws_region     = "ap-northeast-2"
-
 enabled_safe_controls = {
   "Sandbox" : [
     # "AWS-GR_DETECT_CLOUDTRAIL_ENABLED_ON_MEMBER_ACCOUNTS",

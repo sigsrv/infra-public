@@ -1,9 +1,3 @@
-provider "aws" {
-  profile             = var.aws_profile
-  region              = var.aws_region
-  allowed_account_ids = [var.aws_account_id]
-}
-
 data "aws_caller_identity" "this" {}
 data "aws_organizations_organization" "this" {}
 data "aws_organizations_organizational_units" "workloads" {
