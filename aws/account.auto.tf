@@ -92,3 +92,9 @@ variable "aws_profile" {
 variable "aws_region" {
   type = string
 }
+
+# variables: sigsrv
+variable "public_domain" {
+  type    = string
+  default = null
+}
