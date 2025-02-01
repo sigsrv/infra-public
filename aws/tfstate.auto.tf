@@ -39,9 +39,9 @@ locals {
   tfstate = {
     # aws
     region  = "ap-northeast-2"
-    profile = var.aws_profile
+    profile = local.tfstate_config.aws_profile
     assume_role = {
-      role_arn = "arn:aws:iam::820242943905:role/sigsrv-infra-tfstate-${var.aws_account_name}"
+      role_arn = "arn:aws:iam::820242943905:role/sigsrv-infra-tfstate-${local.tfstate_config.aws_account_name}"
     }
 
     # dynamodb

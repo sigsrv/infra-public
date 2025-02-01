@@ -98,3 +98,10 @@ variable "public_domain" {
   type    = string
   default = null
 }
+
+locals {
+  tfstate_config = {
+    aws_profile      = var.aws_profile
+    aws_account_name = var.aws_account_name
+  }
+}
