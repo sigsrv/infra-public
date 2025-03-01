@@ -8,31 +8,42 @@ variable "status" {
 }
 
 variable "incus_project_name" {
-  type = string
+  type     = string
+  nullable = false
+}
+
+variable "incus_network_name" {
+  type     = string
+  nullable = false
 }
 
 variable "incus_network_zone_name" {
-  type = string
+  type     = string
+  nullable = false
 }
 
 variable "incus_instance_name_prefix" {
-  type = string
+  type     = string
+  nullable = true
+  default  = null
+}
+
+variable "incus_project_name_prefix" {
+  type     = string
+  nullable = false
+  default  = "sigsrv-"
 }
 
 variable "talos_controlplane_node_count" {
-  type = number
+  type     = number
+  nullable = false
 }
 
 variable "talos_worker_node_count" {
-  type = number
+  type     = number
+  nullable = false
 }
 
-variable "talos_image" {
-  type = object({
-    incus_iso_volume = string
-    urls = object({
-      installer_secureboot = string
-      iso_secureboot       = string
-    })
-  })
+variable "talos_version" {
+  type = string
 }

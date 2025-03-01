@@ -1,15 +1,30 @@
+# incus project
+module "incus_project" {
+  source = "../../incus/project"
+
+  incus_project_name = var.incus_project_name
+  incus_network_name = var.incus_network_name
+}
+
 # incus instances
+locals {
+  incus_instance_name_prefix = coalesce(
+    var.incus_instance_name_prefix,
+    trimprefix(var.incus_project_name, var.incus_project_name_prefix),
+  )
+}
+
 resource "incus_instance" "this" {
   for_each = merge(
     {
       for i in range(var.talos_controlplane_node_count) :
-      "${var.incus_instance_name_prefix}c${i}" => {
+      "${local.incus_instance_name_prefix}c${i}" => {
         type = "controlplane"
       }
     },
     {
       for i in range(var.talos_worker_node_count) :
-      "${var.incus_instance_name_prefix}w${i}" => {
+      "${local.incus_instance_name_prefix}w${i}" => {
         type = "worker"
       }
     },
@@ -35,10 +50,15 @@ resource "incus_instance" "this" {
     type = "disk"
     properties = {
       "pool"          = "iso"
-      "source"        = var.talos_image.incus_iso_volume
+      "source"        = module.talos_image.incus_iso_volume
       "boot.priority" = 10
     }
   }
+
+  depends_on = [
+    module.incus_project,
+    module.talos_image,
+  ]
 }
 
 locals {
@@ -51,6 +71,14 @@ locals {
     if value.config["user.talos.machine.type"] == "controlplane" && value.running
   }
   controlplane_node = try([for _, node in local.controlplane_nodes : node][0], null)
+}
+
+# incus talos image
+module "talos_image" {
+  source = "../image"
+
+  incus_project_name = var.incus_project_name
+  talos_version      = var.talos_version
 }
 
 # incus network zone records
@@ -90,7 +118,7 @@ data "talos_machine_configuration" "this" {
     }),
     templatefile("${path.module}/files/talos-machine.yaml", {
       hostname      = "${each.value.name}.${var.incus_network_zone_name}"
-      install_image = var.talos_image.urls.installer_secureboot
+      install_image = module.talos_image.urls.installer_secureboot
     }),
     each.value.config["user.talos.machine.type"] != "controlplane" ? [] : [
       # templatefile("${path.module}/files/talos-controlplane.yaml", {}),

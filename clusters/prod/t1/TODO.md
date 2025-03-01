@@ -1,2 +1,0 @@
-- [ ] add cluster.tfvars
-- [ ] add cluster.auto.tf
