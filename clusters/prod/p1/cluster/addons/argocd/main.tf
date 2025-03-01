@@ -26,7 +26,7 @@ resource "helm_release" "this" {
 
   set_sensitive {
     name  = "configs.secret.argocdServerAdminPassword"
-    value = bcrypt(onepassword_item.this.password)
+    value = random_password.admin.bcrypt_hash
   }
 
   dynamic "set" {
@@ -96,19 +96,18 @@ data "onepassword_vault" "vault" {
   name = "sigsrv-prod"
 }
 
-resource "onepassword_item" "this" {
+resource "random_password" "admin" {
+  length  = 40
+  special = true
+}
+
+resource "onepassword_item" "admin" {
   vault = data.onepassword_vault.vault.uuid
   title = "${var.cluster_name}-argocd"
 
   url      = "https://argocd-${var.cluster_alias}.deer-neon.ts.net"
   username = "admin"
-
-  password_recipe {
-    length  = 40
-    digits  = true
-    letters = true
-    symbols = true
-  }
+  password = random_password.admin.result
 }
 
 resource "tls_private_key" "ssh" {
