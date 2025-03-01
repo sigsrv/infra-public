@@ -350,3 +350,4 @@ terragrunt-debug.tfvars.json
 
 kubeconfig
 talosconfig
+!.envrc
