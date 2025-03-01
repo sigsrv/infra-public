@@ -14,6 +14,10 @@ module "talos_cluster" {
 module "addons" {
   source = "./addons"
 
+  cluster_name  = "sigsrv-t1"
+  cluster_alias = "t1"
+  cluster_env   = "prod"
+
   depends_on = [
     module.talos_cluster
   ]

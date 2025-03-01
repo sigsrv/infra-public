@@ -1,5 +1,8 @@
 data "kubectl_file_documents" "this" {
-  content = file("${path.module}/registry.yaml")
+  content = templatefile("${path.module}/registry.yaml", {
+    cluster_name  = var.cluster_name
+    cluster_alias = var.cluster_alias
+  })
 }
 
 resource "kubectl_manifest" "this" {

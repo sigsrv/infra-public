@@ -1,7 +1,3 @@
-locals {
-  original_cluster_name = "sigsrv-prod"
-}
-
 resource "kubernetes_namespace" "this" {
   metadata {
     name = "tailscale"
@@ -19,11 +15,11 @@ resource "helm_release" "this" {
   values = [
     yamlencode({
       operatorConfig = {
-        hostname    = "${local.original_cluster_name}-tailscale-operator"
-        defaultTags = join(",", ["tag:${local.original_cluster_name}-tailscale-operator"])
+        hostname    = "${var.cluster_name}-tailscale-operator"
+        defaultTags = join(",", ["tag:${var.cluster_name}-tailscale-operator"])
       }
       proxyConfig = {
-        defaultTags = join(",", ["tag:${local.original_cluster_name}-tailscale-service"])
+        defaultTags = join(",", ["tag:${var.cluster_name}-tailscale-service"])
         apiServerProxyConfig = {
           mode = true
         }
@@ -59,5 +55,5 @@ data "onepassword_vault" "vault" {
 
 data "onepassword_item" "this" {
   vault = data.onepassword_vault.vault.uuid
-  title = "${local.original_cluster_name}-tailscale-operator"
+  title = "${var.cluster_name}-tailscale-operator"
 }

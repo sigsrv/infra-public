@@ -102,5 +102,5 @@ spec:
                   number: 5000
   tls:
     - hosts:
-        - registry-t1
+        - registry-${cluster_alias}
 ---
