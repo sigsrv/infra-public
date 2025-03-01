@@ -11,7 +11,7 @@ resource "incus_project" "this" {
       "features.networks"        = false
       "features.networks.zones"  = true
       "limits.containers"        = 16
-      "limits.cpu"               = 32
+      "limits.cpu"               = 64
       "limits.disk"              = "20TiB"
       "limits.instances"         = 32
       "limits.memory"            = "64GiB"

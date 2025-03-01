@@ -19,13 +19,15 @@ resource "incus_instance" "this" {
     {
       for i in range(var.talos_controlplane_node_count) :
       "${local.incus_instance_name_prefix}c${i}" => {
-        type = "controlplane"
+        type  = "controlplane"
+        index = i
       }
     },
     {
       for i in range(var.talos_worker_node_count) :
       "${local.incus_instance_name_prefix}w${i}" => {
-        type = "worker"
+        type  = "worker"
+        index = i
       }
     },
   )
@@ -34,6 +36,10 @@ resource "incus_instance" "this" {
   name    = each.key
   type    = "virtual-machine"
   running = var.status != "ready"
+
+  target = var.incus_instance_targets[
+    each.value.index % length(var.incus_instance_targets)
+  ]
 
   config = {
     "user.talos.machine.type" = each.value.type

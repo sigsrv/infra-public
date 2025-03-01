@@ -22,6 +22,11 @@ variable "incus_network_zone_name" {
   nullable = false
 }
 
+variable "incus_instance_targets" {
+  type     = list(string)
+  nullable = false
+}
+
 variable "incus_instance_name_prefix" {
   type     = string
   nullable = true
