@@ -6,6 +6,18 @@ module "argocd" {
   cluster_env   = var.cluster_env
 }
 
+module "cloudnative_pg" {
+  source = "./cloudnative-pg"
+
+  cluster_name  = var.cluster_name
+  cluster_alias = var.cluster_alias
+  cluster_env   = var.cluster_env
+
+  depends_on = [
+    module.local_path_provisioner
+  ]
+}
+
 module "local_path_provisioner" {
   source = "./local-path-provisioner"
 
