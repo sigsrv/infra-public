@@ -11,6 +11,14 @@ module "talos_cluster" {
   status                        = var.status
 }
 
+module "addons" {
+  source = "./addons"
+
+  depends_on = [
+    module.talos_cluster
+  ]
+}
+
 resource "null_resource" "protection" {
   lifecycle {
     prevent_destroy = true

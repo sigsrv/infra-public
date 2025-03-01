@@ -5,17 +5,19 @@ terraform {
       version = "~> 2.35"
     }
 
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.0"
+    }
+
     kubectl = {
       source  = "gavinbunney/kubectl"
       version = "~> 1.19"
     }
+
+    onepassword = {
+      source  = "1Password/onepassword"
+      version = "~> 2.1"
+    }
   }
-}
-
-provider "kubernetes" {
-  config_path = "${path.root}/../../kubeconfig"
-}
-
-provider "kubectl" {
-  config_path = "${path.root}/../../kubeconfig"
 }

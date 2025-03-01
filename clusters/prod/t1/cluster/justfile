@@ -11,7 +11,8 @@ apply:
     if test (just status) = "running"
         tofu apply
     else
-        tofu apply -auto-approve -var status=ready
+        tofu apply -auto-approve -target module.talos_cluster -var status=ready
+        tofu apply -auto-approve -target module.talos_cluster
         tofu apply -auto-approve
     end
 
