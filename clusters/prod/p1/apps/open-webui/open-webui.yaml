@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: open-webui
+  namespace: argocd
+spec:
+  project: apps
+  sources:
+    - repoURL: "https://open-webui.github.io/helm-charts"
+      targetRevision: 5.20.0
+      chart: open-webui
+      helm:
+        valuesObject:
+          ingress:
+            enabled: true
+            class: tailscale
+            host: open-webui-p1
+            tls: true
+  destination:
+    name: in-cluster
+    namespace: open-webui
+  syncPolicy:
+    automated: null

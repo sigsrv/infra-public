@@ -9,6 +9,8 @@ spec:
         elements:
           - name: matrix-synapse
             namespace: synapse
+          - name: open-webui
+            namespace: open-webui
   template:
     metadata:
       name: "apps-{{name}}"
@@ -56,6 +58,7 @@ spec:
   sourceRepos:
     - git@github.com:sigsrv/infra.git
     - https://ananace.gitlab.io/charts
+    - https://open-webui.github.io/helm-charts
   destinations:
     - name: in-cluster
       namespace: "*"
