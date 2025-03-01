@@ -16,8 +16,23 @@ spec:
             class: tailscale
             host: open-webui-p1
             tls: true
+          extraEnvVars:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: open-webui-pg-app
+                  key: uri
   destination:
     name: in-cluster
     namespace: open-webui
   syncPolicy:
     automated: null
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: open-webui-pg
+spec:
+  instances: 1
+  storage:
+    size: 10Gi
