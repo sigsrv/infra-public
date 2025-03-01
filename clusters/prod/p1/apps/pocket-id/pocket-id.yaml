@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pocket-id
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pocket-id
+  template:
+    metadata:
+      labels:
+        app: pocket-id
+    spec:
+      containers:
+        - name: pocket-id
+          image: ghcr.io/pocket-id/pocket-id
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: pocket-id-config
+          env:
+            - name: DB_PROVIDER
+              value: postgres
+            - name: POSTGRES_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: pocket-id-pg-app
+                  key: uri
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+            periodSeconds: 90
+            failureThreshold: 2
+          volumeMounts:
+            - name: pocket-id-data
+              mountPath: /app/backend/data
+      volumes:
+        - name: pocket-id-data
+          persistentVolumeClaim:
+            claimName: pocket-id-data-pvc
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pocket-id-config
+data:
+  PUBLIC_APP_URL: https://pocket-id-p1.deer-neon.ts.net
+  TRUST_PROXY: "true"
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: pocket-id-pg
+spec:
+  instances: 1
+  storage:
+    size: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pocket-id
+spec:
+  selector:
+    app: pocket-id
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pocket-id
+spec:
+  ingressClassName: tailscale
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pocket-id
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - pocket-id-p1
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pocket-id-data-pvc
+spec:
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

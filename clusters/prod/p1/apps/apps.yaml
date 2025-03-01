@@ -11,6 +11,8 @@ spec:
             namespace: synapse
           - name: open-webui
             namespace: open-webui
+          - name: pocket-id
+            namespace: pocket-id
   template:
     metadata:
       name: "apps-{{name}}"
