@@ -1,0 +1,13 @@
+set -l SELECTED_KEYS 1 2 3
+set -l ENCRYPTED_UNSEAL_KEY_NAMES A_YK_5C_13068969_715FE376816038A7 B_YK_5C_23768596_685C7B17D23F1A3E C_YK_5C_Nano_25551278_BC346E1E0C2D56CF
+set -l ENCRYPTED_UNSEAL_KEYS
+for encrypted_unseal_key_name in $ENCRYPTED_UNSEAL_KEY_NAMES
+    set -a ENCRYPTED_UNSEAL_KEYS (op read "op://sigsrv-prod/sigsrv-p1-openbao/encrypted-unseal-keys/$encrypted_unseal_key_name")
+end
+
+for i in (seq 0 2)
+    for index in $SELECTED_KEYS
+        kubectl exec -n openbao openbao-$i -c openbao -- \
+            bao operator unseal (echo $ENCRYPTED_UNSEAL_KEYS[$index] | base64 -d | gpg --decrypt)
+    end
+end

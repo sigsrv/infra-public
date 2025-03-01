@@ -1,0 +1,1 @@
+export VAULT_TOKEN=(op read "op://sigsrv-prod/sigsrv-p1-openbao/encrypted-root-token/root-token" | base64 -d | gpg --decrypt)
