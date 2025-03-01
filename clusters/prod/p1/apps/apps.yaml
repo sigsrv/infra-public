@@ -6,7 +6,9 @@ metadata:
 spec:
   generators:
     - list:
-        elements: []
+        elements:
+          - name: matrix-synapse
+            namespace: synapse
   template:
     metadata:
       name: "apps-{{name}}"
@@ -53,6 +55,7 @@ metadata:
 spec:
   sourceRepos:
     - git@github.com:sigsrv/infra.git
+    - https://ananace.gitlab.io/charts
   destinations:
     - name: in-cluster
       namespace: "*"
