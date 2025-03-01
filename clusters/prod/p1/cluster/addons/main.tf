@@ -1,3 +1,11 @@
+module "argocd" {
+  source = "./argocd"
+
+  cluster_name  = var.cluster_name
+  cluster_alias = var.cluster_alias
+  cluster_env   = var.cluster_env
+}
+
 module "local_path_provisioner" {
   source = "./local-path-provisioner"
 
