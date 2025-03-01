@@ -57,7 +57,7 @@ kind: Cluster
 metadata:
   name: pocket-id-pg
 spec:
-  instances: 1
+  instances: 3
   storage:
     size: 10Gi
 ---
