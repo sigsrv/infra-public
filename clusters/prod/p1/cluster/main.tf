@@ -1,4 +1,4 @@
-module "talos_cluster" {
+module "cluster" {
   source = "../../../shared/modules/talos/cluster"
 
   incus_project_name            = "sigsrv-p1"
@@ -19,7 +19,7 @@ module "addons" {
   cluster_env   = "prod"
 
   depends_on = [
-    module.talos_cluster
+    module.cluster
   ]
 }
 

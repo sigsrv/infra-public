@@ -1,3 +1,3 @@
-output "talos_cluster" {
-  value = module.talos_cluster
+output "cluster" {
+  value = module.cluster
 }
