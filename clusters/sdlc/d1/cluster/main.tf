@@ -10,3 +10,9 @@ module "talos_cluster" {
   talos_worker_node_count       = 3
   status                        = var.status
 }
+
+resource "null_resource" "protection" {
+  lifecycle {
+    prevent_destroy = true
+  }
+}
