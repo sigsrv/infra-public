@@ -14,11 +14,27 @@ module "cluster" {
 }
 
 module "addons" {
-  source = "./addons"
+  source = "../../../shared/modules/kubernetes/addons"
 
-  cluster_name  = "sigsrv-t1"
-  cluster_alias = "t1"
-  cluster_env   = "prod"
+  kubernetes = {
+    cluster_name  = "sigsrv-t1"
+    cluster_alias = "t1"
+    cluster_env   = "prod"
+  }
+
+  addons = {
+    local_path_provisioner = {
+      enabled = true
+    }
+
+    registry = {
+      enabled = true
+    }
+
+    tailscale_operator = {
+      enabled = true
+    }
+  }
 
   depends_on = [
     module.cluster

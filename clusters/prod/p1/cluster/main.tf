@@ -14,11 +14,39 @@ module "cluster" {
 }
 
 module "addons" {
-  source = "./addons"
+  source = "../../../shared/modules/kubernetes/addons"
 
-  cluster_name  = "sigsrv-p1"
-  cluster_alias = "p1"
-  cluster_env   = "prod"
+  kubernetes = {
+    cluster_name  = "sigsrv-p1"
+    cluster_alias = "p1"
+    cluster_env   = "prod"
+  }
+
+  addons = {
+    argocd = {
+      enabled = true
+    }
+
+    cloudnative_pg = {
+      enabled = true
+    }
+
+    local_path_provisioner = {
+      enabled = true
+    }
+
+    registry = {
+      enabled = true
+    }
+
+    tailscale_operator = {
+      enabled = true
+    }
+
+    openbao = {
+      enabled = true
+    }
+  }
 
   depends_on = [
     module.cluster
