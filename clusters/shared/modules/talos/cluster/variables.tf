@@ -39,6 +39,10 @@ variable "incus_project_name_prefix" {
   default  = "sigsrv-"
 }
 
+variable "talos_version" {
+  type = string
+}
+
 variable "talos_controlplane_node_count" {
   type     = number
   nullable = false
@@ -47,8 +51,4 @@ variable "talos_controlplane_node_count" {
 variable "talos_worker_node_count" {
   type     = number
   nullable = false
-}
-
-variable "talos_version" {
-  type = string
 }
