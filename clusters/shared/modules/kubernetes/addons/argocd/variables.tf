@@ -14,6 +14,7 @@ variable "onepassword" {
 
 variable "argocd" {
   type = object({
-    version = string
+    version       = string
+    keybase_users = list(string)
   })
 }

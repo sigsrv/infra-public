@@ -17,7 +17,8 @@ variable "addons" {
     argocd = optional(object({
       enabled = optional(bool, false)
       # https://github.com/argoproj/argo-helm/releases
-      version = optional(string, "7.8.7")
+      version       = optional(string, "7.8.7")
+      keybase_users = optional(list(string), ["ecmaxp"])
     }), {})
 
     cloudnative_pg = optional(object({

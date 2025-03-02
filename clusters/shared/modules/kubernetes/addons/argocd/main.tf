@@ -76,7 +76,7 @@ resource "kubectl_manifest" "this" {
 }
 
 data "http" "keybase" {
-  for_each = toset(["ecmaxp"])
+  for_each = toset(var.argocd.keybase_users)
 
   url = "https://keybase.io/${each.key}/pgp_keys.asc"
 }
