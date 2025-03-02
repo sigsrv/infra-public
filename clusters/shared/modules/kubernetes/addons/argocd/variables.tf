@@ -8,5 +8,6 @@ variable "kubernetes" {
 
 variable "argocd" {
   type = object({
+    version = string
   })
 }

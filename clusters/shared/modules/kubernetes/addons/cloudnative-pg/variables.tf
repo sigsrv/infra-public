@@ -8,5 +8,6 @@ variable "kubernetes" {
 
 variable "cloudnative_pg" {
   type = object({
+    version = string
   })
 }

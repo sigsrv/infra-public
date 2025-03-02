@@ -8,5 +8,6 @@ variable "kubernetes" {
 
 variable "openbao" {
   type = object({
+    version = string
   })
 }

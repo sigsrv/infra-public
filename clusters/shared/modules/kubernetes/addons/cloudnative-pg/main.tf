@@ -8,7 +8,7 @@ resource "helm_release" "this" {
   name       = "cnpg"
   repository = "https://cloudnative-pg.github.io/charts"
   chart      = "cloudnative-pg"
-  version    = "0.23.0"
+  version    = var.cloudnative_pg.version
 
   namespace = kubernetes_namespace.this.metadata[0].name
 

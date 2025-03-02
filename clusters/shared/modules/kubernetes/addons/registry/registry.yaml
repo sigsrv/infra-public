@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
         - name: registry
-          image: registry:2.8.1
+          image: registry:${registry.version}
           env:
             - name: REGISTRY_HTTP_ADDR
               value: :5000

@@ -8,5 +8,6 @@ variable "kubernetes" {
 
 variable "registry" {
   type = object({
+    version = string
   })
 }

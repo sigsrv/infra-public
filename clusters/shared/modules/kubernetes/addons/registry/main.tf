@@ -1,6 +1,7 @@
 data "kubectl_file_documents" "this" {
   content = templatefile("${path.module}/registry.yaml", {
     kubernetes = var.kubernetes
+    registry   = var.registry
   })
 }
 

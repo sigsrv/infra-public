@@ -8,5 +8,6 @@ variable "kubernetes" {
 
 variable "tailscale_operator" {
   type = object({
+    version = string
   })
 }

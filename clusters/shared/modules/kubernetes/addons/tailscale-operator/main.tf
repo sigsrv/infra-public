@@ -8,7 +8,7 @@ resource "helm_release" "this" {
   name       = "tailscale-operator"
   repository = "https://pkgs.tailscale.com/helmcharts"
   chart      = "tailscale-operator"
-  version    = "1.78.3"
+  version    = var.tailscale_operator.version
 
   namespace = kubernetes_namespace.this.metadata[0].name
 
