@@ -8,6 +8,18 @@ module "argocd" {
   argocd      = var.addons.argocd
 }
 
+module "cert_manager" {
+  source = "./cert-manager"
+  count  = var.addons.cert_manager.enabled ? 1 : 0
+
+  kubernetes   = var.kubernetes
+  cert_manager = var.addons.cert_manager
+
+  depends_on = [
+    module.local_path_provisioner,
+  ]
+}
+
 module "cloudnative_pg" {
   source = "./cloudnative-pg"
   count  = var.addons.cloudnative_pg.enabled ? 1 : 0

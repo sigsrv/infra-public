@@ -40,6 +40,10 @@ module "addons" {
       enabled = true
     }
 
+    cert_manager = {
+      enabled = true
+    }
+
     cloudnative_pg = {
       enabled = true
     }

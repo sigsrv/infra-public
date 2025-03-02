@@ -29,6 +29,12 @@ variable "addons" {
       keybase_users = optional(list(string), ["ecmaxp"])
     }), {})
 
+    cert_manager = optional(object({
+      enabled = optional(bool, false)
+      # https://github.com/cert-manager/cert-manager/releases
+      version = optional(string, "1.17.1")
+    }), {})
+
     cloudnative_pg = optional(object({
       enabled = optional(bool, false)
       # https://github.com/cloudnative-pg/charts/releases
