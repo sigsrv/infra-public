@@ -65,8 +65,9 @@ module "openbao" {
   source = "./openbao"
   count  = var.addons.openbao.enabled ? 1 : 0
 
-  kubernetes = var.kubernetes
-  openbao    = var.addons.openbao
+  kubernetes  = var.kubernetes
+  onepassword = var.onepassword
+  openbao     = var.addons.openbao
 
   depends_on = [
     module.local_path_provisioner,

@@ -48,7 +48,17 @@ variable "addons" {
     openbao = optional(object({
       enabled = optional(bool, false)
       # https://github.com/openbao/openbao-helm/releases
-      version = optional(string, "0.8.1")
+      version  = optional(string, "0.8.1")
+      replicas = optional(number, 3)
+      # pgp
+      pgp_keys = optional(list(string), [
+        "715FE376816038A7.pub",
+        "685C7B17D23F1A3E.pub",
+        "BC346E1E0C2D56CF.pub",
+      ])
+      root_token_pgp_key = optional(string, "BC346E1E0C2D56CF.pub")
+      key_shares         = optional(number, 3)
+      key_threshold      = optional(number, 2)
     }), {})
 
     registry = optional(object({

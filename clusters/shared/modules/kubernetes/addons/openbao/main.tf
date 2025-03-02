@@ -15,7 +15,8 @@ resource "helm_release" "this" {
     yamlencode({
       server = {
         ha = {
-          enabled = true
+          enabled  = true
+          replicas = var.openbao.replicas
           raft = {
             enabled   = true
             setNodeId = true
@@ -60,6 +61,10 @@ listener "tcp" {
 
 storage "raft" {
   path = "/openbao/data"
+
+  retry_join {
+    leader_api_addr = "http://openbao-active:8200"
+  }
 }
 
 service_registration "kubernetes" {}
