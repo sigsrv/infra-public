@@ -52,19 +52,11 @@ resource "helm_release" "this" {
   ]
 }
 
-data "kubectl_file_documents" "this" {
+module "kubernetes_manifests" {
+  source = "../../manifests"
   content = templatefile("${path.module}/argocd.yaml", {
     kubernetes = var.kubernetes
   })
-}
-
-resource "terraform_data" "this" {
-  input = data.kubectl_file_documents.this.manifests
-}
-
-resource "kubectl_manifest" "this" {
-  for_each  = terraform_data.this.output
-  yaml_body = each.value
 
   depends_on = [
     helm_release.this,

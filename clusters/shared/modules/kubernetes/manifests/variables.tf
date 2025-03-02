@@ -1,0 +1,3 @@
+variable "content" {
+  type = string
+}
