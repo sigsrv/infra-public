@@ -4,7 +4,7 @@ help:
     @just --list
 
 status:
-    @tofu output -json | jq -r .cluster.value.status
+    @tofu output -json | jq -r .cluster.value.config.status
 
 apply:
     #!/usr/bin/env fish
