@@ -52,3 +52,13 @@ variable "talos_worker_node_count" {
   type     = number
   nullable = false
 }
+
+variable "kubernetes_topology_region" {
+  type     = string
+  nullable = false
+}
+
+variable "kubernetes_topology_zone" {
+  type     = string
+  nullable = true
+}

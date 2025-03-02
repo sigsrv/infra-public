@@ -8,6 +8,8 @@ module "cluster" {
   talos_version                 = "v1.9.3"
   talos_controlplane_node_count = 1
   talos_worker_node_count       = 2
+  kubernetes_topology_region    = "apne-kor-se"
+  kubernetes_topology_zone      = "apne-kor-se1"
   status                        = var.status
 }
 

@@ -126,6 +126,12 @@ data "talos_machine_configuration" "this" {
     templatefile("${path.module}/files/talos-machine.yaml", {
       hostname = each.value.config["user.incus.hostname"]
       node_labels = {
+        # kubernetes topology
+        "topology.kubernetes.io/region" = var.kubernetes_topology_region
+        "topology.kubernetes.io/zone" = coalesce(
+          var.kubernetes_topology_zone,
+          each.value.config["user.incus.target"],
+        )
       }
       node_annotations = {
       }
