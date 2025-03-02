@@ -14,10 +14,5 @@ terraform {
       source  = "gavinbunney/kubectl"
       version = "~> 1.19"
     }
-
-    onepassword = {
-      source  = "1Password/onepassword"
-      version = "~> 2.1"
-    }
   }
 }

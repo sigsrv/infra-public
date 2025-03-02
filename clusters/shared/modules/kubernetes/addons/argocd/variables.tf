@@ -6,6 +6,12 @@ variable "kubernetes" {
   })
 }
 
+variable "onepassword" {
+  type = object({
+    vault_name = string
+  })
+}
+
 variable "argocd" {
   type = object({
     version = string

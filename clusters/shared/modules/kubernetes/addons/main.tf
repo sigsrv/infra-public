@@ -2,8 +2,9 @@ module "argocd" {
   source = "./argocd"
   count  = var.addons.argocd.enabled ? 1 : 0
 
-  kubernetes = var.kubernetes
-  argocd     = var.addons.argocd
+  kubernetes  = var.kubernetes
+  onepassword = var.onepassword
+  argocd      = var.addons.argocd
 }
 
 module "cloudnative_pg" {
@@ -43,6 +44,7 @@ module "tailscale_operator" {
   count  = var.addons.tailscale_operator.enabled ? 1 : 0
 
   kubernetes         = var.kubernetes
+  onepassword        = var.onepassword
   tailscale_operator = var.addons.tailscale_operator
 }
 

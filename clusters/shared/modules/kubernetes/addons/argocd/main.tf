@@ -96,7 +96,7 @@ resource "kubectl_manifest" "kustomize" {
 }
 
 data "onepassword_vault" "vault" {
-  name = "sigsrv-prod"
+  name = var.onepassword.vault_name
 }
 
 resource "random_password" "admin" {

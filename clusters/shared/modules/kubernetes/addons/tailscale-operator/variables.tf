@@ -6,6 +6,12 @@ variable "kubernetes" {
   })
 }
 
+variable "onepassword" {
+  type = object({
+    vault_name = string
+  })
+}
+
 variable "tailscale_operator" {
   type = object({
     version = string

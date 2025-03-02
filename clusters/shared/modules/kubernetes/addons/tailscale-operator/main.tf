@@ -50,7 +50,7 @@ resource "kubernetes_secret" "this" {
 }
 
 data "onepassword_vault" "vault" {
-  name = "sigsrv-prod"
+  name = var.onepassword.vault_name
 }
 
 data "onepassword_item" "this" {

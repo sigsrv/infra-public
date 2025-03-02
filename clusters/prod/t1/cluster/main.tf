@@ -31,6 +31,10 @@ module "addons" {
     cluster_env   = "prod"
   }
 
+  onepassword = {
+    vault_name = "sigsrv-prod"
+  }
+
   addons = {
     local_path_provisioner = {
       enabled = true
