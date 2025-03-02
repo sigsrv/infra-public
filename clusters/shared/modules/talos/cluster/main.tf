@@ -124,7 +124,13 @@ data "talos_machine_configuration" "this" {
     templatefile("${path.module}/files/talos-cluster.yaml", {
     }),
     templatefile("${path.module}/files/talos-machine.yaml", {
-      hostname      = each.value.config["user.incus.hostname"]
+      hostname = each.value.config["user.incus.hostname"]
+      node_labels = {
+      }
+      node_annotations = {
+      }
+      node_taints = {
+      }
       install_image = module.talos_image.urls.installer_secureboot
     }),
     each.value.config["user.talos.machine.type"] != "controlplane" ? [] : [
