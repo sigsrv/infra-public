@@ -16,7 +16,7 @@ module "cloudnative_pg" {
   cloudnative_pg = var.addons.cloudnative_pg
 
   depends_on = [
-    module.local_path_provisioner
+    module.local_path_provisioner,
   ]
 }
 
@@ -36,7 +36,7 @@ module "registry" {
   registry   = var.addons.registry
 
   depends_on = [
-    module.local_path_provisioner
+    module.local_path_provisioner,
   ]
 }
 
@@ -57,6 +57,6 @@ module "openbao" {
   openbao    = var.addons.openbao
 
   depends_on = [
-    module.local_path_provisioner
+    module.local_path_provisioner,
   ]
 }
