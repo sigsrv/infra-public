@@ -7,6 +7,12 @@ variable "status" {
   }
 }
 
+variable "incus_cluster_name" {
+  type     = string
+  nullable = false
+  default  = "sigsrv"
+}
+
 variable "incus_project_name" {
   type     = string
   nullable = false

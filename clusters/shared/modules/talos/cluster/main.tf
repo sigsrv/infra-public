@@ -132,6 +132,10 @@ data "talos_machine_configuration" "this" {
           var.kubernetes_topology_zone,
           each.value.config["user.incus.target"],
         )
+        # incus
+        "incus.linuxcontainers.org/cluster" = var.incus_cluster_name
+        "incus.linuxcontainers.org/project" = var.incus_project_name
+        "incus.linuxcontainers.org/target"  = each.value.config["user.incus.target"]
       }
       node_annotations = {
       }
