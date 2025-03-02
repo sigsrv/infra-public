@@ -14,9 +14,6 @@ resource "helm_release" "this" {
 
   values = [
     yamlencode({
-      crds = {
-        install = false
-      }
       configs = {
         params = {
           "server.insecure" = true
@@ -52,7 +49,6 @@ resource "helm_release" "this" {
 
   depends_on = [
     kubernetes_namespace.this,
-    kubectl_manifest.kustomize,
   ]
 }
 
@@ -79,20 +75,6 @@ data "http" "keybase" {
   for_each = toset(var.argocd.keybase_users)
 
   url = "https://keybase.io/${each.key}/pgp_keys.asc"
-}
-
-
-data "kubectl_kustomize_documents" "kustomize" {
-  target = "${path.module}/kustomize"
-}
-
-data "kubectl_file_documents" "kustomize" {
-  content = join("\n---\n", data.kubectl_kustomize_documents.kustomize.documents)
-}
-
-resource "kubectl_manifest" "kustomize" {
-  for_each  = data.kubectl_file_documents.kustomize.manifests
-  yaml_body = each.value
 }
 
 data "onepassword_vault" "vault" {
