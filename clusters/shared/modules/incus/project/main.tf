@@ -1,6 +1,6 @@
 resource "incus_project" "this" {
-  name        = var.incus_project_name
-  description = "${var.incus_project_name} (managed by OpenTofu)"
+  name        = var.incus.project_name
+  description = "${var.incus.project_name} (managed by OpenTofu)"
 
   config = merge(
     {
@@ -18,7 +18,7 @@ resource "incus_project" "this" {
       "limits.networks"          = 4
       "limits.virtual-machines"  = 16
     },
-    var.incus_project_config,
+    var.incus.project_config,
   )
 }
 
@@ -40,7 +40,7 @@ resource "incus_profile" "this" {
     type = "nic"
     properties = {
       "nictype" = "bridged"
-      "parent"  = var.incus_network_name
+      "parent"  = var.incus.network_name
     }
   }
 

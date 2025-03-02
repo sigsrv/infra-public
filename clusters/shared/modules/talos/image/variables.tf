@@ -1,13 +1,12 @@
-variable "incus_project_name" {
-  type    = string
-  default = "default"
+variable "incus" {
+  type = object({
+    project_name = string
+  })
 }
 
-variable "talos_version" {
-  type = string
-}
-
-variable "talos_image_schematic" {
-  type    = any
-  default = {}
+variable "talos" {
+  type = object({
+    version         = string
+    image_schematic = optional(any, {})
+  })
 }

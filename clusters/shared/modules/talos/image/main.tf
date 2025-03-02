@@ -1,12 +1,12 @@
 data "talos_image_factory_urls" "this" {
-  talos_version = var.talos_version
+  talos_version = var.talos.version
   architecture  = "amd64"
   platform      = "metal"
   schematic_id  = talos_image_factory_schematic.this.id
 }
 
 resource "talos_image_factory_schematic" "this" {
-  schematic = yamlencode(var.talos_image_schematic)
+  schematic = yamlencode(var.talos.image_schematic)
 }
 
 locals {
@@ -28,7 +28,7 @@ resource "null_resource" "talos_image" {
   triggers = {
     talos_iso_url          = data.talos_image_factory_urls.this.urls.iso_secureboot
     incus_talos_iso_volume = local.incus_talos_iso_volume
-    incus_project_name     = var.incus_project_name
+    incus_project_name     = var.incus.project_name
   }
 
   connection {
@@ -44,7 +44,7 @@ resource "null_resource" "talos_image" {
       "TALOS_VERSION='${local.talos_version}'",
       "TALOS_ISO_URL='${local.talos_iso_url}'",
       "TALOS_ISO_FILENAME='${local.talos_iso_filename}'",
-      "INCUS_PROJECT_NAME='${var.incus_project_name}'",
+      "INCUS_PROJECT_NAME='${var.incus.project_name}'",
       "INCUS_TALOS_ISO_VOLUME='${local.incus_talos_iso_volume}'",
       "wget -nc \"$TALOS_ISO_URL\" -O $TALOS_ISO_FILENAME",
       [for target in ["sigsrv", "minisrv"] : [

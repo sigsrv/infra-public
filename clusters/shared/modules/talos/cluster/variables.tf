@@ -7,64 +7,29 @@ variable "status" {
   }
 }
 
-variable "incus_cluster_name" {
-  type     = string
-  nullable = false
-  default  = "sigsrv"
+variable "incus" {
+  type = object({
+    cluster_name         = optional(string, "sigsrv")
+    project_name         = string
+    network_name         = string
+    network_zone_name    = string
+    instance_targets     = list(string)
+    instance_name_prefix = optional(string)
+    project_name_prefix  = optional(string, "sigsrv-")
+  })
 }
 
-variable "incus_project_name" {
-  type     = string
-  nullable = false
+variable "talos" {
+  type = object({
+    version                 = string
+    controlplane_node_count = number
+    worker_node_count       = number
+  })
 }
 
-variable "incus_network_name" {
-  type     = string
-  nullable = false
-}
-
-variable "incus_network_zone_name" {
-  type     = string
-  nullable = false
-}
-
-variable "incus_instance_targets" {
-  type     = list(string)
-  nullable = false
-}
-
-variable "incus_instance_name_prefix" {
-  type     = string
-  nullable = true
-  default  = null
-}
-
-variable "incus_project_name_prefix" {
-  type     = string
-  nullable = false
-  default  = "sigsrv-"
-}
-
-variable "talos_version" {
-  type = string
-}
-
-variable "talos_controlplane_node_count" {
-  type     = number
-  nullable = false
-}
-
-variable "talos_worker_node_count" {
-  type     = number
-  nullable = false
-}
-
-variable "kubernetes_topology_region" {
-  type     = string
-  nullable = false
-}
-
-variable "kubernetes_topology_zone" {
-  type     = string
-  nullable = true
+variable "kubernetes" {
+  type = object({
+    topology_region = string
+    topology_zone   = string
+  })
 }

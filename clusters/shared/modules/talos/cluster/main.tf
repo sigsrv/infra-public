@@ -2,39 +2,38 @@
 module "incus_project" {
   source = "../../incus/project"
 
-  incus_project_name = var.incus_project_name
-  incus_network_name = var.incus_network_name
+  incus = var.incus
 }
 
 # incus instances
 locals {
   incus_instance_name_prefix = coalesce(
-    var.incus_instance_name_prefix,
-    trimprefix(var.incus_project_name, var.incus_project_name_prefix),
+    var.incus.instance_name_prefix,
+    trimprefix(var.incus.project_name, var.incus.project_name_prefix),
   )
 }
 
 resource "incus_instance" "this" {
   for_each = merge(
     {
-      for i in range(var.talos_controlplane_node_count) :
+      for i in range(var.talos.controlplane_node_count) :
       "${local.incus_instance_name_prefix}c${i}" => {
         type   = "controlplane"
         index  = i
-        target = var.incus_instance_targets[i % length(var.incus_instance_targets)]
+        target = var.incus.instance_targets[i % length(var.incus.instance_targets)]
       }
     },
     {
-      for i in range(var.talos_worker_node_count) :
+      for i in range(var.talos.worker_node_count) :
       "${local.incus_instance_name_prefix}w${i}" => {
         type   = "worker"
         index  = i
-        target = var.incus_instance_targets[i % length(var.incus_instance_targets)]
+        target = var.incus.instance_targets[i % length(var.incus.instance_targets)]
       }
     },
   )
 
-  project = var.incus_project_name
+  project = var.incus.project_name
   name    = each.key
   type    = "virtual-machine"
   target  = each.value.target
@@ -42,7 +41,7 @@ resource "incus_instance" "this" {
 
   config = {
     "user.talos.machine.type" = each.value.type
-    "user.incus.hostname"     = "${each.key}.${var.incus_network_zone_name}"
+    "user.incus.hostname"     = "${each.key}.${var.incus.network_zone_name}"
     "user.incus.target"       = each.value.target
   }
 
@@ -84,15 +83,15 @@ locals {
 module "talos_image" {
   source = "../image"
 
-  incus_project_name = var.incus_project_name
-  talos_version      = var.talos_version
+  incus = var.incus
+  talos = var.talos
 }
 
 # incus network zone records
 resource "incus_network_zone_record" "this" {
   for_each = local.all_nodes
 
-  zone = var.incus_network_zone_name
+  zone = var.incus.network_zone_name
   name = each.value.name
 
   entry {
@@ -115,7 +114,7 @@ resource "talos_machine_secrets" "this" {}
 data "talos_machine_configuration" "this" {
   for_each = local.all_nodes
 
-  cluster_name     = var.incus_project_name
+  cluster_name     = var.incus.project_name
   cluster_endpoint = "https://127.0.0.1:7445"
   machine_type     = each.value.config["user.talos.machine.type"]
   machine_secrets  = talos_machine_secrets.this.machine_secrets
@@ -127,14 +126,14 @@ data "talos_machine_configuration" "this" {
       hostname = each.value.config["user.incus.hostname"]
       node_labels = {
         # kubernetes topology
-        "topology.kubernetes.io/region" = var.kubernetes_topology_region
+        "topology.kubernetes.io/region" = var.kubernetes.topology_region
         "topology.kubernetes.io/zone" = coalesce(
-          var.kubernetes_topology_zone,
+          var.kubernetes.topology_zone,
           each.value.config["user.incus.target"],
         )
         # incus
-        "incus.linuxcontainers.org/cluster" = var.incus_cluster_name
-        "incus.linuxcontainers.org/project" = var.incus_project_name
+        "incus.linuxcontainers.org/cluster" = var.incus.cluster_name
+        "incus.linuxcontainers.org/project" = var.incus.project_name
         "incus.linuxcontainers.org/target"  = each.value.config["user.incus.target"]
       }
       node_annotations = {

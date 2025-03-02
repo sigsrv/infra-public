@@ -1,16 +1,25 @@
 module "cluster" {
   source = "../../../shared/modules/talos/cluster"
 
-  incus_project_name            = "sigsrv-p1"
-  incus_network_name            = "sigsrvbr0"
-  incus_network_zone_name       = "sigsrv.local"
-  incus_instance_targets        = ["sigsrv", "sigsrv", "minisrv"]
-  talos_version                 = "v1.9.3"
-  talos_controlplane_node_count = 3
-  talos_worker_node_count       = 6
-  kubernetes_topology_region    = "apne-kor-se"
-  kubernetes_topology_zone      = "apne-kor-se1"
-  status                        = var.status
+  incus = {
+    project_name      = "sigsrv-p1"
+    network_name      = "sigsrvbr0"
+    network_zone_name = "sigsrv.local"
+    instance_targets  = ["sigsrv", "sigsrv", "minisrv"]
+  }
+
+  talos = {
+    version                 = "v1.9.3"
+    controlplane_node_count = 3
+    worker_node_count       = 6
+  }
+
+  kubernetes = {
+    topology_region = "apne-kor-se"
+    topology_zone   = "apne-kor-se1"
+  }
+
+  status = var.status
 }
 
 module "addons" {
