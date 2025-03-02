@@ -93,4 +93,6 @@ EOF
       )
     }
   }
+
+  tags = var.onepassword.tags
 }

@@ -105,4 +105,6 @@ resource "onepassword_item" "ssh" {
       ])
     }
   }
+
+  tags = var.onepassword.tags
 }

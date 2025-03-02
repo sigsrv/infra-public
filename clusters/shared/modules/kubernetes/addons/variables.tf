@@ -17,6 +17,10 @@ variable "tailscale" {
 variable "onepassword" {
   type = object({
     vault_name = string
+    tags = optional(list(string), [
+      "Managed/Terraform",
+      "Server/sigsrv",
+    ])
   })
 }
 
