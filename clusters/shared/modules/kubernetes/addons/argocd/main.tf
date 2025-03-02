@@ -6,11 +6,10 @@ resource "kubernetes_namespace" "this" {
 
 resource "helm_release" "this" {
   name       = "argocd"
+  namespace  = kubernetes_namespace.this.metadata[0].name
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
   version    = var.argocd.version
-
-  namespace = kubernetes_namespace.this.metadata[0].name
 
   values = [
     yamlencode({

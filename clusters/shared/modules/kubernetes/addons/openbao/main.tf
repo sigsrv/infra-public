@@ -6,11 +6,10 @@ resource "kubernetes_namespace" "this" {
 
 resource "helm_release" "this" {
   name       = "openbao"
+  namespace  = kubernetes_namespace.this.metadata[0].name
   repository = "https://openbao.github.io/openbao-helm"
   chart      = "openbao"
   version    = var.openbao.version
-
-  namespace = kubernetes_namespace.this.metadata[0].name
 
   values = [
     yamlencode({

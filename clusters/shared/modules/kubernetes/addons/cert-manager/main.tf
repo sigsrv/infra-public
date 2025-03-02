@@ -6,11 +6,10 @@ resource "kubernetes_namespace" "this" {
 
 resource "helm_release" "this" {
   name       = "cert-manager"
+  namespace  = kubernetes_namespace.this.metadata[0].name
   repository = "https://charts.jetstack.io"
   chart      = "cert-manager"
   version    = var.cert_manager.version
-
-  namespace = kubernetes_namespace.this.metadata[0].name
 
   values = [
     yamlencode({
