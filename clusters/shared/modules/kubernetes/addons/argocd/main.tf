@@ -108,7 +108,7 @@ resource "onepassword_item" "admin" {
   vault = data.onepassword_vault.vault.uuid
   title = "${var.kubernetes.cluster_name}-argocd"
 
-  url      = "https://argocd-${var.kubernetes.cluster_alias}.deer-neon.ts.net"
+  url      = "https://argocd-${var.kubernetes.cluster_alias}.${var.tailscale.tailnet}"
   username = "admin"
   password = random_password.admin.result
 }

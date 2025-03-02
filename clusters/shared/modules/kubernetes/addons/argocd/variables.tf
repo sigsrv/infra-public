@@ -12,6 +12,12 @@ variable "onepassword" {
   })
 }
 
+variable "tailscale" {
+  type = object({
+    tailnet = string
+  })
+}
+
 variable "argocd" {
   type = object({
     version       = string

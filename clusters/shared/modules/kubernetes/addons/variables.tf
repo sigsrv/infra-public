@@ -6,6 +6,14 @@ variable "kubernetes" {
   })
 }
 
+variable "tailscale" {
+  type = object({
+    tailnet = optional(string, "deer-neon.ts.net")
+  })
+
+  default = {}
+}
+
 variable "onepassword" {
   type = object({
     vault_name = string

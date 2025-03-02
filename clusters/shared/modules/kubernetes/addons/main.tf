@@ -3,6 +3,7 @@ module "argocd" {
   count  = var.addons.argocd.enabled ? 1 : 0
 
   kubernetes  = var.kubernetes
+  tailscale   = var.tailscale
   onepassword = var.onepassword
   argocd      = var.addons.argocd
 }
