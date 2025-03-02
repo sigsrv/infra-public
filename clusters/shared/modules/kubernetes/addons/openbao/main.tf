@@ -23,6 +23,23 @@ resource "helm_release" "this" {
             config    = local.openbao_config
           }
         }
+        topologySpreadConstraints = [
+          {
+            maxSkew           = 1
+            topologyKey       = "kubernetes.io/hostname"
+            whenUnsatisfiable = "DoNotSchedule"
+          },
+          {
+            maxSkew           = 1
+            topologyKey       = "topology.kubernetes.io/zone"
+            whenUnsatisfiable = "ScheduleAnyway"
+          },
+          {
+            maxSkew           = 1
+            topologyKey       = "incus.linuxcontainers.org/target"
+            whenUnsatisfiable = "ScheduleAnyway"
+          },
+        ]
       }
       dataStorage = {
         storageClass = "local-path-protected"
