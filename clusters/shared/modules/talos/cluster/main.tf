@@ -19,15 +19,17 @@ resource "incus_instance" "this" {
     {
       for i in range(var.talos_controlplane_node_count) :
       "${local.incus_instance_name_prefix}c${i}" => {
-        type  = "controlplane"
-        index = i
+        type   = "controlplane"
+        index  = i
+        target = var.incus_instance_targets[i % length(var.incus_instance_targets)]
       }
     },
     {
       for i in range(var.talos_worker_node_count) :
       "${local.incus_instance_name_prefix}w${i}" => {
-        type  = "worker"
-        index = i
+        type   = "worker"
+        index  = i
+        target = var.incus_instance_targets[i % length(var.incus_instance_targets)]
       }
     },
   )
@@ -35,14 +37,13 @@ resource "incus_instance" "this" {
   project = var.incus_project_name
   name    = each.key
   type    = "virtual-machine"
+  target  = each.value.target
   running = var.status != "ready"
-
-  target = var.incus_instance_targets[
-    each.value.index % length(var.incus_instance_targets)
-  ]
 
   config = {
     "user.talos.machine.type" = each.value.type
+    "user.incus.hostname"     = "${each.key}.${var.incus_network_zone_name}"
+    "user.incus.target"       = each.value.target
   }
 
   device {
@@ -123,7 +124,7 @@ data "talos_machine_configuration" "this" {
     templatefile("${path.module}/files/talos-cluster.yaml", {
     }),
     templatefile("${path.module}/files/talos-machine.yaml", {
-      hostname      = "${each.value.name}.${var.incus_network_zone_name}"
+      hostname      = each.value.config["user.incus.hostname"]
       install_image = module.talos_image.urls.installer_secureboot
     }),
     each.value.config["user.talos.machine.type"] != "controlplane" ? [] : [
