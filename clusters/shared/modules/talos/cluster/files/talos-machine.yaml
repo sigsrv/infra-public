@@ -34,6 +34,9 @@ machine:
       enabled: true
       forwardKubeDNSToHost: true
   kubelet:
+    extraArgs:
+      # metric-server
+      rotate-server-certificates: true
     extraMounts:
       - destination: /var/local-path-provisioner
         type: bind

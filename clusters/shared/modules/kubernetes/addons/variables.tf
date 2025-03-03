@@ -49,6 +49,12 @@ variable "addons" {
       enabled = optional(bool, false)
     }), {})
 
+    metrics_server = optional(object({
+      enabled = optional(bool, false)
+      # https://artifacthub.io/packages/helm/metrics-server/metrics-server
+      version = optional(string, "3.12.2")
+    }), {})
+
     openbao = optional(object({
       enabled = optional(bool, false)
       # https://github.com/openbao/openbao-helm/releases

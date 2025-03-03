@@ -52,6 +52,10 @@ module "addons" {
       enabled = true
     }
 
+    metrics_server = {
+      enabled = true
+    }
+
     registry = {
       enabled = true
     }

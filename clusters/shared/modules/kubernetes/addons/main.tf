@@ -32,6 +32,14 @@ module "cloudnative_pg" {
   ]
 }
 
+module "metrics_server" {
+  source = "./metrics-server"
+  count  = var.addons.metrics_server.enabled ? 1 : 0
+
+  kubernetes     = var.kubernetes
+  metrics_server = var.addons.metrics_server
+}
+
 module "local_path_provisioner" {
   source = "./local-path-provisioner"
   count  = var.addons.local_path_provisioner.enabled ? 1 : 0
