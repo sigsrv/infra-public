@@ -6,6 +6,10 @@ module "argocd" {
   tailscale   = var.tailscale
   onepassword = var.onepassword
   argocd      = var.addons.argocd
+
+  depends_on = [
+    module.tailscale_operator,
+  ]
 }
 
 module "cert_manager" {
@@ -14,10 +18,6 @@ module "cert_manager" {
 
   kubernetes   = var.kubernetes
   cert_manager = var.addons.cert_manager
-
-  depends_on = [
-    module.local_path_provisioner,
-  ]
 }
 
 module "cloudnative_pg" {
@@ -57,6 +57,7 @@ module "registry" {
 
   depends_on = [
     module.local_path_provisioner,
+    module.tailscale_operator,
   ]
 }
 
@@ -79,5 +80,6 @@ module "openbao" {
 
   depends_on = [
     module.local_path_provisioner,
+    module.tailscale_operator,
   ]
 }
