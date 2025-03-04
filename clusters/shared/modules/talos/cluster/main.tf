@@ -16,7 +16,7 @@ locals {
 resource "incus_instance" "this" {
   for_each = merge(
     {
-      for i in range(var.talos.controlplane_node_count) :
+      for i in range(var.talos.controlplane_node.count) :
       "${local.incus_instance_name_prefix}c${i}" => {
         type   = "controlplane"
         index  = i
@@ -24,7 +24,7 @@ resource "incus_instance" "this" {
       }
     },
     {
-      for i in range(var.talos.worker_node_count) :
+      for i in range(var.talos.worker_node.count) :
       "${local.incus_instance_name_prefix}w${i}" => {
         type   = "worker"
         index  = i

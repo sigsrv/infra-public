@@ -9,9 +9,13 @@ module "cluster" {
   }
 
   talos = {
-    version                 = "v1.9.3"
-    controlplane_node_count = 3
-    worker_node_count       = 3
+    version = "v1.9.3"
+    controlplane_node = {
+      count = 3
+    }
+    worker_node = {
+      count = 3
+    }
   }
 
   kubernetes = {

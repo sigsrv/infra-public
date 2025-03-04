@@ -21,9 +21,13 @@ variable "incus" {
 
 variable "talos" {
   type = object({
-    version                 = string
-    controlplane_node_count = number
-    worker_node_count       = number
+    version = string
+    controlplane_node = object({
+      count = number
+    })
+    worker_node = object({
+      count = number
+    })
   })
 }
 
