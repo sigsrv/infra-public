@@ -55,7 +55,7 @@ resource "helm_release" "this" {
   ]
 }
 
-module "kubernetes_manifests" {
+module "this" {
   source = "../../manifests"
   content = templatefile("${path.module}/openbao.yaml", {
     kubernetes = var.kubernetes

@@ -10,15 +10,11 @@ resource "helm_release" "this" {
   ]
 
   depends_on = [
-    module.kubernetes_manifests_kubelet_serving_cert_approver,
+    module.kubelet_serving_cert_approver,
   ]
 }
 
-data "kubectl_kustomize_documents" "kubelet_serving_cert_approver" {
+module "kubelet_serving_cert_approver" {
+  source = "../../kustomize"
   target = "${path.module}/kustomize/kubelet-serving-cert-approver"
-}
-
-module "kubernetes_manifests_kubelet_serving_cert_approver" {
-  source  = "../../manifests"
-  content = join("\n---\n", data.kubectl_kustomize_documents.kubelet_serving_cert_approver.documents)
 }
