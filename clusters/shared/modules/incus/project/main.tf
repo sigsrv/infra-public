@@ -30,7 +30,7 @@ resource "incus_profile" "this" {
   config = {
     "snapshots.expiry"   = "4w"
     "snapshots.schedule" = "@daily"
-    "limits.cpu"         = 4
+    "limits.cpu"         = 2
     "limits.memory"      = "4GiB"
     "migration.stateful" = false
   }
