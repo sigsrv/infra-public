@@ -132,3 +132,12 @@ EOF
 
   default = {}
 }
+
+variable "status" {
+  default = "running"
+
+  validation {
+    condition     = contains(["ready", "running"], var.status)
+    error_message = "Invalid status: ${var.status}"
+  }
+}

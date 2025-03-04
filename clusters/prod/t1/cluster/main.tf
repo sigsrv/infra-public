@@ -53,6 +53,8 @@ module "addons" {
     }
   }
 
+  status = var.status
+
   depends_on = [
     module.cluster
   ]
