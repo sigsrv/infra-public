@@ -23,10 +23,14 @@ variable "talos" {
   type = object({
     version = string
     controlplane_node = object({
-      count = number
+      count  = number
+      cpu    = optional(number, 4)
+      memory = optional(string, "4GiB")
     })
     worker_node = object({
-      count = number
+      count  = number
+      cpu    = optional(number, 4)
+      memory = optional(string, "4GiB")
     })
   })
 }

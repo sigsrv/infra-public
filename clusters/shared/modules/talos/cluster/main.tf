@@ -21,6 +21,8 @@ resource "incus_instance" "this" {
         type   = "controlplane"
         index  = i
         target = var.incus.instance_targets[i % length(var.incus.instance_targets)]
+        cpu    = var.talos.controlplane_node.cpu
+        memory = var.talos.controlplane_node.memory
       }
     },
     {
@@ -29,6 +31,8 @@ resource "incus_instance" "this" {
         type   = "worker"
         index  = i
         target = var.incus.instance_targets[i % length(var.incus.instance_targets)]
+        cpu    = var.talos.worker_node.cpu
+        memory = var.talos.worker_node.memory
       }
     },
   )
@@ -40,6 +44,8 @@ resource "incus_instance" "this" {
   running = var.status != "ready"
 
   config = {
+    "limits.cpu"              = each.value.cpu
+    "limits.memory"           = each.value.memory
     "user.talos.machine.type" = each.value.type
     "user.incus.hostname"     = "${each.key}.${var.incus.network_zone_name}"
     "user.incus.target"       = each.value.target
