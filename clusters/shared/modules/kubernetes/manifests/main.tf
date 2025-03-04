@@ -1,5 +1,5 @@
-resource "kubernetes_manifest" "this" {
-  for_each = {
+locals {
+  manifests = {
     for manifest in provider::kubernetes::manifest_decode_multi(var.content) :
     join("/", [
       manifest["apiVersion"],
@@ -8,6 +8,9 @@ resource "kubernetes_manifest" "this" {
       manifest["metadata"]["name"]
     ]) => manifest
   }
+}
 
-  manifest = each.value
+resource "kubernetes_manifest" "this" {
+  for_each = toset(keys(local.manifests))
+  manifest = local.manifests[each.key]
 }

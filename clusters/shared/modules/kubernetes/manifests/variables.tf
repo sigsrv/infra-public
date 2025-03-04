@@ -1,3 +1,4 @@
 variable "content" {
-  type = string
+  type     = string
+  nullable = false
 }
