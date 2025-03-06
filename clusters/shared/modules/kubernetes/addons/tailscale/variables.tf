@@ -12,7 +12,7 @@ variable "onepassword" {
   })
 }
 
-variable "tailscale_operator" {
+variable "tailscale" {
   type = object({
     version = string
   })

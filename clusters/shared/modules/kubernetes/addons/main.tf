@@ -12,7 +12,7 @@ module "argocd" {
   argocd      = var.addons.argocd
 
   depends_on = [
-    module.tailscale_operator,
+    module.tailscale,
   ]
 }
 
@@ -64,13 +64,13 @@ module "rook_ceph" {
   rook_ceph  = var.addons.rook_ceph
 }
 
-module "tailscale_operator" {
-  source = "./tailscale-operator"
-  count  = var.addons.tailscale_operator.enabled ? local.count : 0
+module "tailscale" {
+  source = "./tailscale"
+  count  = var.addons.tailscale.enabled ? local.count : 0
 
-  kubernetes         = var.kubernetes
-  onepassword        = var.onepassword
-  tailscale_operator = var.addons.tailscale_operator
+  kubernetes  = var.kubernetes
+  onepassword = var.onepassword
+  tailscale   = var.addons.tailscale
 }
 
 module "openbao" {
@@ -83,6 +83,6 @@ module "openbao" {
 
   depends_on = [
     module.rook_ceph,
-    module.tailscale_operator,
+    module.tailscale,
   ]
 }

@@ -4,13 +4,12 @@ resource "kubernetes_namespace" "this" {
   }
 }
 
-resource "helm_release" "this" {
+resource "helm_release" "operator" {
   name       = "tailscale-operator"
+  namespace  = kubernetes_namespace.this.metadata[0].name
   repository = "https://pkgs.tailscale.com/helmcharts"
   chart      = "tailscale-operator"
-  version    = var.tailscale_operator.version
-
-  namespace = kubernetes_namespace.this.metadata[0].name
+  version    = var.tailscale.version
 
   values = [
     yamlencode({
@@ -29,19 +28,19 @@ resource "helm_release" "this" {
 
   depends_on = [
     kubernetes_namespace.this,
-    kubernetes_secret.this,
+    kubernetes_secret.operator,
   ]
 }
 
-resource "kubernetes_secret" "this" {
+resource "kubernetes_secret" "operator" {
   metadata {
     name      = "operator-oauth"
     namespace = kubernetes_namespace.this.metadata[0].name
   }
 
   data = {
-    client_id     = data.onepassword_item.this.username
-    client_secret = data.onepassword_item.this.password
+    client_id     = data.onepassword_item.operator.username
+    client_secret = data.onepassword_item.operator.password
   }
 
   depends_on = [
@@ -53,7 +52,7 @@ data "onepassword_vault" "vault" {
   name = var.onepassword.vault_name
 }
 
-data "onepassword_item" "this" {
+data "onepassword_item" "operator" {
   vault = data.onepassword_vault.vault.uuid
   title = "${var.kubernetes.cluster_name}-tailscale-operator"
 }

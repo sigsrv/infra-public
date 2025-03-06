@@ -68,7 +68,7 @@ module "addons" {
       enabled = true
     }
 
-    tailscale_operator = {
+    tailscale = {
       enabled = true
     }
 
