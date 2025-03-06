@@ -56,10 +56,6 @@ module "addons" {
       enabled = true
     }
 
-    local_path_provisioner = {
-      enabled = true
-    }
-
     metrics_server = {
       enabled = true
     }

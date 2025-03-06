@@ -45,10 +45,6 @@ variable "addons" {
       version = optional(string, "0.23.0")
     }), {})
 
-    local_path_provisioner = optional(object({
-      enabled = optional(bool, false)
-    }), {})
-
     metrics_server = optional(object({
       enabled = optional(bool, false)
       # https://artifacthub.io/packages/helm/metrics-server/metrics-server

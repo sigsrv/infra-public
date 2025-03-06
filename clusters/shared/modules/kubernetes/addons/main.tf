@@ -44,14 +44,6 @@ module "metrics_server" {
   metrics_server = var.addons.metrics_server
 }
 
-module "local_path_provisioner" {
-  source = "./local-path-provisioner"
-  count  = var.addons.local_path_provisioner.enabled ? local.count : 0
-
-  kubernetes             = var.kubernetes
-  local_path_provisioner = var.addons.local_path_provisioner
-}
-
 module "registry" {
   source = "./registry"
   count  = var.addons.registry.enabled ? local.count : 0
