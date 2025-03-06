@@ -68,6 +68,10 @@ module "addons" {
       enabled = true
     }
 
+    rook_ceph = {
+      enabled = true
+    }
+
     tailscale_operator = {
       enabled = true
     }

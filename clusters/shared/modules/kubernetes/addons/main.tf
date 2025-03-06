@@ -32,7 +32,7 @@ module "cloudnative_pg" {
   cloudnative_pg = var.addons.cloudnative_pg
 
   depends_on = [
-    module.local_path_provisioner,
+    module.rook_ceph,
   ]
 }
 
@@ -60,8 +60,16 @@ module "registry" {
   registry   = var.addons.registry
 
   depends_on = [
-    module.local_path_provisioner,
+    module.rook_ceph,
   ]
+}
+
+module "rook_ceph" {
+  source = "./rook-ceph"
+  count  = var.addons.rook_ceph.enabled ? local.count : 0
+
+  kubernetes = var.kubernetes
+  rook_ceph  = var.addons.rook_ceph
 }
 
 module "tailscale_operator" {
@@ -82,7 +90,7 @@ module "openbao" {
   openbao     = var.addons.openbao
 
   depends_on = [
-    module.local_path_provisioner,
+    module.rook_ceph,
     module.tailscale_operator,
   ]
 }

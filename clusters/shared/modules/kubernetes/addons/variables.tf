@@ -77,6 +77,12 @@ variable "addons" {
       version = optional(string, "2.8.1")
     }), {})
 
+    rook_ceph = optional(object({
+      enabled = optional(bool, false)
+      # https://github.com/rook/rook/releases
+      version = optional(string, "v1.16.4")
+    }), {})
+
     tailscale_operator = optional(object({
       enabled = optional(bool, false)
       # https://artifacthub.io/packages/helm/tailscale/tailscale-operator
