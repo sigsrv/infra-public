@@ -68,10 +68,6 @@ module "addons" {
       enabled = true
     }
 
-    seaweedfs = {
-      enabled = true
-    }
-
     tailscale_operator = {
       enabled = true
     }

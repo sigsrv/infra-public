@@ -77,52 +77,6 @@ variable "addons" {
       version = optional(string, "2.8.1")
     }), {})
 
-    seaweedfs = optional(object({
-      enabled = optional(bool, false)
-      operator = optional(object({
-        # https://seaweedfs.github.io/seaweedfs-operator/helm/index.yaml
-        version = optional(string, "0.0.2")
-      }), {})
-      csi_driver = optional(object({
-        # https://seaweedfs.github.io/seaweedfs-csi-driver/helm/index.yaml
-        version = optional(string, "0.2.2")
-        name    = optional(string, "seaweedfs-csi-driver")
-        image   = optional(string, "chrislusf/seaweedfs-csi-driver:latest")
-      }), {})
-      seaweed = optional(object({
-        name                     = optional(string, "seaweedfs")
-        image                    = optional(string, "chrislusf/seaweedfs:latest")
-        volume_server_disk_count = optional(number, 1)
-        master = optional(object({
-          replicas             = optional(number, 3)
-          volume_size_limit_mb = optional(number, 1024)
-        }), {})
-        volume = optional(object({
-          replicas           = optional(number, 3)
-          storage            = optional(string, "50Gi")
-          storage_class_name = optional(string, "local-path")
-        }), {})
-        filer = optional(object({
-          replicas = optional(number, 3)
-          config = optional(string, <<EOF
-[leveldb2]
-enabled = true
-dir = "/data/filerldb2"
-EOF
-          )
-        }), {})
-      }), {})
-      storage_class = optional(object({
-        name             = optional(string, "seaweedfs")
-        is_default_class = optional(bool, true)
-        parameters = optional(map(string), {
-          # collection  = "default"
-          # replication = "002"
-          # diskType    = "ssd"
-        })
-      }), {})
-    }), {})
-
     tailscale_operator = optional(object({
       enabled = optional(bool, false)
       # https://artifacthub.io/packages/helm/tailscale/tailscale-operator

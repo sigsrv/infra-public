@@ -32,7 +32,7 @@ module "cloudnative_pg" {
   cloudnative_pg = var.addons.cloudnative_pg
 
   depends_on = [
-    module.seaweedfs,
+    module.local_path_provisioner,
   ]
 }
 
@@ -60,20 +60,6 @@ module "registry" {
   registry   = var.addons.registry
 
   depends_on = [
-    module.seaweedfs,
-    module.tailscale_operator,
-  ]
-}
-
-module "seaweedfs" {
-  source = "./seaweedfs"
-  count  = var.addons.seaweedfs.enabled ? local.count : 0
-
-  kubernetes = var.kubernetes
-  seaweedfs  = var.addons.seaweedfs
-
-  depends_on = [
-    module.cert_manager,
     module.local_path_provisioner,
   ]
 }
@@ -96,7 +82,7 @@ module "openbao" {
   openbao     = var.addons.openbao
 
   depends_on = [
-    module.seaweedfs,
+    module.local_path_provisioner,
     module.tailscale_operator,
   ]
 }
