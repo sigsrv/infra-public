@@ -17,16 +17,16 @@ aws_accounts = {
 
 s3_object_keys = {
   # root
-  "sigsrv-root" = [
+  "sigsrv-root" = [ # sigsrv-root
     "test/root/sigsrv-root",
     "aws/root",
   ]
   # prod
-  "sigsrv-workloads-prod-nas" = [
+  "sigsrv-workloads-prod-nas" = [ # sigsrv-nas
     "test/prod/sigsrv-nas",
     "aws/prod/sigsrv-nas",
   ]
-  "sigsrv-workloads-prod-net" = [
+  "sigsrv-workloads-prod-net" = [ # sigsrv-net
     "test/prod/sigsrv-net",
     "aws/prod/sigsrv-net",
     "clusters/prod",
@@ -34,16 +34,16 @@ s3_object_keys = {
     "github/sigsrv",
     "users",
   ]
-  "sigsrv-workloads-prod-tf" = [
+  "sigsrv-workloads-prod-tf" = [ # sigsrv-tf
     "test/prod/sigsrv-tf",
     "aws/prod/sigsrv-tf",
   ]
-  "sigsrv-workloads-prod-web" = [
+  "sigsrv-workloads-prod-web" = [ # sigsrv-web
     "test/prod/sigsrv-web",
     "aws/prod/sigsrv-web",
   ]
   # sdlc
-  "sigsrv-workloads-sdlc" = [
+  "sigsrv-workloads-sdlc" = [ # sigsrv-sdlc
     "test/sdlc/sigsrv-dev",
     "aws/sdlc/sigsrv-dev",
     "clusters/sdlc",
