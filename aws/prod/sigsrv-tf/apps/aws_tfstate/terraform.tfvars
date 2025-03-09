@@ -31,6 +31,7 @@ s3_object_keys = {
     "aws/prod/sigsrv-net",
     "clusters/prod",
     "clusters/shared",
+    "github/sigsrv",
     "users",
   ]
   "sigsrv-workloads-prod-tf" = [
