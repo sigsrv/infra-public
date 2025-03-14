@@ -9,26 +9,31 @@ variable "incus" {
   })
 }
 
-variable "talos" {
-  type = object({
-    version = string
-    controlplane_node = object({
-      count  = number
-      cpu    = optional(number, 2)
-      memory = optional(string, "4GiB")
-    })
-    worker_node = object({
-      count  = number
-      cpu    = optional(number, 2)
-      memory = optional(string, "4GiB")
-    })
-  })
-}
-
 variable "kubernetes" {
   type = object({
     cluster_name    = string
     topology_region = string
     topology_zone   = string
+  })
+}
+
+variable "talos_node" {
+  type = object({
+    type   = string
+    name   = string
+    target = string
+    cpu    = number
+    memory = string
+  })
+}
+
+variable "talos_image" {
+  type = any // TODO: typing this
+}
+
+variable "talos_machine_secrets" {
+  type = object({
+    machine_secrets      = any
+    client_configuration = any
   })
 }

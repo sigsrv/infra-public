@@ -23,11 +23,10 @@ module "cluster" {
   }
 
   kubernetes = {
+    cluster_name    = "sigsrv-p1"
     topology_region = "apne-kor-se"
     topology_zone   = "apne-kor-se1"
   }
-
-  status = var.status
 }
 
 module "addons" {
@@ -76,8 +75,6 @@ module "addons" {
       enabled = true
     }
   }
-
-  status = var.status
 
   depends_on = [
     module.cluster
