@@ -38,7 +38,10 @@ resource "helm_release" "cluster" {
   values = [
     yamlencode({
       operatorNamespace = helm_release.operator.namespace
-    })
+    }),
+    templatefile("${path.module}/cluster-values.yaml", {
+      namespace = kubernetes_namespace.this.metadata[0].name
+    }),
   ]
 
   depends_on = [
