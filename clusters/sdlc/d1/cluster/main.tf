@@ -19,11 +19,12 @@ module "cluster" {
   }
 
   kubernetes = {
+    cluster_name    = "sigsrv-d1"
+    cluster_alias   = "d1"
+    cluster_env     = "dev"
     topology_region = "apne-kor-se"
     topology_zone   = "apne-kor-se1"
   }
-
-  status = var.status
 }
 
 resource "null_resource" "protection" {

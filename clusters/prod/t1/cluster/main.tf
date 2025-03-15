@@ -19,21 +19,19 @@ module "cluster" {
   }
 
   kubernetes = {
+    cluster_name    = "sigsrv-t1"
+    cluster_alias   = "t1"
+    cluster_env     = "prod"
     topology_region = "apne-kor-se"
     topology_zone   = "apne-kor-se1"
   }
-
-  status = var.status
 }
 
 module "addons" {
   source = "../../../modules/kubernetes/addons"
+  count  = module.cluster.ready ? 1 : 0
 
-  kubernetes = {
-    cluster_name  = "sigsrv-t1"
-    cluster_alias = "t1"
-    cluster_env   = "prod"
-  }
+  kubernetes = module.cluster.config.kubernetes
 
   onepassword = {
     vault_name = "sigsrv-prod"
@@ -52,8 +50,6 @@ module "addons" {
       enabled = true
     }
   }
-
-  status = var.status
 
   depends_on = [
     module.cluster
