@@ -5,7 +5,7 @@ module "cluster" {
     project_name      = "sigsrv-t1"
     network_name      = "sigsrvbr0"
     network_zone_name = "sigsrv.local"
-    instance_targets  = ["minisrv"]
+    instance_targets  = ["sigsrv"]
   }
 
   talos = {
