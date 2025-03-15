@@ -79,27 +79,14 @@ resource "talos_machine_bootstrap" "this" {
   ]
 }
 
-# talosconfig
-resource "local_sensitive_file" "talosconfig" {
-  count = local.controlplane_node_is_running ? 1 : 0
+module "talosconfig" {
+  count  = length(talos_machine_bootstrap.this[*])
+  source = "../talosconfig"
 
-  filename = "${path.root}/talosconfig"
-  content = yamlencode({
-    "context" = "talos"
-    "contexts" = {
-      "talos" = {
-        "ca"        = talos_machine_secrets.this.client_configuration.ca_certificate
-        "crt"       = talos_machine_secrets.this.client_configuration.client_certificate
-        "key"       = talos_machine_secrets.this.client_configuration.client_key
-        "endpoints" = [for _, node in module.talos_controlplane_node : node.endpoint]
-        "nodes"     = [module.talos_controlplane_node[0].endpoint]
-      }
-    }
-  })
+  talos_controlplane_nodes = module.talos_controlplane_node
+  talos_machine_secrets    = talos_machine_secrets.this
 
-  depends_on = [
-    talos_machine_bootstrap.this,
-  ]
+  depends_on = [talos_machine_bootstrap.this]
 }
 
 # kubeconfig
