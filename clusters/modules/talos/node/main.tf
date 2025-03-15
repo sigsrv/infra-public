@@ -69,21 +69,21 @@ data "talos_machine_configuration" "this" {
     }),
     templatefile("${path.module}/files/talos-machine.yaml", {
       hostname = local.hostname
-      node_labels = {
-        # kubernetes topology
-        "topology.kubernetes.io/region" = var.kubernetes.topology.region
-        "topology.kubernetes.io/zone" = coalesce(
-          var.kubernetes.topology.zone,
-          var.node.target,
-        )
-        # incus
-        "incus.linuxcontainers.org/project" = var.incus.project_name
-        "incus.linuxcontainers.org/target"  = var.node.target
-      }
-      node_annotations = {
-      }
-      node_taints = {
-      }
+          node_labels = {
+            # kubernetes topology
+            "topology.kubernetes.io/region" = var.kubernetes.topology.region
+            "topology.kubernetes.io/zone" = coalesce(
+              var.kubernetes.topology.zone,
+              var.node.target,
+            )
+            # incus
+            "incus.linuxcontainers.org/project" = var.incus.project_name
+            "incus.linuxcontainers.org/target"  = var.node.target
+          }
+          node_annotations = {
+          }
+          node_taints = {
+          }
       install_image = var.image.urls.installer_secureboot
     }),
     var.node.type != "controlplane" ? [] : [
