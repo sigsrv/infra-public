@@ -11,10 +11,10 @@ module "cluster" {
   talos = {
     version = "v1.9.3"
     controlplane_node = {
-      count = 3
+      count = 1
     }
     worker_node = {
-      count = 3
+      count = 1
     }
   }
 
