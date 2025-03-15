@@ -1,9 +1,0 @@
-vault operator generate-root -init -pgp-key=keybase:EcmaXp
-set NONCE <NONCE>
-
-for encrypted_unseal_key_name in A_YK_5C_13068969_715FE376816038A7 B_YK_5C_23768596_685C7B17D23F1A3E C_YK_5C_Nano_25551278_BC346E1E0C2D56CF
-    op read "op://sigsrv-prod/sigsrv-prod-vault/encrypted-unseal-keys/$encrypted_unseal_key_name" \
-        | base64 --decode \
-        | gpg --decrypt \
-        | vault operator generate-root -nonce $NONCE -
-end
