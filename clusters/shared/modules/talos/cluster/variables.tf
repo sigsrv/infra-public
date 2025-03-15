@@ -28,6 +28,8 @@ variable "talos" {
 variable "kubernetes" {
   type = object({
     cluster_name    = string
+    cluster_alias   = string
+    cluster_env     = string
     topology_region = string
     topology_zone   = string
   })

@@ -24,6 +24,8 @@ module "cluster" {
 
   kubernetes = {
     cluster_name    = "sigsrv-p1"
+    cluster_alias   = "p1"
+    cluster_env     = "prod"
     topology_region = "apne-kor-se"
     topology_zone   = "apne-kor-se1"
   }
@@ -31,12 +33,9 @@ module "cluster" {
 
 module "addons" {
   source = "../../../shared/modules/kubernetes/addons"
+  count  = module.cluster.ready ? 1 : 0
 
-  kubernetes = {
-    cluster_name  = "sigsrv-p1"
-    cluster_alias = "p1"
-    cluster_env   = "prod"
-  }
+  kubernetes = module.cluster.config.kubernetes
 
   onepassword = {
     vault_name = "sigsrv-prod"
