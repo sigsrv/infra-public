@@ -1,8 +1,10 @@
 variable "kubernetes" {
   type = object({
-    cluster_name  = string
-    cluster_alias = string
-    cluster_env   = string
+    cluster = object({
+      name  = string
+      alias = string
+      env   = string
+    })
   })
 }
 

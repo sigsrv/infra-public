@@ -15,7 +15,7 @@ data "onepassword_vault" "vault" {
 
 locals {
   machine_init  = sensitive(jsondecode(data.kubernetes_secret.machine_init.data["machine-init.json"]))
-  op_secret_uri = "op://${var.onepassword.vault_name}/${var.kubernetes.cluster_name}-openbao"
+  op_secret_uri = "op://${var.onepassword.vault_name}/${var.kubernetes.cluster.name}-openbao"
   op_secret_uris = {
     encrypted_unseal_keys = "${local.op_secret_uri}/encrypted-unseal-keys"
     encrypted_root_token  = "${local.op_secret_uri}/encrypted-root-token/root-token"
@@ -25,7 +25,7 @@ locals {
 
 resource "onepassword_item" "this" {
   vault = data.onepassword_vault.vault.uuid
-  title = "${var.kubernetes.cluster_name}-openbao"
+  title = "${var.kubernetes.cluster.name}-openbao"
 
   section {
     label = "encrypted-unseal-keys"

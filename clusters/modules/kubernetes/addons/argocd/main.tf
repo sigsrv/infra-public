@@ -79,9 +79,9 @@ resource "random_password" "admin" {
 
 resource "onepassword_item" "admin" {
   vault = data.onepassword_vault.vault.uuid
-  title = "${var.kubernetes.cluster_name}-argocd"
+  title = "${var.kubernetes.cluster.name}-argocd"
 
-  url      = "https://argocd-${var.kubernetes.cluster_alias}.${var.tailscale.tailnet}"
+  url      = "https://argocd-${var.kubernetes.cluster.alias}.${var.tailscale.tailnet}"
   username = "admin"
   password = random_password.admin.result
 }
@@ -92,7 +92,7 @@ resource "tls_private_key" "ssh" {
 
 resource "onepassword_item" "ssh" {
   vault = data.onepassword_vault.vault.uuid
-  title = "${var.kubernetes.cluster_name}-argocd-ssh"
+  title = "${var.kubernetes.cluster.name}-argocd-ssh"
 
   section {
     label = "terraform"
@@ -101,7 +101,7 @@ resource "onepassword_item" "ssh" {
       label = "public_key"
       value = join(" ", [
         tls_private_key.ssh.public_key_openssh,
-        "${var.kubernetes.cluster_name}-argocd-ssh",
+        "${var.kubernetes.cluster.name}-argocd-ssh",
       ])
     }
   }

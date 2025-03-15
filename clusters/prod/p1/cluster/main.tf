@@ -10,26 +10,31 @@ module "cluster" {
 
   talos = {
     version = "v1.9.3"
-    nodes = {
-      controlplane = {
-        count  = 3
-        cpu    = 4
-        memory = "8GiB"
-      }
-      worker = {
-        count  = 3
-        cpu    = 4
-        memory = "4GiB"
-      }
-    }
   }
 
   kubernetes = {
-    cluster_name    = "sigsrv-p1"
-    cluster_alias   = "p1"
-    cluster_env     = "prod"
-    topology_region = "apne-kor-se"
-    topology_zone   = "apne-kor-se1"
+    cluster = {
+      name  = "sigsrv-p1"
+      alias = "p1"
+      env   = "prod"
+    }
+    topology = {
+      region = "apne-kor-se"
+      zone   = "apne-kor-se1"
+    }
+    nodes = {
+      "c" : {
+        type   = "controlplane"
+        count  = 3
+        cpu    = 4
+        memory = "8GiB"
+      },
+      "w" : {
+        count  = 3
+        cpu    = 4
+        memory = "4GiB"
+      },
+    }
   }
 }
 

@@ -5,27 +5,32 @@ module "cluster" {
     project_name      = "sigsrv-t1"
     network_name      = "sigsrvbr0"
     network_zone_name = "sigsrv.local"
-    instance_targets  = ["sigsrv"]
   }
 
   talos = {
     version = "v1.9.3"
-    nodes = {
-      controlplane = {
-        count = 1
-      }
-      worker = {
-        count = 2
-      }
-    }
   }
 
   kubernetes = {
-    cluster_name    = "sigsrv-t1"
-    cluster_alias   = "t1"
-    cluster_env     = "prod"
-    topology_region = "apne-kor-se"
-    topology_zone   = "apne-kor-se1"
+    cluster = {
+      name  = "sigsrv-t1"
+      alias = "t1"
+      env   = "prod"
+    }
+    topology = {
+      region  = "apne-kor-se"
+      zone    = "apne-kor-se1"
+      targets = ["sigsrv"]
+    }
+    nodes = {
+      "c" : {
+        type  = "controlplane"
+        count = 1
+      },
+      "w" : {
+        count = 2
+      },
+    }
   }
 }
 

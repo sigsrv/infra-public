@@ -102,4 +102,4 @@ spec:
                   number: 5000
   tls:
     - hosts:
-        - registry-${kubernetes.cluster_alias}
+        - registry-${kubernetes.cluster.alias}

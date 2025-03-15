@@ -9,7 +9,7 @@ spec:
         elements:
           - name: cluster-apps
             namespace: argocd
-            path: "clusters/${kubernetes.cluster_env}/${kubernetes.cluster_alias}/apps"
+            path: "clusters/${kubernetes.cluster.env}/${kubernetes.cluster.alias}/apps"
   template:
     metadata:
       name: "{{name}}"
@@ -62,4 +62,4 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - argocd-${kubernetes.cluster_alias}
+        - argocd-${kubernetes.cluster.alias}

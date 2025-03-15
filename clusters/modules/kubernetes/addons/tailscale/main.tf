@@ -14,11 +14,11 @@ resource "helm_release" "operator" {
   values = [
     yamlencode({
       operatorConfig = {
-        hostname    = "${var.kubernetes.cluster_name}-tailscale-operator"
-        defaultTags = join(",", ["tag:${var.kubernetes.cluster_name}-tailscale-operator"])
+        hostname    = "${var.kubernetes.cluster.name}-tailscale-operator"
+        defaultTags = join(",", ["tag:${var.kubernetes.cluster.name}-tailscale-operator"])
       }
       proxyConfig = {
-        defaultTags = join(",", ["tag:${var.kubernetes.cluster_name}-tailscale-service"])
+        defaultTags = join(",", ["tag:${var.kubernetes.cluster.name}-tailscale-service"])
         apiServerProxyConfig = {
           mode = true
         }
@@ -54,5 +54,5 @@ data "onepassword_vault" "vault" {
 
 data "onepassword_item" "operator" {
   vault = data.onepassword_vault.vault.uuid
-  title = "${var.kubernetes.cluster_name}-tailscale-operator"
+  title = "${var.kubernetes.cluster.name}-tailscale-operator"
 }

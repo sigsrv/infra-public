@@ -1,33 +1,36 @@
 variable "incus" {
   type = object({
-    project_name         = string
-    project_name_prefix  = optional(string, "sigsrv-")
-    network_name         = string
-    network_zone_name    = string
-    instance_name_prefix = optional(string)
-    instance_targets     = list(string)
+    project_name      = string
+    network_name      = string
+    network_zone_name = string
   })
 }
 
-variable "talos" {
+variable "kubernetes" {
   type = object({
-    version = string
+    cluster = object({
+      name  = string
+      alias = string
+      env   = string
+    })
+    topology = object({
+      region  = string
+      zone    = string
+      targets = list(string)
+    })
     nodes = map(object({
       count  = optional(number, 1)
       type   = optional(string, "worker")
-      name   = optional(string)
+      group  = optional(string)
       cpu    = optional(number, 2)
       memory = optional(string, "4GiB")
     }))
   })
 }
 
-variable "kubernetes" {
+variable "talos" {
   type = object({
-    cluster_name    = string
-    cluster_alias   = string
-    cluster_env     = string
-    topology_region = string
-    topology_zone   = string
+    version         = string
+    image_schematic = optional(any, {})
   })
 }

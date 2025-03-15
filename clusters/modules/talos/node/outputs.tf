@@ -1,5 +1,5 @@
 output "type" {
-  value = var.talos_node.type
+  value = var.node.type
 }
 
 output "config" {

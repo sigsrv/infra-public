@@ -1,7 +1,7 @@
 output "type" {
-  value = var.talos_node.type
+  value = var.node.type
 }
 
 output "node" {
-  value = modules.talos_node
+  value = module.node
 }
