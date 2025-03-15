@@ -10,15 +10,17 @@ module "cluster" {
 
   talos = {
     version = "v1.9.3"
-    controlplane_node = {
-      count  = 3
-      cpu    = 4
-      memory = "8GiB"
-    }
-    worker_node = {
-      count  = 3
-      cpu    = 4
-      memory = "4GiB"
+    nodes = {
+      controlplane = {
+        count  = 3
+        cpu    = 4
+        memory = "8GiB"
+      }
+      worker = {
+        count  = 3
+        cpu    = 4
+        memory = "4GiB"
+      }
     }
   }
 

@@ -32,6 +32,7 @@ variable "talos_image" {
 }
 
 variable "talos_machine_secrets" {
+  sensitive = true
   type = object({
     machine_secrets      = any
     client_configuration = any

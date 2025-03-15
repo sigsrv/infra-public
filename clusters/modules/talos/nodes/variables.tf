@@ -9,25 +9,32 @@ variable "incus" {
   })
 }
 
-variable "talos" {
-  type = object({
-    version = string
-    nodes = map(object({
-      count  = optional(number, 1)
-      type   = optional(string, "worker")
-      name   = optional(string)
-      cpu    = optional(number, 2)
-      memory = optional(string, "4GiB")
-    }))
-  })
-}
-
 variable "kubernetes" {
   type = object({
     cluster_name    = string
-    cluster_alias   = string
-    cluster_env     = string
     topology_region = string
     topology_zone   = string
+  })
+}
+
+variable "talos_node" {
+  type = object({
+    type   = string
+    count  = number
+    name   = string
+    cpu    = number
+    memory = string
+  })
+}
+
+variable "talos_image" {
+  type = any // TODO: typing this
+}
+
+variable "talos_machine_secrets" {
+  sensitive = true
+  type = object({
+    machine_secrets      = any
+    client_configuration = any
   })
 }
