@@ -1,5 +1,5 @@
 module "cluster" {
-  source = "../../../shared/modules/talos/cluster"
+  source = "../../../modules/talos/cluster"
 
   incus = {
     project_name      = "sigsrv-t1"
@@ -27,7 +27,7 @@ module "cluster" {
 }
 
 module "addons" {
-  source = "../../../shared/modules/kubernetes/addons"
+  source = "../../../modules/kubernetes/addons"
 
   kubernetes = {
     cluster_name  = "sigsrv-t1"

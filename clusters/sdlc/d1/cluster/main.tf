@@ -1,5 +1,5 @@
 module "cluster" {
-  source = "../../../shared/modules/talos/cluster"
+  source = "../../../modules/talos/cluster"
 
   incus = {
     project_name      = "sigsrv-d1"

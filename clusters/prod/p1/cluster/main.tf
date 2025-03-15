@@ -1,5 +1,5 @@
 module "cluster" {
-  source = "../../../shared/modules/talos/cluster"
+  source = "../../../modules/talos/cluster"
 
   incus = {
     project_name      = "sigsrv-p1"
@@ -32,7 +32,7 @@ module "cluster" {
 }
 
 module "addons" {
-  source = "../../../shared/modules/kubernetes/addons"
+  source = "../../../modules/kubernetes/addons"
   count  = module.cluster.ready ? 1 : 0
 
   kubernetes = module.cluster.config.kubernetes
