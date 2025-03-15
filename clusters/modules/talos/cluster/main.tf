@@ -89,29 +89,12 @@ module "talosconfig" {
   depends_on = [talos_machine_bootstrap.this]
 }
 
-# kubeconfig
-resource "talos_cluster_kubeconfig" "kubeconfig" {
-  count = local.controlplane_node_is_running ? 1 : 0
+module "kubeconfig" {
+  count  = length(talos_machine_bootstrap.this[*])
+  source = "../kubeconfig"
 
-  client_configuration = talos_machine_secrets.this.client_configuration
-  node                 = module.talos_controlplane_node[0].ipv4_address
+  talos_controlplane_nodes = module.talos_controlplane_node
+  talos_machine_secrets    = talos_machine_secrets.this
 
-  depends_on = [
-    talos_machine_bootstrap.this,
-  ]
-}
-
-resource "local_sensitive_file" "kubeconfig" {
-  count = local.controlplane_node_is_running ? 1 : 0
-
-  filename = "${path.root}/kubeconfig"
-  content = replace(
-    talos_cluster_kubeconfig.kubeconfig[0].kubeconfig_raw,
-    "https://127.0.0.1:7445",
-    "https://${module.talos_controlplane_node[0].endpoint}:6443",
-  )
-
-  depends_on = [
-    talos_cluster_kubeconfig.kubeconfig,
-  ]
+  depends_on = [talos_machine_bootstrap.this]
 }
