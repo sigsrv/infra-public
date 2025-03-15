@@ -28,7 +28,7 @@ module "cluster" {
         count = 1
       },
       "w" : {
-        count = 2
+        count = 1
       },
     }
   }
