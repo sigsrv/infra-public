@@ -1,6 +1,6 @@
 module "network" {
   for_each = var.networks
-  source   = "./network"
+  source   = "./modules/network"
   name     = each.key
   network  = each.value
 }
