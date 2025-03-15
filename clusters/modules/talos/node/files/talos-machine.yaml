@@ -2,12 +2,6 @@ version: v1alpha1
 machine:
   network:
     hostname: ${hostname}
-  nodeLabels:
-    ${indent(4, yamlencode(node_labels))}
-  nodeAnnotations:
-    ${indent(4, yamlencode(node_annotations))}
-  nodeTaints:
-    ${indent(4, yamlencode(node_taints))}
   install:
     disk: /dev/sda
     image: ${install_image}

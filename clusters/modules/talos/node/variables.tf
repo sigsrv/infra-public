@@ -23,11 +23,14 @@ variable "kubernetes" {
 
 variable "node" {
   type = object({
-    type   = string
-    name   = string
-    target = string
-    cpu    = number
-    memory = string
+    type        = string
+    name        = string
+    target      = string
+    cpu         = number
+    memory      = string
+    labels      = map(string)
+    annotations = map(string)
+    taints      = map(string)
   })
 }
 

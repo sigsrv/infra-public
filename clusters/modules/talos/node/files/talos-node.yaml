@@ -1,0 +1,8 @@
+version: v1alpha1
+machine:
+  nodeLabels:
+    ${indent(4, yamlencode(node.labels))}
+  nodeAnnotations:
+    ${indent(4, yamlencode(node.annotations))}
+  nodeTaints:
+    ${indent(4, yamlencode(node.taints))}

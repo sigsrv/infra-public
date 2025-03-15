@@ -68,8 +68,14 @@ data "talos_machine_configuration" "this" {
     templatefile("${path.module}/files/talos-cluster.yaml", {
     }),
     templatefile("${path.module}/files/talos-machine.yaml", {
-      hostname = local.hostname
-          node_labels = {
+      hostname      = local.hostname
+      install_image = var.image.urls.installer_secureboot
+    }),
+    templatefile("${path.module}/files/talos-node.yaml", {
+      node = merge(
+        var.node,
+        {
+          labels = {
             # kubernetes topology
             "topology.kubernetes.io/region" = var.kubernetes.topology.region
             "topology.kubernetes.io/zone" = coalesce(
@@ -80,11 +86,8 @@ data "talos_machine_configuration" "this" {
             "incus.linuxcontainers.org/project" = var.incus.project_name
             "incus.linuxcontainers.org/target"  = var.node.target
           }
-          node_annotations = {
-          }
-          node_taints = {
-          }
-      install_image = var.image.urls.installer_secureboot
+        }
+      )
     }),
     var.node.type != "controlplane" ? [] : [
       # templatefile("${path.module}/files/talos-controlplane.yaml", {}),
