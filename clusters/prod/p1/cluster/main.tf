@@ -30,7 +30,7 @@ module "cluster" {
         memory = "8GiB"
       },
       "w" : {
-        count  = 3
+        count  = 6
         cpu    = 4
         memory = "4GiB"
       },
