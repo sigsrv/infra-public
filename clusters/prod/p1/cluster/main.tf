@@ -5,7 +5,6 @@ module "cluster" {
     project_name      = "sigsrv-p1"
     network_name      = "sigsrvbr0"
     network_zone_name = "sigsrv.local"
-    instance_targets  = ["sigsrv", "sigsrv", "minisrv"]
   }
 
   talos = {
@@ -19,8 +18,9 @@ module "cluster" {
       env   = "prod"
     }
     topology = {
-      region = "apne-kor-se"
-      zone   = "apne-kor-se1"
+      region  = "apne-kor-se"
+      zone    = "apne-kor-se1"
+      targets = ["sigsrv", "sigsrv", "minisrv"]
     }
     nodes = {
       "c" : {
