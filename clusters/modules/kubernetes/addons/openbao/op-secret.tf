@@ -1,4 +1,4 @@
-data "kubernetes_secret" "machine_init" {
+data "kubernetes_secret" "vault_init" {
   metadata {
     name      = "${helm_release.this.name}-init"
     namespace = helm_release.this.namespace
@@ -14,7 +14,7 @@ data "onepassword_vault" "vault" {
 }
 
 locals {
-  machine_init  = sensitive(jsondecode(data.kubernetes_secret.machine_init.data["machine-init.json"]))
+  vault_init    = sensitive(jsondecode(data.kubernetes_secret.vault_init.data["vault-init.json"]))
   op_secret_uri = "op://${var.onepassword.vault_name}/${var.kubernetes.cluster.name}-openbao"
   op_secret_uris = {
     encrypted_unseal_keys = "${local.op_secret_uri}/encrypted-unseal-keys"
@@ -31,7 +31,7 @@ resource "onepassword_item" "this" {
     label = "encrypted-unseal-keys"
 
     dynamic "field" {
-      for_each = local.machine_init.unseal_keys_b64
+      for_each = local.vault_init.unseal_keys_b64
 
       content {
         label = "key-${field.key}"
@@ -47,7 +47,7 @@ resource "onepassword_item" "this" {
     field {
       label = "root-token"
       type  = "CONCEALED"
-      value = local.machine_init.root_token
+      value = local.vault_init.root_token
     }
   }
 
@@ -75,7 +75,7 @@ EOF
       value = trimspace(<<EOF
 function __bao_operator_unseal
   set -l ENCRYPTED_UNSEAL_KEYS
-  for i in (seq 0 ${length(local.machine_init.unseal_keys_b64) - 1})
+  for i in (seq 0 ${length(local.vault_init.unseal_keys_b64) - 1})
       set -a ENCRYPTED_UNSEAL_KEYS (op read "${local.op_secret_uris.encrypted_unseal_keys}/key-$i")
   end
 

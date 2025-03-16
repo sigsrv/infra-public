@@ -44,11 +44,11 @@ bao operator init \
     -root-token-pgp-key=${var.openbao.root_token_pgp_key} \
     -key-shares=${var.openbao.key_shares} \
     -key-threshold=${var.openbao.key_threshold} \
-    -format=json > /tmp/machine-init.json
+    -format=json > /tmp/vault-init.json
 
 kubectl create secret generic \
   "${helm_release.this.name}-init" \
-  --from-file=machine-init.json=/tmp/machine-init.json
+  --from-file=vault-init.json=/tmp/vault-init.json
 EOF
           ]
 
