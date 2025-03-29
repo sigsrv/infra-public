@@ -2,6 +2,7 @@ name = "langbot"
 
 deployments = [
   "langbot-claude",
+  "langbot-gemini",
   "langbot-openai-gpt-4o",
   "langbot-openai-o1",
   "langbot-openai-o3-mini",
