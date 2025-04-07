@@ -51,7 +51,7 @@ locals {
     bucket = "sigsrv-infra-tfstate"
     key = "${trimprefix(
       abspath(path.root),
-      "/Users/ecmaxp/Library/Mobile Documents/com~apple~CloudDocs/Projects/sigsrv-infra/"
+      "/Users/ecmaxp/Library/Mobile Documents/com~apple~CloudDocs/Projects/Root/sigsrv-infra/"
     )}/terraform.tfstate"
     encrypt = true
 
