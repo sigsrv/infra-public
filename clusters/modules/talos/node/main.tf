@@ -104,17 +104,20 @@ data "talos_machine_configuration" "this" {
       node = merge(
         var.node,
         {
-          labels = {
-            # kubernetes topology
-            "topology.kubernetes.io/region" = var.kubernetes.topology.region
-            "topology.kubernetes.io/zone" = coalesce(
-              var.kubernetes.topology.zone,
-              var.node.target,
-            )
-            # incus
-            "incus.linuxcontainers.org/project" = var.incus.project_name
-            "incus.linuxcontainers.org/target"  = var.node.target
-          }
+          labels = merge(
+            var.node.labels,
+            {
+              # kubernetes topology
+              "topology.kubernetes.io/region" = var.kubernetes.topology.region
+              "topology.kubernetes.io/zone" = coalesce(
+                var.kubernetes.topology.zone,
+                var.node.target,
+              )
+              # incus
+              "incus.linuxcontainers.org/project" = var.incus.project_name
+              "incus.linuxcontainers.org/target"  = var.node.target
+            }
+          )
         }
       )
     }),
