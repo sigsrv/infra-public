@@ -28,7 +28,7 @@ module "cluster" {
         type   = "controlplane"
         count  = 3
         cpu    = 4
-        memory = "8GiB"
+        memory = "4GiB"
       },
       "w" : {
         count  = 6
