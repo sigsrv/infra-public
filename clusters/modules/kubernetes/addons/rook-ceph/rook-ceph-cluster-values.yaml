@@ -1,0 +1,282 @@
+# https://github.com/rook/rook/blob/master/deploy/charts/rook-ceph-cluster/values.yaml
+
+cephClusterSpec:
+  resources:
+    mgr:
+      requests:
+        cpu: 100m
+        memory: 768Mi
+      limits: {}
+    mon:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits: {}
+    osd:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits: {}
+    prepareosd:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits: {}
+    mgr-sidecar:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits: {}
+    crashcollector:
+      requests:
+        cpu: 10m
+        memory: 16Mi
+      limits: {}
+    logcollector:
+      requests:
+        cpu: 10m
+        memory: 16Mi
+      limits: {}
+    cleanup:
+      requests:
+        cpu: 10m
+        memory: 16Mi
+      limits: {}
+    exporter:
+      requests:
+        cpu: 10m
+        memory: 16Mi
+      limits: {}
+
+  placement:
+    all:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: kubernetes.sigsrv.net/role
+                  operator: In
+                  values: [storage]
+      tolerations:
+        - key: kubernetes.sigsrv.net/role
+          operator: Equal
+          value: storage
+          effect: NoSchedule
+
+csi:
+  csiRBDProvisionerResource: |
+    - name: csi-provisioner
+      resource:
+        requests:
+          cpu: 10m
+          memory: 16Mi
+        limits:
+          memory: 32Mi
+    - name: csi-resizer
+      resource:
+        requests:
+          memory: 16Mi
+          cpu: 10m
+        limits:
+          memory: 32Mi
+    - name: csi-attacher
+      resource:
+        requests:
+          memory: 16Mi
+          cpu: 10m
+        limits:
+          memory: 32Mi
+    - name: csi-snapshotter
+      resource:
+        requests:
+          memory: 16Mi
+          cpu: 10m
+        limits:
+          memory: 32Mi
+    - name: csi-rbdplugin
+      resource:
+        requests:
+          memory: 48Mi
+          cpu: 10m
+        limits:
+          memory: 64Mi
+    - name: csi-omap-generator
+      resource:
+        requests:
+          memory: 32Mi
+          cpu: 10m
+        limits:
+          memory: 64Mi
+    - name: liveness-prometheus
+      resource:
+        requests:
+          memory: 16Mi
+          cpu: 10m
+        limits:
+          memory: 32Mi
+
+  csiRBDPluginResource: |
+    - name: driver-registrar
+      resource:
+        requests:
+          memory: 16Mi
+          cpu: 10m
+        limits:
+          memory: 32Mi
+    - name: csi-rbdplugin
+      resource:
+        requests:
+          memory: 40Mi
+          cpu: 10m
+        limits:
+          memory: 64Mi
+    - name: liveness-prometheus
+      resource:
+        requests:
+          memory: 16Mi
+          cpu: 10m
+        limits:
+          memory: 32Mi
+
+  csiCephFSProvisionerResource: |
+    - name: csi-provisioner
+      resource:
+        requests:
+          memory: 16Mi
+          cpu: 10m
+        limits:
+          memory: 32Mi
+    - name: csi-resizer
+      resource:
+        requests:
+          memory: 16Mi
+          cpu: 10m
+        limits:
+          memory: 32Mi
+    - name: csi-attacher
+      resource:
+        requests:
+          memory: 16Mi
+          cpu: 10m
+        limits:
+          memory: 32Mi
+    - name: csi-snapshotter
+      resource:
+        requests:
+          memory: 16Mi
+          cpu: 10m
+        limits:
+          memory: 32Mi
+    - name: csi-cephfsplugin
+      resource:
+        requests:
+          memory: 48Mi
+          cpu: 10m
+        limits:
+          memory: 64Mi
+    - name: liveness-prometheus
+      resource:
+        requests:
+          memory: 16Mi
+          cpu: 10m
+        limits:
+          memory: 32Mi
+
+  csiCephFSPluginResource: |
+    - name: driver-registrar
+      resource:
+        requests:
+          memory: 16Mi
+          cpu: 10m
+        limits:
+          memory: 32Mi
+    - name: csi-cephfsplugin
+      resource:
+        requests:
+          memory: 48Mi
+          cpu: 10m
+        limits:
+          memory: 64Mi
+    - name: liveness-prometheus
+      resource:
+        requests:
+          memory: 16Mi
+          cpu: 10m
+        limits:
+          memory: 32Mi
+
+# https://github.com/rook/rook/blob/master/Documentation/CRDs/Block-Storage/ceph-block-pool-crd.md
+cephBlockPools:
+  - name: ceph-blockpool
+    spec:
+      failureDomain: host
+      replicated:
+        size: 1
+      enableRBDStats: true
+    storageClass:
+      enabled: true
+      name: ceph-block
+      annotations: {}
+      labels: {}
+      isDefault: true
+      reclaimPolicy: Delete
+      allowVolumeExpansion: true
+      volumeBindingMode: "Immediate"
+      mountOptions: []
+      allowedTopologies: []
+      parameters:
+        clusterID: "${namespace}"
+        imageFormat: "2"
+        imageFeatures: layering
+        csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
+        csi.storage.k8s.io/provisioner-secret-namespace: "${namespace}"
+        csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
+        csi.storage.k8s.io/controller-expand-secret-namespace: "${namespace}"
+        csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
+        csi.storage.k8s.io/node-stage-secret-namespace: "${namespace}"
+        csi.storage.k8s.io/fstype: ext4
+
+# https://github.com/rook/rook/blob/master/Documentation/CRDs/Shared-Filesystem/ceph-filesystem-crd.md
+cephFileSystems:
+  - name: ceph-filesystem
+    spec:
+      metadataPool:
+        replicated:
+          size: 3
+      dataPools:
+        - failureDomain: host
+          replicated:
+            size: 3
+          name: data0
+      metadataServer:
+        activeCount: 1
+        activeStandby: true
+        resources:
+          limits:
+            memory: "256Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+        priorityClassName: system-cluster-critical
+    storageClass:
+      enabled: true
+      isDefault: false
+      name: ceph-filesystem
+      pool: data0
+      reclaimPolicy: Delete
+      allowVolumeExpansion: true
+      volumeBindingMode: "Immediate"
+      annotations: {}
+      labels: {}
+      mountOptions: []
+      parameters:
+        clusterID: "${namespace}"
+        csi.storage.k8s.io/provisioner-secret-name: rook-csi-cephfs-provisioner
+        csi.storage.k8s.io/provisioner-secret-namespace: "${namespace}"
+        csi.storage.k8s.io/controller-expand-secret-name: rook-csi-cephfs-provisioner
+        csi.storage.k8s.io/controller-expand-secret-namespace: "${namespace}"
+        csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
+        csi.storage.k8s.io/node-stage-secret-namespace: "${namespace}"
+        csi.storage.k8s.io/fstype: ext4
+
+cephECBlockPools: []

@@ -18,11 +18,7 @@ resource "helm_release" "operator" {
   version    = var.rook_ceph.version
 
   values = [
-    yamlencode({
-      crds = {
-        enabled = true
-      }
-    })
+    file("${path.module}/rook-ceph-operator-values.yaml"),
   ]
 
   depends_on = [
@@ -41,7 +37,7 @@ resource "helm_release" "cluster" {
     yamlencode({
       operatorNamespace = helm_release.operator.namespace
     }),
-    templatefile("${path.module}/cluster-values.yaml", {
+    templatefile("${path.module}/rook-ceph-cluster-values.yaml", {
       namespace = kubernetes_namespace.this.metadata[0].name
     }),
   ]

@@ -30,6 +30,23 @@ module "cluster" {
         cpu    = 4
         memory = "4GiB"
       },
+      "s" : {
+        count  = 3
+        cpu    = 4
+        memory = "4GiB"
+        disks = {
+          "data" = {
+            pool = "nvme"
+            size = "100GiB"
+          }
+        }
+        labels = {
+          "kubernetes.sigsrv.net/role" = "storage"
+        }
+        taints = {
+          "kubernetes.sigsrv.net/role" = "storage:NoSchedule"
+        }
+      }
       "w" : {
         count  = 6
         cpu    = 4
