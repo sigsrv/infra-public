@@ -32,6 +32,10 @@ variable "node" {
     labels      = map(string)
     annotations = map(string)
     taints      = map(string)
+    disks = optional(map(object({
+      pool = string
+      size = string
+    })), {})
   })
 }
 

@@ -36,6 +36,35 @@ resource "incus_instance" "this" {
       "boot.priority" = 10
     }
   }
+
+  # Add additional disks dynamically based on configuration
+  dynamic "device" {
+    for_each = incus_storage_volume.this
+    content {
+      name = device.key
+      type = "disk"
+      properties = {
+        "pool"   = device.value.pool
+        "source" = device.value.name
+      }
+    }
+  }
+}
+
+# incus storage disks
+resource "incus_storage_volume" "this" {
+  for_each = var.node.disks
+
+  project = var.incus.project_name
+  name    = "${var.node.name}-${each.key}"
+  type    = "custom"
+  target  = var.node.target
+  pool    = each.value.pool
+
+  content_type = "block"
+  config = {
+    size = each.value.size
+  }
 }
 
 # incus network zone records

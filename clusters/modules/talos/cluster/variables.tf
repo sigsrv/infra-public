@@ -28,6 +28,10 @@ variable "kubernetes" {
       labels      = optional(map(string), {})
       annotations = optional(map(string), {})
       taints      = optional(map(string), {})
+      disks = optional(map(object({
+        pool = string
+        size = string
+      })), {})
     }))
   })
 }
