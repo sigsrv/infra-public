@@ -82,7 +82,7 @@ variable "addons" {
     rook_ceph = optional(object({
       enabled = optional(bool, false)
       # https://github.com/rook/rook/releases
-      version = optional(string, "v1.16.4")
+      version = optional(string, "v1.17.1")
     }), {})
 
     tailscale = optional(object({
