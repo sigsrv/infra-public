@@ -60,7 +60,7 @@ data "talos_machine_configuration" "this" {
   count = phaser_sequential.this.phase == "running" ? 1 : 0
 
   cluster_name     = var.kubernetes.cluster.name
-  cluster_endpoint = "https://127.0.0.1:7445"
+  cluster_endpoint = var.kubernetes.cluster.endpoint
   machine_type     = var.node.type
   machine_secrets  = var.machine_secrets.machine_secrets
 

@@ -9,9 +9,10 @@ variable "incus" {
 variable "kubernetes" {
   type = object({
     cluster = object({
-      name  = string
-      alias = string
-      env   = string
+      name     = string
+      alias    = string
+      env      = string
+      endpoint = string
     })
     topology = object({
       region  = string
