@@ -2,406 +2,248 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with the sigsrv-infra repository. It documents the infrastructure architecture, common operations, troubleshooting workflows, and best practices.
 
-## 1. Infrastructure Overview
+## Introduction and Sequential Thinking Approach
 
-### Purpose and Design
+### Purpose and Usage
+
+This document is organized using a sequential thinking approach that builds knowledge progressively. When working with this codebase, Claude should
+
+- Break down complex problems into smaller, manageable steps
+- Approach infrastructure tasks methodically from understanding to implementation
+- Follow systematic diagnostic patterns for troubleshooting
+- Consider dependencies and component relationships before making changes
+- Use progressive refinement when designing and implementing solutions
+
+### Important Notes for Cluster Operations
+
+- Documentation First Approach
+
+  - Always update CLAUDE.md with new instructions, workflows, or best practices BEFORE executing commands
+  - Document any changes to workflows, configurations, or troubleshooting steps
+  - This ensures documentation remains current and consistent with actual operations
+
+- Just Command Usage
+
+  - Always use the `just` command runner for executing common operations
+  - Run `just --list` to see all available commands
+  - Commands are prefixed by their category (e.g., `tofu-`, `incus-`, `kubectl-`)
+  - All commands use appropriate flags and project configurations by default
+  - Justfile is located in cluster directories and contains command descriptions and workflows
+  - Review the justfile headers for common operation workflows and best practices
+
+- Kubernetes Cluster Provisioning
+
+  - When creating or updating Kubernetes clusters with OpenTofu, you must run `just tofu-apply` :multiple times: (at least 3-4 times)
+  - Refer to the justfile for detailed explanation of this process
+
+- Security Considerations:
+  - Never read or display the contents of `kubeconfig` or `talosconfig` files
+  - These files contain sensitive credentials and should be protected
+
+- Rook-Ceph Maintenance:
+  - Never delete the CephCluster resource or other Ceph CRDs directly
+  - Do not use `kubectl delete cephcluster` as it can lead to resource leaks and data loss
+  - Use the proper Rook-Ceph cleanup procedures as documented in Rook documentation
+  - When troubleshooting OSDs, prefer to reset the underlying devices without destroying CRDs
+
+### Sequential Problem-Solving Framework
+
+When faced with a problem in this infrastructure
+
+- Understand the context: What components and systems are involved?
+- Define the problem: What specifically isn't working as expected?
+- Gather information: Collect relevant logs, configurations, and statuses
+- Analyze systematically: Follow the data flow through the system components
+- Develop hypothesis: What are possible causes based on the evidence?
+- Test incrementally: Make small, reversible changes to verify hypothesis
+- Implement solution: Apply changes systematically
+- Verify results: Confirm the problem is resolved and no new issues created
+
+## Core Concepts and Mental Model
+
+### Infrastructure Purpose and Design
 
 The sigsrv-infra repository manages a multi-host virtualization infrastructure designed for running containerized workloads and virtual machines. It provides isolated network environments for various projects while enabling cross-host communication.
 
-### Key Components
+### Key Infrastructure Components
 
-- **Physical Hosts**: 
+#### Physical Components
+
+- Physical Hosts:
   - sigsrv: Primary host for system services
   - minisrv: Secondary host for additional capacity
 
-- **Virtualization Platform**:
-  - Incus: A fork of LXD that manages Linux containers and VMs
+#### Virtualization Layer
+
+- Incus: A fork of LXD that manages Linux containers and VMs
   - Organized into projects for isolation
+  - Provides virtualized compute, network, and storage resources
 
-- **Network Architecture**:
-  ```
-  ┌────────────┐                     ┌────────────┐
-  │   sigsrv   │                     │   minisrv  │
-  │            │                     │            │
-  │ ┌────────┐ │                     │ ┌────────┐ │
-  │ │Instance│ │                     │ │Instance│ │
-  │ └────────┘ │                     │ └────────┘ │
-  │     │      │                     │     │      │
-  │  sigsrvbr0 │                     │  sigsrvbr0 │
-  │     │      │                     │     │      │
-  │  sigsrv0   │      Physical       │  sigsrv0   │
-  │     │      │      Network        │     │      │
-  └─────┼──────┘     Connection      └─────┼──────┘
-        │      ───────────────────────     │
-        │          VLAN ID 20 (172.20/16)  │
-  ```
+#### Networking Layer
 
-- **Storage Pools**:
-  - nvme: Fast SSD storage for OS and applications
-  - hdd: Large capacity storage for data
-  - iso: Image storage for VM templates
-
-- **Networks**:
+- Network Bridges:
   - sigsrvbr0 (172.20.0.0/16): Primary system services network
   - incusbr0 (172.16.0.0/16): Management network
   - userbr0 (172.24.0.0/16): User workload network
 
-- **Configuration Management**:
-  - Terraform/OpenTofu: Infrastructure-as-code provisioning
-  - NixOS: Declarative host OS configuration
+#### Storage Layer
 
-## 2. Tools and Command Reference
+- Storage Pools:
+  - nvme: Fast SSD storage for OS and applications
+  - hdd: Large capacity storage for data
+  - iso: Image storage for VM templates
 
-### Why Use These Tools
+#### Orchestration Layer
 
-- **Terraform/OpenTofu**: For declarative, version-controlled infrastructure provisioning
-- **Incus CLI**: For direct management and troubleshooting of containers and VMs
-- **Linux Networking Tools**: For diagnosing and fixing network connectivity issues
+- Kubernetes Clusters:
+  - Talos Linux based
+  - Control plane and worker nodes
+  - Various add-ons including Rook-Ceph for storage
 
-### Terraform/OpenTofu Commands
+#### Configuration Management
 
-| Command | Purpose | Example |
-|---------|---------|---------|
-| `terraform fmt -recursive` | Format code according to standards | Cleanup before commits |
-| `terraform validate` | Verify configuration syntax | Check for errors before planning |
-| `terraform plan` | Preview changes | See what would change before applying |
-| `terraform apply` | Apply infrastructure changes | Deploy infrastructure updates |
-| `terraform destroy -target=resource_type.resource_name` | Remove specific resources | Delete a specific instance or network |
+- OpenTofu: Infrastructure-as-code provisioning
+- NixOS: Declarative host OS configuration
 
-```bash
-# Workflow: Make a change to infrastructure
-terraform fmt -recursive
-terraform validate
-terraform plan
-terraform apply
-```
+### Component Relationships
 
-### Incus CLI for Container/VM Management
+- Physical Hosts (sigsrv, minisrv)
+  - Incus Layer
+    - Compute Units
+      - Kubernetes Orchestration
+    - Network Bridges
+      - Kubernetes Orchestration
+    - Storage Pools
+      - Kubernetes Orchestration
 
-| Category | Command | Purpose |
-|----------|---------|---------|
-| **Projects** | `incus project list` | List all projects |
-| | `incus project create <name>` | Create a new project |
-| | `incus project switch <name>` | Change to a different project |
-| | `incus project delete <name>` | Delete a project (must be empty) |
-| **Instances** | `incus launch <image> <name> --network <net> --storage <pool>` | Create a new instance |
-| | `incus list [--project <project>]` | List all instances |
-| | `incus start/stop/restart <name>` | Control instance state |
-| | `incus delete <name>` | Remove an instance |
-| **Networking** | `incus network list` | Show available networks |
-| | `incus network show <name> --target <host>` | Get network configuration |
-| | `incus network create <name> <type>` | Create a new network |
-| **Storage** | `incus storage list` | Show storage pools |
-| | `incus storage volume list <pool>` | List volumes in a pool |
+## Network Architecture
 
-```bash
-# Workflow: Create a new instance in a project
-incus project switch myproject
-incus launch images:ubuntu/22.04 webserver --network sigsrvbr0 --storage nvme
-incus list
-incus exec webserver -- apt update && apt upgrade -y
-```
+### Bridge Networks and VLANs
 
-### Bridge and VLAN Management
+Each physical host has three main bridge networks that correspond to VLANs on the physical network
 
-| Command | Purpose |
-|---------|---------|
-| `brctl show` | Display bridge interfaces and their attached interfaces |
-| `brctl addif <bridge> <interface>` | Add an interface to a bridge |
-| `ip addr show [dev <interface>]` | Show IP addresses for interfaces |
-| `ip addr flush dev <interface>` | Remove IP configuration from an interface |
-| `ip link set <interface> up/down` | Enable/disable a network interface |
+- sigsrvbr0:
+  - VLAN ID: 20
+  - VLAN Interface: sigsrv0
+  - IP Range: 172.20.0.0/16
+  - Purpose: System instances
+- incusbr0:
+  - VLAN ID: 16
+  - VLAN Interface: incus0
+  - IP Range: 172.16.0.0/16
+  - Purpose: Incus management
+- userbr0:
+  - VLAN ID: 24
+  - VLAN Interface: user0
+  - IP Range: 172.24.0.0/16
+  - Purpose: User instances
 
-## 3. Common Workflows
+### Physical Network Topology
 
-### Creating a New User Environment
+Both hosts (sigsrv, minisrv) share identical network structure
 
-1. **Create Project**:
-   ```bash
-   incus project create user-john
-   incus project switch user-john
-   ```
+- Host Instances
+  - User Instances → userbr0 → user0
+  - System Instances → sigsrvbr0 → sigsrv0
+  - Mgmt Instances → incusbr0 → incus0
+- All VLAN interfaces (user0, sigsrv0, incus0) connect to Physical Network via VLAN Trunking
 
-2. **Configure Network Access**:
-   ```bash
-   # Set up network ACLs (if needed)
-   incus network acl create john-acl
-   incus network acl rule add john-acl egress accept tcp --protocol tcp
-   incus network acl rule add john-acl ingress accept tcp --protocol tcp
-   
-   # Apply ACL to user network
-   incus network set userbr0 security.acls=john-acl
-   ```
+### Cross-Host Communication Requirements
 
-3. **Create Storage**:
-   ```bash
-   # Create user storage volume
-   incus storage volume create nvme john-data
-   ```
+For instances to communicate across physical hosts
 
-4. **Launch User Instance**:
-   ```bash
-   incus launch images:ubuntu/22.04 john-vm1 --network userbr0 --storage nvme
-   
-   # Add storage to instance
-   incus storage volume attach nvme john-data john-vm1 /data
-   ```
+- Bridge networks must have the same name on both hosts
+- Each bridge must have its corresponding VLAN interface attached
+- VLAN interfaces must have their IP configurations flushed before adding to bridges
+- Physical switches must allow VLAN trunking between hosts
 
-5. **Configure Access**:
-   ```bash
-   # Set up SSH key
-   incus exec john-vm1 -- mkdir -p /root/.ssh
-   incus file push authorized_keys john-vm1/root/.ssh/authorized_keys
-   ```
+## Troubleshooting Guide
 
-### Setting Up Cross-Host Network Communication
+### Sequential Troubleshooting Approach
 
-1. **Verify Current Network Configuration**:
-   ```bash
-   ssh sigsrv -- 'brctl show'
-   ssh minisrv -- 'brctl show'
-   ```
+Follow this step-by-step process for all troubleshooting
 
-2. **Check VLAN Interfaces**:
-   ```bash
-   ssh sigsrv -- 'ip addr show sigsrv0'
-   ssh minisrv -- 'ip addr show sigsrv0'
-   ```
-
-3. **Flush IP Addresses (if needed)**:
-   ```bash
-   ssh sigsrv -- 'sudo ip addr flush dev sigsrv0'
-   ssh minisrv -- 'sudo ip addr flush dev sigsrv0'
-   ```
-
-4. **Add Interfaces to Bridges**:
-   ```bash
-   ssh sigsrv -- 'sudo brctl addif sigsrvbr0 sigsrv0'
-   ssh minisrv -- 'sudo brctl addif sigsrvbr0 sigsrv0'
-   ```
-
-5. **Test Connectivity**:
-   ```bash
-   # Create test instances on different hosts
-   incus launch images:ubuntu/22.04 s1 --network sigsrvbr0 --target sigsrv
-   incus launch images:ubuntu/22.04 s2 --network sigsrvbr0 --target minisrv
-   
-   # Test connectivity
-   incus list  # To get IPs
-   incus exec s1 -- ping -c 4 <s2_ip>
-   ```
-
-## 4. Troubleshooting Guide
+- Identify the affected component or service
+- Gather initial information: (logs, status, configuration)
+- Check connectivity and dependencies: (network, storage, etc.)
+- Analyze error messages and patterns
+- Test with minimal configuration: to isolate the issue
+- Apply targeted fixes: based on findings
+- Verify the solution: works completely
 
 ### Network Connectivity Issues
 
 #### Symptoms
+
 - Instances cannot communicate across hosts
 - `ping` fails between instances on different physical hosts
 - Network services are unreachable
 
 #### Diagnostic Workflow
-1. **Verify Instance Network Configuration**:
-   ```bash
-   # Check instance network status
-   incus list  # Note the IPs and networks
-   incus info <instance_name>  # Check network configuration
-   ```
 
-2. **Test Local Connectivity**:
-   ```bash
-   # Test connectivity to gateway
-   incus exec <instance> -- ping -c 4 <network_gateway>
-   ```
+- Verify Instance Network Configuration
+- Test Local Connectivity
+- Check Bridge Configuration
+- Verify VLAN Interface Status
+- Inspect IP Configurations on VLANs
 
-3. **Check Bridge Configuration**:
-   ```bash
-   # Check bridges on each host
-   ssh sigsrv -- 'brctl show'
-   ssh minisrv -- 'brctl show'
-   ```
-
-4. **Verify VLAN Interface Status**:
-   ```bash
-   # Check VLAN interfaces on each host
-   ssh sigsrv -- 'ip addr show'
-   ssh minisrv -- 'ip addr show'
-   ```
-
-5. **Inspect IP Configurations on VLANs**:
-   ```bash
-   ssh sigsrv -- 'ip addr show sigsrv0'
-   ssh minisrv -- 'ip addr show sigsrv0'
-   ```
-
-#### Common Solutions
-1. **Fix Missing VLAN Interface on Bridge**:
-   ```bash
-   ssh <host> -- 'sudo ip addr flush dev <vlan_interface>'
-   ssh <host> -- 'sudo brctl addif <bridge_name> <vlan_interface>'
-   ```
-
-2. **Reset Network Interface**:
-   ```bash
-   ssh <host> -- 'sudo ip link set <interface> down'
-   ssh <host> -- 'sudo ip link set <interface> up'
-   ```
-
-3. **Restart Network Service** (if needed):
-   ```bash
-   ssh <host> -- 'sudo systemctl restart networking'
-   ```
+See the justfile for specific commands to run for each step.
 
 ### Incus Cluster Issues
 
 #### Symptoms
+
 - Cluster members show as disconnected
 - Operations fail with cluster-related errors
 - Unable to target specific hosts
 
 #### Diagnostic Steps
-1. **Check Cluster Status**:
-   ```bash
-   incus cluster list
-   ```
 
-2. **Verify Cluster Member Configuration**:
-   ```bash
-   incus cluster show <member>
-   ```
-
-3. **Check Incus Service Status**:
-   ```bash
-   ssh <host> -- 'systemctl status incus'
-   ssh <host> -- 'journalctl -u incus -n 100'
-   ```
-
-#### Common Solutions
-1. **Restart Incus Service**:
-   ```bash
-   ssh <host> -- 'sudo systemctl restart incus'
-   ```
-
-2. **Verify Firewall Rules**:
-   ```bash
-   ssh <host> -- 'sudo iptables -L'
-   ```
+- Check Cluster Status
+- Verify Cluster Member Configuration
+- Check Incus Service Status
 
 ### Storage Issues
 
 #### Symptoms
+
 - Unable to create volumes
 - Storage operations fail
 - Instance cannot access storage
 
 #### Diagnostic Steps
-1. **Check Storage Pool Status**:
-   ```bash
-   incus storage list
-   incus storage info <pool> --target <host>
-   ```
 
-2. **Verify Storage Backend**:
-   ```bash
-   ssh <host> -- 'zpool status'  # For ZFS pools
-   ```
+- Check Storage Pool Status
+- Verify Storage Backend
+- Check Storage Space
 
-3. **Check Storage Space**:
-   ```bash
-   ssh <host> -- 'df -h'
-   ```
+### Kubernetes Rook-Ceph Storage Issues
 
-#### Common Solutions
-1. **Clean Up Unused Volumes**:
-   ```bash
-   incus storage volume list <pool>
-   incus storage volume delete <pool> <volume>
-   ```
+#### Symptoms
 
-2. **Expand Storage Pool** (if needed):
-   ```bash
-   ssh <host> -- 'zpool add <pool> <device>'  # For ZFS
-   ```
+- PersistentVolumeClaims (PVCs) stuck in "Pending" state
+- CephCluster shows "HEALTH_ERR" status
+- Ceph Monitor pods in CrashLoopBackOff
+- No Object Storage Devices (OSDs) detected
+- Error message: "OSD count 0 < osd_pool_default_size"
 
-## 5. Network Architecture Details
+#### Diagnostic Steps
 
-### Bridge Networks and VLANs
+- Check PVC Status
+- Verify Ceph Health
+- Check Ceph Component Pods
+- Verify OSD Creation
 
-Each physical host has three main bridge networks that correspond to VLANs on the physical network:
+See the justfile's "Rook-Ceph Storage Troubleshooting" workflow for detailed steps.
 
-| Bridge    | VLAN ID | VLAN Interface | IP Range        | Purpose           |
-|-----------|---------|----------------|-----------------|-------------------|
-| sigsrvbr0 | 20      | sigsrv0        | 172.20.0.0/16   | System instances  |
-| incusbr0  | 16      | incus0         | 172.16.0.0/16   | Incus management  |
-| userbr0   | 24      | user0          | 172.24.0.0/16   | User instances    |
-
-### Cross-Host Communication Requirements
-
-For instances to communicate across physical hosts:
-
-1. Bridge networks must have the same name on both hosts
-2. Each bridge must have its corresponding VLAN interface attached
-3. VLAN interfaces must have their IP configurations flushed before adding to bridges
-4. Physical switches must allow VLAN trunking between hosts
-
-### Network Topology
-
-```
-Physical Host: sigsrv                   Physical Host: minisrv
-┌────────────────────────┐              ┌────────────────────────┐
-│                        │              │                        │
-│  ┌─────────────────┐   │              │  ┌─────────────────┐   │
-│  │  User Instances │   │              │  │  User Instances │   │
-│  └────────┬────────┘   │              │  └────────┬────────┘   │
-│           │            │              │           │            │
-│        userbr0         │              │        userbr0         │
-│           │            │              │           │            │
-│         user0          │              │         user0          │
-│           │            │              │           │            │
-├───────────┼────────────┤              ├───────────┼────────────┤
-│           │            │              │           │            │
-│  ┌────────┴────────┐   │              │  ┌────────┴────────┐   │
-│  │ System Instances│   │              │  │ System Instances│   │
-│  └────────┬────────┘   │              │  └────────┬────────┘   │
-│           │            │              │           │            │
-│       sigsrvbr0        │              │       sigsrvbr0        │
-│           │            │              │           │            │
-│        sigsrv0         │              │        sigsrv0         │
-│           │            │              │           │            │
-├───────────┼────────────┤              ├───────────┼────────────┤
-│           │            │              │           │            │
-│  ┌────────┴────────┐   │              │  ┌────────┴────────┐   │
-│  │ Mgmt Instances  │   │              │  │ Mgmt Instances  │   │
-│  └────────┬────────┘   │              │  └────────┬────────┘   │
-│           │            │              │           │            │
-│        incusbr0        │              │        incusbr0        │
-│           │            │              │           │            │
-│         incus0         │              │         incus0         │
-│           │            │              │           │            │
-└───────────┼────────────┘              └───────────┼────────────┘
-            │                                       │
-            └───────────────┬───────────────────────┘
-                            │
-                     Physical Network
-                    (VLAN Trunking)
-```
-
-## 6. Security Best Practices
+## Security Best Practices
 
 ### Network Security
 
 - Use project-specific networks for isolation
-- Apply network ACLs to restrict traffic between projects
+- Apply network ACLs to restrict traffic between projects (later)
 - Use proxy devices for controlled external access
 - Limit bridge interfaces to only necessary VLANs
-
-```bash
-# Create network ACL
-incus network acl create restrictive
-incus network acl rule add restrictive egress deny all
-incus network acl rule add restrictive ingress deny all
-incus network acl rule add restrictive egress allow tcp dst=80,443
-```
 
 ### Instance Security
 
@@ -410,25 +252,11 @@ incus network acl rule add restrictive egress allow tcp dst=80,443
 - Configure instance restrictions appropriately
 - Apply security.privileged=false unless absolutely necessary
 
-```bash
-# Set security limits on instances
-incus config set instancename security.privileged false
-incus config set instancename limits.cpu=2
-incus config set instancename limits.memory=2GB
-```
-
 ### Project Isolation
 
 - Create separate projects for different users/purposes
 - Use project restrictions to limit resource usage
 - Avoid sharing storage between projects
-
-```bash
-# Create restricted project
-incus project create restricted
-incus project set restricted features.images=false
-incus project set restricted restricted=true
-```
 
 ### Access Control
 
@@ -436,21 +264,23 @@ incus project set restricted restricted=true
 - Implement least privilege access policies
 - Regularly audit access logs
 
-## 7. Terraform/OpenTofu Style Guidelines
+## Development Guidelines
 
-### Naming Conventions
+### OpenTofu Style Guidelines
+
+#### Naming Conventions
 
 - Use `snake_case` for resource names and variables
 - Prefix resources with their type (e.g., `instance_web`, `network_internal`)
 - Use descriptive names that indicate purpose
 
-### Resource Organization
+#### Resource Organization
 
 - Group related resources together
 - Use modules for reusable components
 - Apply meaningful tags to all resources
 
-### Code Quality
+#### Code Quality
 
 - Document variables with descriptions and types
 - Use dynamic blocks for conditional resources
@@ -458,7 +288,7 @@ incus project set restricted restricted=true
 - Apply lifecycle rules for critical resources
 - Use consistent indentation (2 spaces)
 
-### Example: Well-Structured Terraform Block
+#### Example: Well-Structured OpenTofu Block
 
 ```hcl
 resource "incus_instance" "web_server" {
@@ -466,7 +296,7 @@ resource "incus_instance" "web_server" {
   image       = var.server_image
   project     = var.project_name
   profiles    = ["default"]
-  
+
   device {
     name = "eth0"
     type = "nic"
@@ -474,68 +304,15 @@ resource "incus_instance" "web_server" {
       network = incus_network.internal.name
     }
   }
-  
+
   config = {
     "limits.cpu"    = "2"
     "limits.memory" = "2GB"
   }
-  
+
   # Prevent accidental deletion
   lifecycle {
     prevent_destroy = true
   }
 }
 ```
-
-## 8. Maintenance Procedures
-
-### Backups
-
-- **Backing Up Incus Configuration**:
-  ```bash
-  incus export <instance_name> ./backups/<instance_name>-$(date +%Y%m%d).tar.gz
-  ```
-
-- **Storage Volume Snapshots**:
-  ```bash
-  incus storage volume snapshot create <pool> <volume> <snapshot_name>
-  incus storage volume snapshot copy <pool> <volume>/<snapshot> <new_pool> <new_volume>
-  ```
-
-### Updates
-
-- **Updating Incus**:
-  ```bash
-  ssh <host> -- 'sudo apt update && sudo apt upgrade -y incus'
-  ```
-
-- **Checking Cluster Status After Updates**:
-  ```bash
-  incus cluster list
-  incus info --target <host>
-  ```
-
-### Health Checks
-
-- **System Resources**:
-  ```bash
-  ssh <host> -- 'free -h'
-  ssh <host> -- 'df -h'
-  ssh <host> -- 'top -b -n 1'
-  ```
-
-- **Network Health**:
-  ```bash
-  # Check bridge status
-  ssh <host> -- 'brctl show'
-  
-  # Verify VLAN interfaces
-  ssh <host> -- 'ip addr show | grep vlan'
-  ```
-
-- **Storage Health**:
-  ```bash
-  # Check ZFS pool status
-  ssh <host> -- 'zpool status'
-  ssh <host> -- 'zpool list'
-  ```

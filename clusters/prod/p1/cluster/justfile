@@ -1,0 +1,442 @@
+#!/usr/bin/env just -f
+
+INCUS_PROJECT := "sigsrv-p1"
+INCUS_NETWORK := "sigsrvbr0"
+HOST_NETWORK := "sigsrv0"
+
+default:
+    just --list
+
+#------------------------------------
+# OPENTOFU COMMANDS
+#------------------------------------
+# Workflow: Make a change to infrastructure
+# - just tofu-fmt        - Format code according to standards
+# - just tofu-validate   - Verify configuration syntax
+# - just tofu-plan       - Save plan to file for review
+# - just tofu-apply-plan - Apply saved plan exactly as reviewed
+#
+# Workflow: Quick non-interactive update
+# - just tofu-apply - Apply with concise output, no confirmation
+#
+# Cluster Provisioning:
+# - Must run `just tofu-apply` MULTIPLE TIMES (3-4 times)
+# - The phaser provider manages state transitions across multiple applies
+# - Initial apply creates VMs and network resources
+# - Subsequent applies configure Talos OS, bootstrap the cluster
+# - Final apply completes the Kubernetes configuration
+
+tofu-fmt:
+    # Format code according to standards (cleanup before commits)
+    tofu fmt -recursive
+
+tofu-validate:
+    # Verify configuration syntax (check for errors before planning)
+    tofu validate
+
+tofu-plan:
+    # Preview changes with concise output, save plan to file for review
+    tofu plan -concise -out tfplan
+
+tofu-apply-plan:
+    # Apply the saved plan exactly as reviewed
+    tofu apply -concise tfplan
+
+tofu-apply:
+    # Apply infrastructure changes with concise output, without confirmation prompt
+    tofu apply -concise --auto-approve
+
+tofu-refresh:
+    # Update state without making changes
+    tofu apply -concise -refresh-only --auto-approve
+
+tofu-state-list:
+    # List resources in state (view managed resources)
+    tofu state list
+
+[positional-arguments]
+tofu-state-rm *args:
+    # Remove resource from state (remove stale resource references)
+    tofu state rm $args
+
+tofu-force-unlock lock_id:
+    # Force unlock state (resolve locked state issues)
+    tofu force-unlock -force {{lock_id}}
+
+tofu-destroy-target resource:
+    # Remove specific resources
+    tofu destroy -target={{resource}}
+
+#------------------------------------
+# INCUS COMMANDS
+#------------------------------------
+
+[positional-arguments]
+incus *args:
+    incus --project {{INCUS_PROJECT}} {{args}}
+
+[positional-arguments]
+incus-global *args:
+    incus {{args}}
+
+#------------------------------------
+# INCUS PROJECT COMMANDS
+#------------------------------------
+# Creating User Environment:
+# - Create Project: just incus-project-create
+# - Configure Project: just incus-project-set name key value
+# - Work with project: just incus-project-switch
+
+incus-projects:
+    # List all projects
+    @just incus project list
+
+incus-project-create:
+    # Create a new project
+    @just incus project create {{INCUS_PROJECT}}
+
+incus-project-switch:
+    # Change to a different project
+    @just incus project switch {{INCUS_PROJECT}}
+
+incus-project-show:
+    # Show details of a project and its resources
+    @just incus project show {{INCUS_PROJECT}}
+
+incus-project-delete:
+    # Delete a project (must be empty)
+    @just incus project delete {{INCUS_PROJECT}}
+
+incus-project-set key value:
+    # Set project properties
+    @just incus project set {{INCUS_PROJECT}} {{key}} {{value}}
+
+#------------------------------------
+# INCUS INSTANCE COMMANDS
+#------------------------------------
+# Instance Management:
+# - Create instance: just incus-instance-launch image name network storage
+# - Start/stop/restart: just incus-instance-start|stop|restart name
+# - Execute commands: just incus-instance-exec name command args
+# - Configure: just incus-instance-config-set name key value
+# - Push files: just incus-instance-file-push local_path instance_path
+
+incus-instances:
+    # List all instances in the current project
+    @just incus list
+
+incus-instance-launch image name network="sigsrvbr0" storage="nvme":
+    # Create a new instance
+    @just incus launch {{image}} {{name}} --network {{network}} --storage {{storage}}
+
+incus-instance-start name:
+    # Start an instance
+    @just incus start {{name}}
+
+incus-instance-stop name:
+    # Stop an instance
+    @just incus stop {{name}}
+
+incus-instance-restart name:
+    # Restart an instance
+    @just incus restart {{name}}
+
+incus-instance-delete name:
+    # Remove an instance
+    @just incus delete {{name}}
+
+incus-instance-exec name command *args:
+    # Execute commands inside an instance
+    @just incus exec {{name}} -- {{command}} $args
+
+incus-instance-config-set name key value:
+    # Configure instance settings
+    @just incus config set {{name}} {{key}} {{value}}
+
+incus-instance-file-push local_path instance_path:
+    # Push a file to an instance
+    @just incus file push {{local_path}} {{instance_path}}
+
+#------------------------------------
+# INCUS NETWORK COMMANDS
+#------------------------------------
+# Network ACL Configuration:
+# - Create ACL: just incus-network-acl-create name
+# - Add rules: just incus-network-acl-rule-add acl direction action protocol
+# - Apply ACL: just incus-network-set network security.acls=acl_name
+
+incus-networks:
+    # Show available networks
+    @just incus network list
+
+incus-network-show host:
+    # Get network configuration
+    @just incus network show {{INCUS_NETWORK}} --target {{host}}
+
+incus-network-create type:
+    # Create a new network
+    @just incus network create {{INCUS_NETWORK}} {{type}}
+
+incus-network-set key value:
+    # Set network properties
+    @just incus network set {{INCUS_NETWORK}} {{key}}={{value}}
+
+#------------------------------------
+# INCUS STORAGE COMMANDS
+#------------------------------------
+# Storage Volume Management:
+# - Create volume: just incus-storage-volume-create pool name size
+# - Attach volume: just incus-storage-volume-attach pool volume instance mountpoint
+# - Delete volume: just incus-storage-volume-delete pool volume
+
+incus-storages:
+    # Show storage pools
+    @just incus storage list
+
+incus-storage-volumes-all:
+    # List volumes in all pools
+    @just incus-storage-volumes hdd
+    @just incus-storage-volumes nvme
+    @just incus-storage-volumes iso
+
+incus-storage-volumes pool:
+    # List volumes in a pool
+    @just incus storage volume list {{pool}}
+
+incus-storage-volume-create pool name size="20gb":
+    # Create a volume
+    @just incus storage volume create {{pool}} {{name}} --size={{size}}
+
+incus-storage-volume-attach pool volume instance mountpoint:
+    # Attach volume to an instance
+    @just incus storage volume attach {{pool}} {{volume}} {{instance}} {{mountpoint}}
+
+incus-storage-volume-delete pool volume:
+    # Delete a storage volume
+    @just incus storage volume delete {{pool}} {{volume}}
+
+incus-storage-info pool host:
+    # Get storage pool details
+    @just incus storage info {{pool}} --target {{host}}
+
+#------------------------------------
+# INCUS NETWORK COMMANDS
+#------------------------------------
+# Network Zone Management:
+# - List zones: just incus-network-zone-list
+# - List zone records: just incus-network-zone-record-list zone
+# - Create zone record: just incus-network-zone-record-create zone name ip
+# - Delete zone record: just incus-network-zone-record-delete zone name
+
+incus-network-zone-list:
+    # List all network zones
+    @just incus-global network zone list
+
+incus-network-zone-record-list zone:
+    # List all records in a network zone
+    @just incus-global network zone record list {{zone}}
+
+incus-network-zone-record-create zone name ip ttl="60":
+    # Create a network zone record manually
+    @just incus-global network zone record create {{zone}} {{name}} A {{ip}} --ttl={{ttl}}
+
+incus-network-zone-record-delete zone name:
+    # Delete a network zone record
+    @just incus-global network zone record delete {{zone}} {{name}}
+
+#------------------------------------
+# NETWORK MANAGEMENT COMMANDS
+#------------------------------------
+# Cross-Host Network Communication:
+# - Verify Network: just network-bridges host
+# - Check VLANs: just network-ip-addr host interface
+# - Flush IPs: just network-ip-flush host interface
+# - Add interfaces: just network-bridge-add-if host bridge interface
+# - Reset interface: just network-ip-link-set host interface state
+# - Restart networking: just network-restart host
+
+network-bridges host:
+    # Display bridge interfaces and their attached interfaces
+    ssh {{host}} "brctl show"
+
+network-bridge-add-if host bridge interface:
+    # Add an interface to a bridge
+    ssh {{host}} "sudo brctl addif {{bridge}} {{interface}}"
+
+network-ip-addr host interface:
+    # Show IP addresses for interfaces
+    ssh {{host}} "ip addr show {{interface}}"
+
+network-ip-flush host interface:
+    # Remove IP configuration from an interface
+    ssh {{host}} "sudo ip addr flush dev {{interface}}"
+
+network-ip-link-set host interface state="up":
+    # Enable/disable a network interface
+    ssh {{host}} "sudo ip link set {{interface}} {{state}}"
+
+network-restart host:
+    # Restart networking service
+    ssh {{host}} "sudo systemctl restart networking"
+
+#------------------------------------
+# KUBERNETES COMMANDS
+#------------------------------------
+# Kubernetes Management:
+# - Check cluster: just kubectl-cluster-info, just kubectl-nodes
+# - Monitor pods: just kubectl-pods, just kubectl-describe-pod pod namespace
+# - View logs: just kubectl-logs pod namespace
+# - Storage ops: just kubectl-pv, just kubectl-pvc, just kubectl-sc
+# - Backup resources: just kubectl-export-all
+
+kubectl-cluster-info:
+    # Get cluster information
+    kubectl cluster-info
+
+kubectl-nodes:
+    # List all nodes in the cluster
+    kubectl get nodes
+
+kubectl-pods:
+    # List all pods in all namespaces
+    kubectl get pods -A
+
+kubectl-describe-pod pod namespace:
+    # Get detailed pod information
+    kubectl describe pod {{pod}} -n {{namespace}}
+
+kubectl-logs pod namespace:
+    # View pod logs
+    kubectl logs {{pod}} -n {{namespace}}
+
+kubectl-delete-pod pod namespace:
+    # Delete a pod
+    kubectl delete pod {{pod}} -n {{namespace}}
+
+kubectl-pv:
+    # List persistent volumes
+    kubectl get pv
+
+kubectl-pvc:
+    # List all persistent volume claims
+    kubectl get pvc -A
+
+kubectl-sc:
+    # List storage classes
+    kubectl get sc
+
+kubectl-export-all:
+    # Backup Kubernetes resources
+    kubectl get all -A -o yaml > k8s-resources-backup.yaml
+
+#------------------------------------
+# TALOS COMMANDS
+#------------------------------------
+# Talos Management:
+# - Check version: just talos-version node
+# - View services: just talos-services node
+# - Restart services: just talos-restart-service node service
+
+talos-version node:
+    # Check Talos version
+    talosctl --nodes {{node}} --talosconfig ./talosconfig version
+
+talos-services node:
+    # Get node status
+    talosctl --nodes {{node}} --talosconfig ./talosconfig services
+
+talos-restart-service node service:
+    # Restart Talos services
+    talosctl --nodes {{node}} --talosconfig ./talosconfig service restart {{service}}
+
+#------------------------------------
+# BACKUP COMMANDS
+#------------------------------------
+# Backup Operations:
+# - Instance backup: just backup-incus instance
+# - Volume snapshot: just backup-volume-snapshot pool volume snapshot
+# - Copy snapshot: just backup-volume-copy pool volume snapshot new_pool new_volume
+# - Etcd backup: just backup-etcd
+
+backup-incus instance:
+    # Backup Incus instance configuration
+    @just incus export {{instance}} ./backups/{{instance}}-$(date +%Y%m%d).tar.gz
+
+backup-volume-snapshot pool volume snapshot:
+    # Create storage volume snapshot
+    @just incus storage volume snapshot create {{pool}} {{volume}} {{snapshot}}
+
+backup-volume-copy pool volume snapshot new_pool new_volume:
+    # Copy storage volume snapshot
+    @just incus storage volume snapshot copy {{pool}} {{volume}}/{{snapshot}} {{new_pool}} {{new_volume}}
+
+backup-etcd:
+    # Backup etcd data
+    kubectl -n kube-system exec -it etcd-control-plane -- etcdctl snapshot save /var/lib/etcd/snapshot.db
+
+#------------------------------------
+# HEALTH CHECK COMMANDS
+#------------------------------------
+# Health Checks:
+# - System resources: just health-resources host
+# - Network status: just health-network host
+# - Storage health: just health-storage host
+# - Kubernetes status: just health-kubernetes
+# - Incus cluster status: just health-incus-cluster, just health-incus-host host
+
+health-resources host:
+    # Check system resources (memory, disk, CPU)
+    ssh {{host}} "free -h && df -h && top -b -n 1"
+
+health-network host:
+    # Check network health (bridges, VLAN interfaces)
+    ssh {{host}} "brctl show && ip addr show | grep vlan"
+
+health-storage host:
+    # Check storage health (ZFS pools)
+    ssh {{host}} "zpool status && zpool list"
+
+health-kubernetes:
+    # Check Kubernetes health (nodes, pods, volumes)
+    kubectl get nodes && kubectl get pods -A && kubectl get pv,pvc -A
+
+health-incus-cluster:
+    # Check Incus cluster status
+    @just incus cluster list
+
+health-incus-host host:
+    # Check host-specific Incus status
+    @just incus info --target {{host}}
+
+#------------------------------------
+# ROOK-CEPH COMMANDS
+#------------------------------------
+# Rook-Ceph Troubleshooting:
+# - Check status: just rook-ceph-health, just rook-ceph-pvc
+# - Check pods: just rook-ceph-pods, just rook-ceph-osd
+# - View logs: just rook-ceph-logs
+# - Fix storage:
+#   - Create volumes with incus-storage-volume-create nvme ceph-disk-instance 20gb
+#   - Attach with incus-storage-volume-attach nvme ceph-disk-instance instance /dev/sdb
+#   - Apply with tofu-apply
+
+rook-ceph-pvc:
+    # List Ceph PVCs
+    kubectl get pvc -A
+
+rook-ceph-health:
+    # Check Ceph cluster health
+    kubectl -n rook-ceph get cephcluster
+    kubectl -n rook-ceph describe cephcluster rook-ceph
+
+rook-ceph-pods:
+    # List Ceph pods
+    kubectl -n rook-ceph get pods
+
+rook-ceph-osd:
+    # List Ceph OSDs
+    kubectl -n rook-ceph get pod -l app=rook-ceph-osd
+
+rook-ceph-logs:
+    # View Ceph operator logs
+    kubectl -n rook-ceph logs -l app=rook-ceph-operator
