@@ -351,3 +351,6 @@ terragrunt-debug.tfvars.json
 kubeconfig
 talosconfig
 !.envrc
+
+**/.claude/settings.local.json
+*tfplan*
