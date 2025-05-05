@@ -3,6 +3,7 @@ variable "incus" {
     project_name      = string
     network_name      = string
     network_zone_name = string
+    project_config    = optional(map(string), {})
   })
 }
 
