@@ -1,23 +1,25 @@
-[tool.poetry]
+[project]
 name = "sigsrv-infra"
 version = "1.0.0"
 description = ""
-authors = ["EcmaXp <ecmaxp@ecmaxp.kr>"]
-exclude = ["**/*"]
+authors = [{ name = "EcmaXp", email = "ecmaxp@ecmaxp.kr" }]
+requires-python = "~=3.12"
 classifiers = ["Private :: Do not Upload"]
+dependencies = [
+    "boto3>=1.34.23",
+    "cdk8s>=2.68.27",
+    "cdk8s-plus-27>=2.7.73",
+    "kubernetes>=29.0.0",
+    "pylxd>=2.3.2",
+]
 
-[tool.poetry.dependencies]
-python = "^3.12"
-boto3 = "^1.28.58"
-kubernetes = "^29.0.0"
-pylxd = "^2.3.1"
-setuptools = "^69.0.3"
-cdk8s = "^2.68.27"
-cdk8s-plus-27 = "^2.7.73"
+[tool.hatch.build.targets.sdist]
+exclude = ["**/*"]
 
-[tool.poetry.group.dev.dependencies]
-boto3-stubs-lite = {extras = ["all"], version = "^1.28.58"}
+[tool.hatch.build.targets.wheel]
+exclude = ["**/*"]
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[dependency-groups]
+dev = [
+    "boto3-stubs-lite[all]>=1.38.13",
+]
