@@ -4,7 +4,7 @@ locals {
 
 resource "incus_network" "this" {
   name        = var.name
-  description = "Network this (managed by OpenTofu)"
+  description = "Network ${var.name} (managed by OpenTofu)"
 
   config = {
     "dns.domain"       = incus_network_zone.this.name
@@ -23,7 +23,7 @@ resource "incus_network" "node" {
   for_each = toset(["sigsrv", "minisrv"])
 
   name        = var.name
-  description = "Network this (managed by OpenTofu)"
+  description = "Network ${var.name} (managed by OpenTofu)"
   target      = each.key
 
   config = {
@@ -39,9 +39,20 @@ resource "incus_network" "node" {
 
 resource "incus_network_zone" "this" {
   name        = var.network.zone
-  description = "Zone incus_network_zone (managed by OpenTofu)"
+  description = "Zone ${var.network.zone} (managed by OpenTofu)"
 
   config = {
     "peers.ns.address" = "127.0.0.1"
   }
+}
+
+module "tailscale_router" {
+  source  = "../tailscale-router"
+  name    = var.name
+  network = var.network
+
+  depends_on = [
+    incus_network.this,
+    incus_network_zone.this,
+  ]
 }
