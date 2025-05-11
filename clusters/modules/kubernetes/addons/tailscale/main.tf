@@ -14,14 +14,14 @@ resource "helm_release" "operator" {
   values = [
     yamlencode({
       operatorConfig = {
-        hostname    = "${var.kubernetes.cluster.name}-tailscale-operator"
-        defaultTags = join(",", ["tag:${var.kubernetes.cluster.name}-tailscale-operator"])
+        hostname = var.kubernetes.cluster.alias
+        defaultTags = join(",", ["tag:${var.kubernetes.cluster.name}"])
       }
       proxyConfig = {
-        defaultTags = join(",", ["tag:${var.kubernetes.cluster.name}-tailscale-service"])
-        apiServerProxyConfig = {
-          mode = true
-        }
+        defaultTags = join(",", ["tag:${var.kubernetes.cluster.name}-service"])
+      }
+      apiServerProxyConfig = {
+        mode = "true"
       }
     })
   ]

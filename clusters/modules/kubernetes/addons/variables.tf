@@ -88,7 +88,7 @@ variable "addons" {
     tailscale = optional(object({
       enabled = optional(bool, false)
       # https://artifacthub.io/packages/helm/tailscale/tailscale-operator
-      version = optional(string, "1.78.3")
+      version = optional(string, "1.82.5")
     }), {})
   })
 
