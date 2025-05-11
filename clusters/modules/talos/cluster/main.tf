@@ -51,8 +51,15 @@ resource "talos_machine_bootstrap" "this" {
   ]
 }
 
+resource "talos_cluster_kubeconfig" "this" {
+  count = length(local.talos_controlplane_nodes) > 0 ? 1 : 0
+
+  client_configuration = talos_machine_secrets.this.client_configuration
+  node                 = local.talos_controlplane_nodes[0].ipv4_address
+}
+
 module "talosconfig" {
-  count  = length(talos_machine_bootstrap.this[*])
+  count  = length(talos_machine_bootstrap.this[*]) > 0 && var.debug.talosconfig ? 1 : 0
   source = "../talosconfig"
 
   controlplane_nodes = local.talos_controlplane_nodes
@@ -62,7 +69,7 @@ module "talosconfig" {
 }
 
 module "kubeconfig" {
-  count  = length(talos_machine_bootstrap.this[*])
+  count  = length(talos_machine_bootstrap.this[*]) > 0 && var.debug.kubeconfig ? 1 : 0
   source = "../kubeconfig"
 
   controlplane_nodes = local.talos_controlplane_nodes

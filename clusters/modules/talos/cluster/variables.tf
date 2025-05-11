@@ -43,3 +43,11 @@ variable "talos" {
     image_schematic = optional(any, {})
   })
 }
+
+variable "debug" {
+  type = object({
+    kubeconfig  = optional(bool, false)
+    talosconfig = optional(bool, false)
+  })
+  default = {}
+}

@@ -13,9 +13,10 @@ module "cluster" {
 
   kubernetes = {
     cluster = {
-      name  = "sigsrv-d1"
-      alias = "d1"
-      env   = "dev"
+      name     = "sigsrv-d1"
+      alias    = "d1"
+      env      = "dev"
+      endpoint = "https://d1c0.sigsrv.local:6443"
     }
     topology = {
       region  = "apne-kor-se"

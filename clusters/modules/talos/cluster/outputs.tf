@@ -9,3 +9,8 @@ output "config" {
 output "ready" {
   value = length(talos_machine_bootstrap.this) > 0
 }
+
+output "kubernetes" {
+  sensitive = true
+  value     = one(talos_cluster_kubeconfig.this[*].kubernetes_client_configuration)
+}

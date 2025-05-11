@@ -44,17 +44,26 @@ provider "incus" {
 provider "talos" {}
 
 provider "kubernetes" {
-  config_path = "${path.root}/kubeconfig"
+  host                   = module.cluster.kubernetes.host
+  cluster_ca_certificate = base64decode(module.cluster.kubernetes.ca_certificate)
+  client_certificate     = base64decode(module.cluster.kubernetes.client_certificate)
+  client_key             = base64decode(module.cluster.kubernetes.client_key)
 }
 
 provider "helm" {
   kubernetes {
-    config_path = "${path.root}/kubeconfig"
+    host                   = module.cluster.kubernetes.host
+    cluster_ca_certificate = base64decode(module.cluster.kubernetes.ca_certificate)
+    client_certificate     = base64decode(module.cluster.kubernetes.client_certificate)
+    client_key             = base64decode(module.cluster.kubernetes.client_key)
   }
 }
 
 provider "kubectl" {
-  config_path = "${path.root}/kubeconfig"
+  host                   = module.cluster.kubernetes.host
+  cluster_ca_certificate = base64decode(module.cluster.kubernetes.ca_certificate)
+  client_certificate     = base64decode(module.cluster.kubernetes.client_certificate)
+  client_key             = base64decode(module.cluster.kubernetes.client_key)
 }
 
 provider "onepassword" {
