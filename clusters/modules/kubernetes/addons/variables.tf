@@ -60,7 +60,7 @@ variable "addons" {
     openbao = optional(object({
       enabled = optional(bool, false)
       # https://github.com/openbao/openbao-helm/releases
-      version  = optional(string, "0.8.1")
+      version  = optional(string, "0.12.0")
       replicas = optional(number, 3)
       # pgp
       pgp_keys = optional(list(string), [
