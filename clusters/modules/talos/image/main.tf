@@ -47,7 +47,7 @@ resource "null_resource" "talos_image" {
       "INCUS_PROJECT_NAME='${var.incus.project_name}'",
       "INCUS_TALOS_ISO_VOLUME='${local.incus_talos_iso_volume}'",
       "wget -nc \"$TALOS_ISO_URL\" -O $TALOS_ISO_FILENAME",
-      [for target in ["sigsrv", "minisrv"] : [
+      [for target in ["sigsrv", "twinsrv", "minisrv"] : [
         "incus storage volume delete --project $INCUS_PROJECT_NAME iso $INCUS_TALOS_ISO_VOLUME --target ${target}",
         "incus storage volume import --project $INCUS_PROJECT_NAME --type=iso iso $TALOS_ISO_FILENAME $INCUS_TALOS_ISO_VOLUME --target ${target}",
       ]],

@@ -21,7 +21,7 @@ module "cluster" {
     topology = {
       region  = "apne-kor-se"
       zone    = "apne-kor-se1"
-      targets = ["sigsrv", "sigsrv", "minisrv"]
+      targets = ["sigsrv", "twinsrv", "minisrv", "twinsrv", "twinsrv", "twinsrv"]
     }
     nodes = {
       "c" : {
