@@ -96,6 +96,8 @@ data "talos_machine_configuration" "this" {
   config_patches = flatten([
     templatefile("${path.module}/files/talos-cluster.yaml", {
     }),
+    templatefile("${path.module}/files/talos-cilium.yaml", {
+    }),
     templatefile("${path.module}/files/talos-machine.yaml", {
       hostname      = local.hostname
       install_image = var.image.urls.installer_secureboot
