@@ -8,7 +8,8 @@ resource "tailscale_tailnet_key" "this" {
 
 resource "incus_instance" "this" {
   name    = var.name
-  image   = "ghcr:tailscale/tailscale:latest"
+  image   = "images:ubuntu/plucky/cloud"
+  type    = "virtual-machine"
   project = "incus-network"
   target  = "sigsrv"
 
@@ -18,7 +19,7 @@ resource "incus_instance" "this" {
     properties = {
       pool = "nvme"
       path = "/"
-      size = "20GiB"
+      size = "10GiB"
     }
   }
 
@@ -31,22 +32,35 @@ resource "incus_instance" "this" {
   }
 
   config = {
-    "limits.cpu"              = "1"
-    "limits.memory"           = "1GB"
-    "oci.cwd"                 = "/"
-    "oci.entrypoint"          = "/usr/local/bin/containerboot"
-    "oci.gid"                 = "0"
-    "oci.uid"                 = "0"
-    "environment.TS_HOSTNAME" = var.name
-    "environment.TS_AUTHKEY"  = tailscale_tailnet_key.this.key
-    "environment.TS_ROUTES"   = var.network.ipv4_cidr
+    "limits.cpu"           = "1"
+    "limits.memory"        = "1GB"
+    "cloud-init.user-data" = <<EOF
+#cloud-config
+packages:
+  - curl
+write_files:
+  - path: /etc/sysctl.d/99-tailscale.conf
+    content: |
+      net.ipv4.ip_forward = 1
+      net.ipv6.conf.all.forwarding = 1
+runcmd:
+  - ['sh', '-c', 'curl -fsSL https://tailscale.com/install.sh | sh']
+  - ['sysctl', '-p', '/etc/sysctl.d/99-tailscale.conf']
+  - - 'tailscale'
+    - 'up'
+    - '--hostname'
+    - '${var.name}'
+    - '--auth-key=${tailscale_tailnet_key.this.key}'
+    - '--advertise-routes=${var.network.ipv4_cidr}'
+    - '--accept-routes'
+EOF
   }
 
   depends_on = [tailscale_tailnet_key.this]
 }
 
 data "tailscale_device" "this" {
-  hostname = incus_instance.this.config["environment.TS_HOSTNAME"]
+  hostname = var.name
   wait_for = "60s"
 
   depends_on = [incus_instance.this]
@@ -54,7 +68,7 @@ data "tailscale_device" "this" {
 
 resource "tailscale_device_subnet_routes" "this" {
   device_id = data.tailscale_device.this.id
-  routes    = split(",", incus_instance.this.config["environment.TS_ROUTES"])
+  routes    = [var.network.ipv4_cidr]
 
   depends_on = [data.tailscale_device.this]
 }
