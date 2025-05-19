@@ -1,0 +1,41 @@
+global:
+  enableReplication: true
+  replicationPlacement: "002"
+
+master:
+  replicas: 3
+
+  nodeSelector: &nodeSelector |
+    kubernetes.sigsrv.net/role: storage
+
+  tolerations: &tolerations |
+    - key: kubernetes.sigsrv.net/role
+      operator: Equal
+      value: storage
+      effect: NoSchedule
+
+  data: &pvc
+    type: "persistentVolumeClaim"
+    size: "10Gi"
+    storageClass: "local-path"
+
+  logs: *pvc
+
+volume:
+  replicas: 3
+  nodeSelector: *nodeSelector
+  tolerations: *tolerations
+
+  dataDirs:
+    - <<: *pvc
+      name: data1
+      maxVolumes: 0
+      size: "100Gi"
+
+filer:
+  replicas: 3
+  nodeSelector: *nodeSelector
+  tolerations: *tolerations
+
+  data: *pvc
+  logs: *pvc

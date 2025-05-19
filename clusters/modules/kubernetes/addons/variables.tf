@@ -85,6 +85,17 @@ variable "addons" {
       version = optional(string, "v1.17.1")
     }), {})
 
+    seaweedfs = optional(object({
+      enabled = optional(bool, false)
+      # https://github.com/seaweedfs/seaweedfs
+      version = optional(string, "4.0.387")
+      csi_driver = optional(object({
+        enabled = optional(bool, true)
+        # https://github.com/seaweedfs/seaweedfs-csi-driver
+        version = optional(string, "0.2.2")
+      }), {})
+    }), {})
+
     tailscale = optional(object({
       enabled = optional(bool, false)
       # https://artifacthub.io/packages/helm/tailscale/tailscale-operator

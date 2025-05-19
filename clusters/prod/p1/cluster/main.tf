@@ -83,11 +83,15 @@ module "addons" {
       enabled = true
     }
 
+    local_path_provisioner = {
+      enabled = true
+    }
+
     registry = {
       enabled = true
     }
 
-    rook_ceph = {
+    seaweedfs = {
       enabled = true
     }
 

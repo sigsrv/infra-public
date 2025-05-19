@@ -23,6 +23,17 @@ resource "helm_release" "this" {
             config    = local.openbao_config
           }
         }
+        nodeSelector = {
+          "kubernetes.sigsrv.net/role" = "storage"
+        }
+        tolerations = [
+          {
+            key      = "kubernetes.sigsrv.net/role"
+            operator = "Equal"
+            value    = "storage"
+            effect   = "NoSchedule"
+          },
+        ]
         topologySpreadConstraints = [
           {
             maxSkew           = 1
@@ -40,12 +51,6 @@ resource "helm_release" "this" {
             whenUnsatisfiable = "ScheduleAnyway"
           },
         ]
-      }
-      dataStorage = {
-        storageClass = "local-path-protected"
-      }
-      auditStorage = {
-        storageClass = "local-path-protected"
       }
     }),
   ]

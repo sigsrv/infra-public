@@ -1,0 +1,24 @@
+seaweedfsFiler: seaweedfs-filer:8888
+storageClassName: seaweedfs-storage
+isDefaultStorageClass: true
+
+controller:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.sigsrv.net/role
+                operator: In
+                values: [storage]
+  tolerations:
+    - key: kubernetes.sigsrv.net/role
+      operator: Equal
+      value: storage
+      effect: NoSchedule
+
+node:
+  tolerations:
+    - key: kubernetes.sigsrv.net/role
+      operator: Exists
+      effect: NoSchedule

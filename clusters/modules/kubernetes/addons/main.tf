@@ -36,6 +36,18 @@ module "cloudnative_pg" {
   ]
 }
 
+module "seaweedfs" {
+  source = "./seaweedfs"
+  count  = var.addons.seaweedfs.enabled ? local.count : 0
+
+  kubernetes = var.kubernetes
+  seaweedfs  = var.addons.seaweedfs
+
+  depends_on = [
+    module.local_path_provisioner,
+  ]
+}
+
 module "local_path_provisioner" {
   source = "./local-path-provisioner"
   count  = var.addons.local_path_provisioner.enabled ? local.count : 0
