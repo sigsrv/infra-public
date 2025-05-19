@@ -35,6 +35,31 @@ module "cluster" {
   }
 }
 
+module "addons" {
+  source = "../../../modules/kubernetes/addons"
+  count  = module.cluster.ready ? 1 : 0
+
+  kubernetes = module.cluster.config.kubernetes
+
+  onepassword = {
+    vault_name = "sigsrv-sdlc"
+  }
+
+  addons = {
+    metrics_server = {
+      enabled = true
+    }
+
+    tailscale = {
+      enabled = true
+    }
+  }
+
+  depends_on = [
+    module.cluster
+  ]
+}
+
 resource "null_resource" "protection" {
   lifecycle {
     prevent_destroy = true
