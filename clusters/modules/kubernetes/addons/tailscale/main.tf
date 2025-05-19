@@ -14,8 +14,31 @@ resource "helm_release" "operator" {
   values = [
     yamlencode({
       operatorConfig = {
-        hostname = var.kubernetes.cluster.alias
+        hostname    = var.kubernetes.cluster.alias
         defaultTags = join(",", ["tag:${var.kubernetes.cluster.name}"])
+        affinity = {
+          nodeAffinity = {
+            requiredDuringSchedulingIgnoredDuringExecution = {
+              nodeSelectorTerms = [
+                {
+                  matchExpressions = [
+                    {
+                      key      = "node-role.kubernetes.io/control-plane"
+                      operator = "Exists"
+                    },
+                  ]
+                },
+              ]
+            }
+          }
+        }
+        tolerations = [
+          {
+            key      = "node-role.kubernetes.io/control-plane"
+            operator = "Exists"
+            effect   = "NoSchedule"
+          },
+        ]
       }
       proxyConfig = {
         defaultTags = join(",", ["tag:${var.kubernetes.cluster.name}-service"])
