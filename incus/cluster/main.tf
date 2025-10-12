@@ -12,6 +12,10 @@ module "network" {
   depends_on = [incus_project.network]
 }
 
+resource "tailscale_acl" "this" {
+  acl = file("${path.module}/config/tailscale-policy.json5")
+}
+
 resource "null_resource" "protection" {
   lifecycle {
     prevent_destroy = true
